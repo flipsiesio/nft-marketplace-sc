@@ -108,7 +108,7 @@ contract NFTAuction is Management {
     function take(uint256 _at) external payable nonReentrant {
         require(msg.value >= _auctions[_at].currentPrice.add(_auctions[_at].feesToPay), "notEnoughFunds");
         require(block.timestamp > _auctions[_at].stopTime, "auctionIsStopped");
-        require(msg.sender == _auctions[_at].lastBuyer, "mustBeBuyerWhoWon");
+        require(msg.sender == _auctions[_at].lastBuyer, "senderMustBeBuyerWhoWon");
         _auctions[_at].seller.transfer(_auctions[_at].currentPrice);
         feeReceiver.transfer(_auctions[_at].feesToPay);
         nftOnSale.safeTransferFrom(address(this), _auctions[_at].lastBuyer, _auctions[_at].tokenId);
