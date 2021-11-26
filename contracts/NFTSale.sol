@@ -2,9 +2,8 @@
 pragma solidity ^0.4.0;
 
 import './interfaces/IERC721.sol';
-import './Management.sol'
+import './Management.sol';
 import './SafeMath.sol';
-import './Status.sol';
 
 contract NFTSale is Management {
     using SafeMath for uint256;
@@ -23,6 +22,11 @@ contract NFTSale is Management {
     }
 
     mapping(uint256 => SellOrder) internal _sellOrders;
+
+    modifier onlySellerOf(uint256 _at) {
+        require(_sellOrders[_at].seller == msg.sender, "onlySeller");
+        _;
+    }
 
     function getSellOrdersAmount() external view returns(uint256) {
         return _length;
@@ -50,7 +54,7 @@ contract NFTSale is Management {
 
     function getBackFromSale(uint256 _at) external onlySellerOf(_at) {
         nftOnSale.safeTransferFrom(address(this), msg.sender, _sellOrders[_at].tokenId);
-        if (block.timestamp <= _sellOrders[_at].expirationDuration) {
+        if (block.timestamp <= _sellOrders[_at].expirationTime) {
             _sellOrders[_at].status = Status.REJECTED;
         } else {
             _sellOrders[_at].status = Status.EXPIRED;
@@ -92,8 +96,8 @@ contract NFTSale is Management {
 
     function buy(uint256 _at) external payable nonReentrant validIndex(_at) {
         uint256 price = _sellOrders[_at].price;
-        uint256 feeAmount = price.mul(buyFee).div(MAX_FEE);
-        require(msg.value >= price.add(feeAmount)), "notEnoughFunds");
+        uint256 feeAmount = price.mul(feeInBps).div(MAX_FEE);
+        require(msg.value >= price.add(feeAmount), "notEnoughFunds");
         require(_sellOrders[_at].status == Status.PENDING, "orderIsFilledOrRejected");
         require(block.timestamp <= _sellOrders[_at].expirationTime, "orderIsExpired");
 

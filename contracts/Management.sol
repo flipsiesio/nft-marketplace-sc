@@ -3,8 +3,17 @@ pragma solidity ^0.4.0;
 
 import './Ownable.sol';
 import './ReentrancyGuard.sol';
+import './interfaces/IERC721.sol';
 
-abstract contract Management is Ownable, ReentrancyGuard {
+contract Management is Ownable, ReentrancyGuard {
+
+    enum Status {
+        PENDING,
+        FILLED,
+        REJECTED,
+        EXPIRED
+    }
+
     uint256 public constant MAX_FEE = 10000;
     uint256 public feeInBps;
     address public feeReceiver;
@@ -27,11 +36,6 @@ abstract contract Management is Ownable, ReentrancyGuard {
 
     modifier validExpirationDuration(uint256 _expirationDuration) {
         require(_expirationDuration >= minExpirationDuration && _expirationDuration <= maxExpirationDuration, "invalidExpirationDuration");
-        _;
-    }
-
-    modifier onlySellerOf(uint256 _at) {
-        require(_sellOrders[_at].seller == msg.sender, "onlySeller");
         _;
     }
 
