@@ -58,6 +58,12 @@ contract Management is Ownable, ReentrancyGuard {
         _;
     }
 
+    /// @notice A standard setter for the working NFT which available only for user
+    /// @param _newNFTOnSale The new NFT token address
+    function setWorkingNFT(address _newNFTOnSale) external onlyOwner {
+        nftOnSale = IERC721(_newNFTOnSale);
+    }
+
     /// @notice A standard setter for the fee receiver address which available only for user
     /// @param _feeReceiver The new fee receiver address
     function setFeeReceiver(address _feeReceiver) external onlyOwner {
