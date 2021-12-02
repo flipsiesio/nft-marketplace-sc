@@ -33,6 +33,17 @@ module.exports = async ({
       log: true
     }
   );
+
+  const nftAuctionConstructorArguments = [
+    pokerNFT.address
+  ];
+  const nftAuction = await deploy("NFTAuction", {
+      from: deployer,
+      args: nftAuctionConstructorArguments,
+      skipIfAlreadyDeployed: skipDeploymentIfAlreadyDeployed,
+      log: true
+    }
+  );
 }
 module.exports.tags = ["main"]
 module.exports.runAtTheEnd = true;
