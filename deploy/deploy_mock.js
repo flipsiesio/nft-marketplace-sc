@@ -3,7 +3,7 @@ const ethers = hre.ethers;
 
 const { constants } = require('@openzeppelin/test-helpers');
 const { ZERO_ADDRESS } = constants;
-const { skipDeploymentIfAlreadyDeployed } = require('./helpers.js');
+const { skipDeploymentIfAlreadyDeployed } = require('./lib/helpers.js');
 
 module.exports = async ({
     getNamedAccounts,

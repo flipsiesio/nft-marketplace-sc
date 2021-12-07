@@ -40,8 +40,18 @@ contract Management is Ownable, ReentrancyGuard {
 
     /// @notice This is a standard constructor with one argument
     /// @param _nftOnSale The NFT which could be sold in marketplace or auction
-    constructor(address _nftOnSale) public {
+    constructor(
+        address _nftOnSale,
+        address _feeReceiver,
+        uint256 _minExpirationDuration,
+        uint256 _maxExpirationDuration,
+        uint256 _feeInBps
+    ) public {
         nftOnSale = IERC721(_nftOnSale);
+        feeReceiver = _feeReceiver;
+        minExpirationDuration = _minExpirationDuration;
+        maxExpirationDuration = _maxExpirationDuration;
+        feeInBps = _feeInBps;
     }
 
     /// @notice This custom modifier is to validate index of either sell order or auction

@@ -1,14 +1,13 @@
 const hre = require("hardhat");
 const ethers = hre.ethers;
 
-const { constants } = require('@openzeppelin/test-helpers');
+const { constants, time } = require('@openzeppelin/test-helpers');
 const { ZERO_ADDRESS } = constants;
 
 const {
-  getMock,
   skipDeploymentIfAlreadyDeployed,
   withImpersonatedSigner
-} = require('./helpers.js');
+} = require('./lib/helpers.js');
 
 module.exports = async ({
     getNamedAccounts,
@@ -23,27 +22,35 @@ module.exports = async ({
 
   const pokerNFT = await deployments.get('PokerNFT');
 
-  const nftSaleConstructorArguments = [
-    pokerNFT.address
+  const feeReceiver = deployer;
+  const minExpirationDuration = ethers.BigNumber.from(time.duration.days(1).toString());
+  const maxExpirationDuration = ethers.BigNumber.from(time.duration.days(10).toString());
+  const feeInBps = 9500;
+
+  const constructorArguments = [
+    pokerNFT.address,
+    feeReceiver,
+    minExpirationDuration,
+    maxExpirationDuration,
+    feeInBps
   ];
+
   const nftSale = await deploy("NFTSale", {
       from: deployer,
-      args: nftSaleConstructorArguments,
+      args: constructorArguments,
       skipIfAlreadyDeployed: skipDeploymentIfAlreadyDeployed,
       log: true
     }
   );
 
-  const nftAuctionConstructorArguments = [
-    pokerNFT.address
-  ];
   const nftAuction = await deploy("NFTAuction", {
       from: deployer,
-      args: nftAuctionConstructorArguments,
+      args: constructorArguments,
       skipIfAlreadyDeployed: skipDeploymentIfAlreadyDeployed,
       log: true
     }
   );
 }
-module.exports.tags = ["main"]
+module.exports.tags = ["main"];
+module.exports.dependencies = ["deploy_mock"];
 module.exports.runAtTheEnd = true;

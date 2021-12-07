@@ -37,7 +37,7 @@ module.exports = {
   docgen: {
     path: './docs',
     clear: true,
-    runOnCompile: true,
+    runOnCompile: false,
   },
   etherscan: {
     apiKey: process.env.ETHERSCAN_API_KEY,

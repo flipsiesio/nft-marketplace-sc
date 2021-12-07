@@ -40,6 +40,23 @@ contract NFTSale is Management {
         _;
     }
 
+    constructor(
+        address _nftOnSale,
+        address _feeReceiver,
+        uint256 _minExpirationDuration,
+        uint256 _maxExpirationDuration,
+        uint256 _feeInBps
+    )
+        public
+        Management(
+          _nftOnSale,
+          _feeReceiver,
+          _minExpirationDuration,
+          _maxExpirationDuration,
+          _feeInBps
+        )
+    {}
+
     /// @notice The standard getter to return an amount of the sell orders
     /// @return Amount of the sell orders
     function getSellOrdersAmount() external view returns(uint256) {
@@ -74,16 +91,24 @@ contract NFTSale is Management {
         return _sellOrders[_at].paidFees;
     }
 
+    /// @notice The standard getter to return an expiration time of the given sell order
+    /// @param _at The index of the sell order
+    /// @return Expiration timestamp in future
+    function getSellOrderExpirationTime(uint256 _at) external view validIndex(_at) returns(uint256) {
+        return _sellOrders[_at].expirationTime;
+    }
+
     /// @notice The standard getter to return a status of the given sell order
     /// @param _at The index of the auction
     /// @return Status enumeration member as uint256
-    function getSellStatus(uint256 _at) external view validIndex(_at) returns(uint256) {
+    function getSellOrderStatus(uint256 _at) external view validIndex(_at) returns(uint256) {
         return uint256(_sellOrders[_at].status);
     }
 
     /// @notice The function cancel the sell order and return the token in the sell order to the seller.
     /// @param _at The index of the sell order
     function getBackFromSale(uint256 _at) external onlySellerOf(_at) {
+        require(_sellOrders[_at].status == Status.PENDING, "onlyWhenPending");
         nftOnSale.safeTransferFrom(address(this), msg.sender, _sellOrders[_at].tokenId);
         if (block.timestamp <= _sellOrders[_at].expirationTime) {
             _sellOrders[_at].status = Status.REJECTED;

@@ -43,6 +43,23 @@ contract NFTAuction is Management {
         _;
     }
 
+    constructor(
+        address _nftOnSale,
+        address _feeReceiver,
+        uint256 _minExpirationDuration,
+        uint256 _maxExpirationDuration,
+        uint256 _feeInBps
+    )
+        public
+        Management(
+          _nftOnSale,
+          _feeReceiver,
+          _minExpirationDuration,
+          _maxExpirationDuration,
+          _feeInBps
+        )
+    {}
+
     /// @notice The standard getter to return an amount of the auctions
     /// @return Amount of the auctions
     function getAuctionsAmount() external view returns(uint256) {
