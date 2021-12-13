@@ -1,5 +1,8 @@
 {
   "name": "hardhat-project",
+  "scripts": {
+    "deploy_local": "npx hardhat node --tags main"
+  },
   "devDependencies": {
     "@nomiclabs/hardhat-ethers": "npm:hardhat-deploy-ethers",
     "@nomiclabs/hardhat-etherscan": "^2.1.7",
