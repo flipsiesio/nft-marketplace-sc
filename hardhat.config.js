@@ -14,15 +14,23 @@ module.exports = {
   solidity: "0.4.26",
   networks: {
     hardhat: {
-      fork: `https://eth-mainnet.alchemyapi.io/v2/${process.env.ALCHEMY_MAINNET}`
+      fork: "https://api.trongrid.io"
+    },
+    mainnet: {
+      url: `https://eth-mainnet.alchemyapi.io/v2/${process.env.ALCHEMY_MAINNET}`,
+      accounts: { mnemonic: process.env.MNEMONIC },
     },
     rinkeby: {
-       url: `https://eth-rinkeby.alchemyapi.io/v2/${process.env.ALCHEMY_RINKEBY}`,
-       accounts: { mnemonic: process.env.MNEMONIC },
+      url: `https://eth-rinkeby.alchemyapi.io/v2/${process.env.ALCHEMY_RINKEBY}`,
+      accounts: { mnemonic: process.env.MNEMONIC },
     },
     kovan: {
-       url: `https://eth-kovan.alchemyapi.io/v2/${process.env.ALCHEMY_KOVAN}`,
-       accounts: { mnemonic: process.env.MNEMONIC },
+      url: `https://eth-kovan.alchemyapi.io/v2/${process.env.ALCHEMY_KOVAN}`,
+      accounts: { mnemonic: process.env.MNEMONIC },
+    },
+    tron: {
+      url: "https://api.trongrid.io",
+      accounts: { mnemonic: process.env.MNEMONIC },
     },
   },
   gasReporter: {
