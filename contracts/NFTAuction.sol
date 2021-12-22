@@ -179,7 +179,7 @@ contract NFTAuction is Management {
         require(msg.sender == _auctions[_at].lastBuyer, "senderMustBeBuyerWhoWon");
         _auctions[_at].seller.transfer(_auctions[_at].currentPrice);
         feeReceiver.transfer(_auctions[_at].feesToPay);
-        nftOnSale.safeTransferFrom(address(this), _auctions[_at].lastBuyer, _auctions[_at].tokenId);
+        nftOnSale.safeTransfer(_auctions[_at].lastBuyer, _auctions[_at].tokenId);
         _auctions[_at].status = Status.FILLED;
         emit AuctionFilled(_at);
     }

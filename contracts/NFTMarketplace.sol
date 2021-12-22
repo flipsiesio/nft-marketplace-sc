@@ -7,7 +7,7 @@ import './SafeMath.sol';
 
 /// @title A contract of the marketplace.
 /// @author Integral Team
-contract NFTSale is Management {
+contract NFTMarketplace is Management {
     using SafeMath for uint256;
 
 
@@ -20,6 +20,12 @@ contract NFTSale is Management {
     /// @notice This event is fired when seller reject the sell order
     event OrderRejected(uint256 indexed orderIndex);
 
+    /// @notice This event is fired when buyer places a bid
+    event Bid(uint256 indexed orderIndex, address indexed buyer, uint256 indexed amount);
+
+    /// @notice This event is fired when buyer renounce the bid
+    event BidCancelled(uint256 indexed orderIndex, address indexed buyer, uint256 indexed amount);
+
     // This struct is describing the sell order information
     struct SellOrder {
         uint256 tokenId; // ID of the selling token
@@ -28,6 +34,7 @@ contract NFTSale is Management {
         Status status; // status of the sell order
         uint256 expirationTime; // time when the sell order expires
         uint256 paidFees; // amount of fees to pay
+        mapping(address => uint256) bids; // bids for sell order (buyer => amount to buy)
     }
 
     /// @notice the storage for the sell orders
@@ -160,20 +167,41 @@ contract NFTSale is Management {
         _sellOrders[_at].expirationTime = _expirationTime;
     }
 
+    function bid(uint256 _at, uint256 _amount) external payable validIndex(_at) {
+        require(_amount > 0, "cannotBid0");
+        uint256 feeAmount = _amount.mul(feeInBps).div(MAX_FEE);
+        require(msg.value >= _amount.add(feeAmount), "notEnoughFunds");
+        require(_sellOrders[_at].status == Status.PENDING, "orderIsFilledOrRejected");
+        require(block.timestamp <= _sellOrders[_at].expirationTime, "orderIsExpired");
+        _sellOrders[_at].bids[msg.sender] = _amount;
+        emit Bid(_at, msg.sender, _amount);
+    }
+
+    function cancelBid(uint256 _at) external nonReentrant validIndex(_at) {
+        uint256 bidToReturn = _sellOrders[_at].bids[msg.sender];
+        uint256 feeAmount = bidToReturn.mul(feeInBps).div(MAX_FEE);
+        uint256 toReturn = bidToReturn.add(feeAmount);
+        require(toReturn > 0, "nothingToCancelAndReturn");
+        msg.sender.transfer(toReturn);
+        emit BidCancelled(_at, msg.sender, toReturn);
+    }
+
     /// @notice The function allows anyone to fill sell order.
     /// @param _at The seller order index
-    function buy(uint256 _at) external payable nonReentrant validIndex(_at) {
-        uint256 price = _sellOrders[_at].price;
-        uint256 feeAmount = price.mul(feeInBps).div(MAX_FEE);
-        require(msg.value >= price.add(feeAmount), "notEnoughFunds");
+    function performBuyOperation(address buyer, uint256 _at) external nonReentrant onlySellerOf(_at) validIndex(_at) {
         require(_sellOrders[_at].status == Status.PENDING, "orderIsFilledOrRejected");
         require(block.timestamp <= _sellOrders[_at].expirationTime, "orderIsExpired");
 
         nftOnSale.safeTransfer(msg.sender, _sellOrders[_at].tokenId);
-        _sellOrders[_at].seller.transfer(_sellOrders[_at].price);
+
+        uint256 price = _sellOrders[_at].bids[buyer];
+        uint256 feeAmount = price.mul(feeInBps).div(MAX_FEE);
+
+        _sellOrders[_at].seller.transfer(price);
         feeReceiver.transfer(feeAmount);
         _sellOrders[_at].paidFees = feeAmount;
         _sellOrders[_at].status = Status.FILLED;
+        _sellOrders[_at].bids[buyer] = 0;
         emit OrderFilled(_at);
     }
 }
