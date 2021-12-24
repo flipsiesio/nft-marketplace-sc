@@ -1,9 +1,10 @@
 //SPDX-License-Identifier: Unlicense
 pragma solidity ^0.4.0;
 
-import './interfaces/IERC721.sol';
+import './openzeppelin/token/ERC721/IERC721.sol';
+import './openzeppelin/math/SafeMath.sol';
+
 import './Management.sol';
-import './SafeMath.sol';
 
 /// @title A contract for auctioning the NFTs.
 /// @author Integral Team
@@ -179,7 +180,7 @@ contract NFTAuction is Management {
         require(msg.sender == _auctions[_at].lastBuyer, "senderMustBeBuyerWhoWon");
         _auctions[_at].seller.transfer(_auctions[_at].currentPrice);
         feeReceiver.transfer(_auctions[_at].feesToPay);
-        nftOnSale.safeTransfer(_auctions[_at].lastBuyer, _auctions[_at].tokenId);
+        nftOnSale.safeTransferFrom(address(this), _auctions[_at].lastBuyer, _auctions[_at].tokenId);
         _auctions[_at].status = Status.FILLED;
         emit AuctionFilled(_at);
     }

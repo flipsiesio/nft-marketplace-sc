@@ -1,9 +1,10 @@
 //SPDX-License-Identifier: Unlicense
 pragma solidity ^0.4.0;
 
-import './interfaces/IERC721.sol';
+import './openzeppelin/token/ERC721/IERC721.sol';
+import './openzeppelin/math/SafeMath.sol';
+
 import './Management.sol';
-import './SafeMath.sol';
 
 /// @title A contract of the marketplace.
 /// @author Integral Team
@@ -169,7 +170,7 @@ contract NFTSale is Management {
         require(_sellOrders[_at].status == Status.PENDING, "orderIsFilledOrRejected");
         require(block.timestamp <= _sellOrders[_at].expirationTime, "orderIsExpired");
 
-        nftOnSale.safeTransfer(msg.sender, _sellOrders[_at].tokenId);
+        nftOnSale.safeTransferFrom(address(this), msg.sender, _sellOrders[_at].tokenId);
         _sellOrders[_at].seller.transfer(_sellOrders[_at].price);
         feeReceiver.transfer(feeAmount);
         _sellOrders[_at].paidFees = feeAmount;
