@@ -1,0 +1,24 @@
+{
+  "name": "tronbox-poker-marketplace-sc",
+  "version": "2.1.0",
+  "description": "",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "dev": "bash scripts/dev.sh",
+    "migrate": "bash scripts/migrate.sh"
+  },
+  "originalAuthors": "truffle-box",
+  "author": {
+    "name": "Oleg Bedrin",
+    "email": "obedrin@sfxdx.com"
+  },
+  "license": "MIT",
+  "devDependencies": {
+    "chalk": "^2.4.1"
+  },
+  "dependencies": {
+    "@openzeppelin/test-helpers": "^0.5.15"
+  }
+}

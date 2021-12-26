@@ -4,6 +4,11 @@ coverage
 coverage.json
 typechain
 
+# Tronbox files
+build
+tron_nodes
+running_nodes.json
+
 #Hardhat files
 cache
 artifacts
