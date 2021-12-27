@@ -66,8 +66,6 @@ contract CardRandomMinter is Ownable, IRandomMinter {
                     if (factory.mint(_otherOptions[j], _to)) {
                         minted++;
                         break;
-                    } else {
-                        continue;
                     }
                 }
             }
