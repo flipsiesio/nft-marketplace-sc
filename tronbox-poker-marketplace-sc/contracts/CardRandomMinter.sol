@@ -4,8 +4,9 @@ pragma solidity ^0.4.0;
 import './openzeppelin/ownership/Ownable.sol';
 
 import "./interfaces/IOptionMintable.sol";
+import "./interfaces/IRandomMinter.sol";
 
-contract CardRandomMinter is Ownable {
+contract CardRandomMinter is Ownable, IRandomMinter {
 
     event Minted(uint8 _amount, address indexed _to);
 
@@ -24,6 +25,7 @@ contract CardRandomMinter is Ownable {
     int256 internal _currentSeed = -125026;
 
     mapping(uint8 => bool) public allowedItemsPerRandomMint;
+    mapping(address => bool) public isMinter;
 
     constructor() public {
         allowedItemsPerRandomMint[1] = true;
@@ -50,19 +52,18 @@ contract CardRandomMinter is Ownable {
         revert('invalidOptionPickedRandomly');
     }
 
-    function mintRandom(uint8 _itemsPerRandomMint) external payable {
+    function _mintRandom(uint8 _itemsPerRandomMint, address _to) internal {
         require(allowedItemsPerRandomMint[_itemsPerRandomMint], "amountIsNotAllowed");
-        require(msg.value >= price * uint256(_itemsPerRandomMint), "notEnoughAmountSent");
         uint8 minted = 0;
         for (uint8 i = 0; i < _itemsPerRandomMint; i++) {
             // Mint the ERC721 item(s).
             uint8 randomOption = _getRandomSingleOption(_currentSeed);
             uint8[4] memory _otherOptions = _getOtherOptions(randomOption);
-            if (factory.mint(randomOption, msg.sender)) {
+            if (factory.mint(randomOption, _to)) {
                 minted++;
             } else {
                 for (uint256 j = 0; j < 4; j++) {
-                    if (factory.mint(_otherOptions[j], msg.sender)) {
+                    if (factory.mint(_otherOptions[j], _to)) {
                         minted++;
                         break;
                     } else {
@@ -71,7 +72,17 @@ contract CardRandomMinter is Ownable {
                 }
             }
         }
-        emit Minted(minted, msg.sender);
+        emit Minted(minted, _to);
+    }
+
+    function mintRandomFree(uint8 _itemsPerRandomMint, address _to) external {
+        require(isMinter[msg.sender], "onlyMinter");
+        _mintRandom(_itemsPerRandomMint, _to);
+    }
+
+    function mintRandom(uint8 _itemsPerRandomMint) external payable {
+        require(msg.value >= price * uint256(_itemsPerRandomMint), "notEnoughAmountSent");
+        _mintRandom(_itemsPerRandomMint, msg.sender);
     }
 
     function _getRandomSingleOption(int256 _seed) internal view returns(uint8) {
@@ -110,6 +121,10 @@ contract CardRandomMinter is Ownable {
 
     function setPrice(uint256 _price) external onlyOwner {
         price = _price;
+    }
+
+    function setMinter(address who, bool status) external onlyOwner {
+        isMinter[who] = status;
     }
 
     function setAllowedAmountOfItemsPerRandomMint(uint8 _amount, bool _status) external onlyOwner {
