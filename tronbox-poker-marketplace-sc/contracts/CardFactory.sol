@@ -33,6 +33,10 @@ contract CardFactory is Ownable, IOptionMintable {
         _;
     }
 
+    constructor(IMintable _mintableToken) public {
+        mintableToken = _mintableToken;
+    }
+
     // SET UP BOUNDARIES FOR EVERY TOKENS BEFORE DEPLOY!
     function setIdBoundaryForOption(
         uint8 optionId,
@@ -54,6 +58,10 @@ contract CardFactory is Ownable, IOptionMintable {
     // set CardRandomMinter as option minter
     function setOptionMinter(address _minter, bool _status) external onlyOwner {
         isOptionMinter[_minter] = _status;
+    }
+
+    function setMintableToken(IMintable _mintableToken) external onlyOwner {
+        mintableToken = _mintableToken;
     }
 
     function mint(uint8 optionId, address toAddress)

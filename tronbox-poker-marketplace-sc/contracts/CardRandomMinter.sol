@@ -27,7 +27,8 @@ contract CardRandomMinter is Ownable, IRandomMinter {
     mapping(uint8 => bool) public allowedItemsPerRandomMint;
     mapping(address => bool) public isMinter;
 
-    constructor() public {
+    constructor(IOptionMintable _factory) public {
+        factory = _factory;
         allowedItemsPerRandomMint[1] = true;
         allowedItemsPerRandomMint[3] = true;
         allowedItemsPerRandomMint[5] = true;
