@@ -24,7 +24,7 @@ contract Card is Ownable, ERC721Token {
         isMinter[_minter] = _status;
     }
 
-    function getNFTListByAddress(address _nftOwner) public returns (uint256 []) {
+    function getNFTListByAddress(address _nftOwner) public view returns (uint256 []) {
         return ownedTokens[_nftOwner];
     }
 }
