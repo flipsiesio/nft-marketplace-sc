@@ -13,7 +13,7 @@ contract NFTMarketplace is Management {
 
 
     /// @notice This event is fired when seller create the sell order
-    event OrderCreated(uint256 tokenId, uint256 indexed orderIndex);
+    event OrderCreated(uint256 indexed tokenId, uint256 indexed orderIndex);
 
     /// @notice This event is fired when seller fill the sell order
     event OrderFilled(uint256 indexed orderIndex);
