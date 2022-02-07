@@ -70,13 +70,16 @@ contract CardFactory is Ownable, IOptionMintable {
         returns(bool)
     {
         require(isOptionMinter[msg.sender], "onlyOptionMinter");
-        require(!mintableToken.exists(_idBoundaries[optionId].start), "alreadyMinted");
-        require(_idBoundaries[optionId].start < _idBoundaries[optionId].end, "noMoreTokens");
 
-        mintableToken.mint(toAddress, _idBoundaries[optionId].start);
-        _idBoundaries[optionId].start += 1;
+        for (uint256 i = _idBoundaries[optionId].start; i < _idBoundaries[optionId].end; i++) {
+            if(!mintableToken.exists(_idBoundaries[optionId].start)) {
+                mintableToken.mint(toAddress, _idBoundaries[optionId].start);
+                _idBoundaries[optionId].start = i + 1;
+                return true;
+            }
+        }
 
-        return true;
+        return false;
     }
 
     function availableTokens(uint8 optionId) public view returns (uint256) {
