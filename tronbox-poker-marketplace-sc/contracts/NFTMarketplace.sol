@@ -184,6 +184,7 @@ contract NFTMarketplace is Management {
         uint256 toReturn = bidToReturn.add(feeAmount);
         require(toReturn > 0, "nothingToCancelAndReturn");
         msg.sender.transfer(toReturn);
+        delete _sellOrders[_at].bids[msg.sender];
         emit BidCancelled(_at, msg.sender, toReturn);
     }
 
@@ -193,7 +194,7 @@ contract NFTMarketplace is Management {
         require(_sellOrders[_at].status == Status.PENDING, "orderIsFilledOrRejected");
         require(block.timestamp <= _sellOrders[_at].expirationTime, "orderIsExpired");
 
-        nftOnSale.safeTransferFrom(address(this), msg.sender, _sellOrders[_at].tokenId);
+        nftOnSale.safeTransferFrom(address(this), buyer, _sellOrders[_at].tokenId);
 
         uint256 price = _sellOrders[_at].bids[buyer];
         uint256 feeAmount = price.mul(feeInBps).div(MAX_FEE);
@@ -202,7 +203,7 @@ contract NFTMarketplace is Management {
         feeReceiver.transfer(feeAmount);
         _sellOrders[_at].paidFees = feeAmount;
         _sellOrders[_at].status = Status.FILLED;
-        _sellOrders[_at].bids[buyer] = 0;
+        delete _sellOrders[_at].bids[buyer];
         emit OrderFilled(_at);
     }
 }
