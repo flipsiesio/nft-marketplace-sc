@@ -179,10 +179,14 @@ contract NFTMarketplace is Management {
     }
 
     function cancelBid(uint256 _at) external nonReentrant validIndex(_at) {
+        require((_sellOrders[_at].status != Status.PENDING) ||
+            (block.timestamp > _sellOrders[_at].expirationTime), "orderIsActive");
+        require(_sellOrders[_at].bids[msg.sender] > 0, "nothingToCancelAndReturn");
+
         uint256 bidToReturn = _sellOrders[_at].bids[msg.sender];
         uint256 feeAmount = bidToReturn.mul(feeInBps).div(MAX_FEE);
         uint256 toReturn = bidToReturn.add(feeAmount);
-        require(toReturn > 0, "nothingToCancelAndReturn");
+
         msg.sender.transfer(toReturn);
         delete _sellOrders[_at].bids[msg.sender];
         emit BidCancelled(_at, msg.sender, toReturn);
