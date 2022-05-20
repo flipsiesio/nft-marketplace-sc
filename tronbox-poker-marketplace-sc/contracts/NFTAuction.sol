@@ -23,7 +23,7 @@ contract NFTAuction is Management {
     }
 
     /// @notice This event is fired when seller create an auction
-    event AuctionCreated(uint256 indexed _at);
+    event AuctionCreated(uint256 indexed tokenId, uint256 indexed _at);
 
     /// @notice This event is fired when seller reject the auction
     event AuctionRejected(uint256 indexed _at);
@@ -134,7 +134,7 @@ contract NFTAuction is Management {
             feesToPay: 0,
             status: Status.PENDING
         });
-        emit AuctionCreated(_length);
+        emit AuctionCreated(_nftToSell, _length);
         _length = _length.add(1);
     }
 
