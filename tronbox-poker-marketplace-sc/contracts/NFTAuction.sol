@@ -176,7 +176,7 @@ contract NFTAuction is Management {
     /// @param _at The index of the auction
     function take(uint256 _at) external payable nonReentrant {
         require(msg.value >= _auctions[_at].currentPrice.add(_auctions[_at].feesToPay), "notEnoughFunds");
-        require(block.timestamp > _auctions[_at].stopTime, "auctionIsStopped");
+        require(block.timestamp > _auctions[_at].stopTime, "auctionIsActive");
         require(msg.sender == _auctions[_at].lastBuyer, "senderMustBeBuyerWhoWon");
         _auctions[_at].seller.transfer(_auctions[_at].currentPrice);
         feeReceiver.transfer(_auctions[_at].feesToPay);
@@ -184,5 +184,4 @@ contract NFTAuction is Management {
         _auctions[_at].status = Status.FILLED;
         emit AuctionFilled(_at);
     }
-
 }
