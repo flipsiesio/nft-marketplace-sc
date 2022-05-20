@@ -56,7 +56,7 @@ contract CardFactory is Ownable, IOptionMintable {
     }
 
     // set CardRandomMinter as option minter
-    function setOptionMinter(address _minter, bool _status) external onlyOwner {
+    function setMinterRole(address _minter, bool _status) external onlyOwner {
         isOptionMinter[_minter] = _status;
     }
 
