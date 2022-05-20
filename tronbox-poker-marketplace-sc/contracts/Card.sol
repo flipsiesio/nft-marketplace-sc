@@ -23,4 +23,8 @@ contract Card is Ownable, ERC721Token {
     function setMinterRole(address _minter, bool _status) external onlyOwner {
         isMinter[_minter] = _status;
     }
+
+    function getNFTListByAddress(address _nftOwner) public view returns (uint256 []) {
+        return ownedTokens[_nftOwner];
+    }
 }
