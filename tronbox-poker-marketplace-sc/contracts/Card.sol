@@ -4,8 +4,6 @@ pragma solidity ^0.4.0;
 import './openzeppelin/ownership/Ownable.sol';
 import './openzeppelin/token/ERC721/ERC721Token.sol';
 
-import "./interfaces/IMintable.sol";
-
 contract Card is Ownable, ERC721Token {
 
     mapping(address => bool) public isMinter;

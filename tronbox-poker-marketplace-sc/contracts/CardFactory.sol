@@ -22,7 +22,6 @@ contract CardFactory is Ownable, IOptionMintable {
     struct Boundaries {
         uint256 start;
         uint256 end;
-        mapping(uint256 => bool) isMinted;
     }
 
     // option id => interval of ids in class (option)
@@ -35,6 +34,7 @@ contract CardFactory is Ownable, IOptionMintable {
 
     constructor(IMintable _mintableToken) public {
         mintableToken = _mintableToken;
+        isOptionMinter[msg.sender] = true;
     }
 
     // SET UP BOUNDARIES FOR EVERY TOKENS BEFORE DEPLOY!
@@ -69,19 +69,20 @@ contract CardFactory is Ownable, IOptionMintable {
         validOption(optionId)
         returns(bool)
     {
-        require(isOptionMinter[msg.sender], "onlyMinter");
-        uint256 endId = _idBoundaries[optionId].end;
-        if (!_idBoundaries[optionId].isMinted[endId]) {
-            for (uint256 i = _idBoundaries[optionId].start; i < endId; i++) {
-                if (!_idBoundaries[optionId].isMinted[i]) {
-                    mintableToken.mint(toAddress, i);
-                    _idBoundaries[optionId].isMinted[i] = true;
-                    break;
-                }
+        require(isOptionMinter[msg.sender], "onlyOptionMinter");
+
+        for (uint256 i = _idBoundaries[optionId].start; i < _idBoundaries[optionId].end; i++) {
+            if(!mintableToken.exists(_idBoundaries[optionId].start)) {
+                mintableToken.mint(toAddress, _idBoundaries[optionId].start);
+                _idBoundaries[optionId].start = i + 1;
+                return true;
             }
-            return true;
-        } else {
-            return false;
         }
+
+        return false;
+    }
+
+    function availableTokens(uint8 optionId) public view returns (uint256) {
+        return _idBoundaries[optionId].end - _idBoundaries[optionId].start;
     }
 }
