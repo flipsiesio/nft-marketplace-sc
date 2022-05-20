@@ -1,3 +1,5 @@
+Warning: contracts are tested with truffle (Card*.sol) and hardhat (NFT*.sol)
+
 ## Contract addresses (shasta testnet)
 ### Migrations
 * (base58) TRhgjgc7saHpYPU1S1WPJBxQy1k2Zz8NUw
