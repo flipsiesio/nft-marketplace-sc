@@ -1,9 +1,9 @@
 //SPDX-License-Identifier: Unlicense
 pragma solidity ^0.4.0;
 
-import './openzeppelin/token/ERC721/IERC721.sol';
 import './openzeppelin/math/SafeMath.sol';
 
+import './interfaces/IERC721.sol';
 import './Management.sol';
 
 /// @title A contract for auctioning the NFTs.
@@ -23,7 +23,7 @@ contract NFTAuction is Management {
     }
 
     /// @notice This event is fired when seller create an auction
-    event AuctionCreated(uint256 indexed _at);
+    event AuctionCreated(uint256 indexed tokenId, uint256 indexed _at);
 
     /// @notice This event is fired when seller reject the auction
     event AuctionRejected(uint256 indexed _at);
@@ -134,7 +134,7 @@ contract NFTAuction is Management {
             feesToPay: 0,
             status: Status.PENDING
         });
-        emit AuctionCreated(_length);
+        emit AuctionCreated(_nftToSell, _length);
         _length = _length.add(1);
     }
 
@@ -176,7 +176,7 @@ contract NFTAuction is Management {
     /// @param _at The index of the auction
     function take(uint256 _at) external payable nonReentrant {
         require(msg.value >= _auctions[_at].currentPrice.add(_auctions[_at].feesToPay), "notEnoughFunds");
-        require(block.timestamp > _auctions[_at].stopTime, "auctionIsStopped");
+        require(block.timestamp > _auctions[_at].stopTime, "auctionIsActive");
         require(msg.sender == _auctions[_at].lastBuyer, "senderMustBeBuyerWhoWon");
         _auctions[_at].seller.transfer(_auctions[_at].currentPrice);
         feeReceiver.transfer(_auctions[_at].feesToPay);
@@ -184,5 +184,4 @@ contract NFTAuction is Management {
         _auctions[_at].status = Status.FILLED;
         emit AuctionFilled(_at);
     }
-
 }

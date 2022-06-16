@@ -1,9 +1,9 @@
 //SPDX-License-Identifier: Unlicense
 pragma solidity ^0.4.0;
 
-import './openzeppelin/token/ERC721/IERC721.sol';
 import './openzeppelin/math/SafeMath.sol';
 
+import './interfaces/IERC721.sol';
 import './Management.sol';
 
 /// @title A contract of the marketplace.
@@ -13,7 +13,7 @@ contract NFTSale is Management {
 
 
     /// @notice This event is fired when seller create the sell order
-    event OrderCreated(uint256 indexed orderIndex);
+    event OrderCreated(uint256 indexed tokenId, uint256 indexed orderIndex);
 
     /// @notice This event is fired when seller fill the sell order
     event OrderFilled(uint256 indexed orderIndex);
@@ -136,7 +136,7 @@ contract NFTSale is Management {
             expirationTime: block.timestamp.add(_expirationDuration),
             paidFees: 0
         });
-        emit OrderCreated(_length);
+        emit OrderCreated(_nftToSell, _length);
         _length = _length.add(1);
     }
 

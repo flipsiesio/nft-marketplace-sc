@@ -1,6 +1,7 @@
-pragma solidity ^0.4.24;
+pragma solidity ^0.4.23;
 
 import "./SafeERC20.sol";
+
 
 /**
  * @title TokenTimelock
@@ -8,56 +9,41 @@ import "./SafeERC20.sol";
  * beneficiary to extract the tokens after a given release time
  */
 contract TokenTimelock {
-    using SafeERC20 for IERC20;
+  using SafeERC20 for ERC20Basic;
 
-    // ERC20 basic token contract being held
-    IERC20 private _token;
+  // ERC20 basic token contract being held
+  ERC20Basic public token;
 
-    // beneficiary of tokens after they are released
-    address private _beneficiary;
+  // beneficiary of tokens after they are released
+  address public beneficiary;
 
-    // timestamp when token release is enabled
-    uint256 private _releaseTime;
+  // timestamp when token release is enabled
+  uint256 public releaseTime;
 
-    constructor (IERC20 token, address beneficiary, uint256 releaseTime) public {
-        // solium-disable-next-line security/no-block-members
-        require(releaseTime > block.timestamp);
-        _token = token;
-        _beneficiary = beneficiary;
-        _releaseTime = releaseTime;
-    }
+  constructor(
+    ERC20Basic _token,
+    address _beneficiary,
+    uint256 _releaseTime
+  )
+    public
+  {
+    // solium-disable-next-line security/no-block-members
+    require(_releaseTime > block.timestamp);
+    token = _token;
+    beneficiary = _beneficiary;
+    releaseTime = _releaseTime;
+  }
 
-    /**
-     * @return the token being held.
-     */
-    function token() public view returns (IERC20) {
-        return _token;
-    }
+  /**
+   * @notice Transfers tokens held by timelock to beneficiary.
+   */
+  function release() public {
+    // solium-disable-next-line security/no-block-members
+    require(block.timestamp >= releaseTime);
 
-    /**
-     * @return the beneficiary of the tokens.
-     */
-    function beneficiary() public view returns (address) {
-        return _beneficiary;
-    }
+    uint256 amount = token.balanceOf(this);
+    require(amount > 0);
 
-    /**
-     * @return the time when the tokens are released.
-     */
-    function releaseTime() public view returns (uint256) {
-        return _releaseTime;
-    }
-
-    /**
-     * @notice Transfers tokens held by timelock to beneficiary.
-     */
-    function release() public {
-        // solium-disable-next-line security/no-block-members
-        require(block.timestamp >= _releaseTime);
-
-        uint256 amount = _token.balanceOf(address(this));
-        require(amount > 0);
-
-        _token.safeTransfer(_beneficiary, amount);
-    }
+    token.safeTransfer(beneficiary, amount);
+  }
 }

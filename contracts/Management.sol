@@ -2,12 +2,14 @@
 pragma solidity ^0.4.0;
 
 import './openzeppelin/ownership/Ownable.sol';
-import './openzeppelin/utils/ReentrancyGuard.sol';
-import './openzeppelin/token/ERC721/IERC721.sol';
+import './openzeppelin/ReentrancyGuard.sol';
+import './openzeppelin/token/ERC721/ERC721Holder.sol';
+
+import './interfaces/IERC721.sol';
 
 /// @title A contract for holding management functions and modifiers.
 /// @author Integral Team
-contract Management is Ownable, ReentrancyGuard {
+contract Management is Ownable, ReentrancyGuard, ERC721Holder {
 
     // This enumeration is describing different statuses of the different orders
     enum Status {

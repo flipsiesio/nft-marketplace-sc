@@ -1,41 +1,43 @@
-pragma solidity ^0.4.24;
+pragma solidity ^0.4.23;
 
-import "./escrow/Escrow.sol";
+
+import "../math/SafeMath.sol";
+
 
 /**
  * @title PullPayment
  * @dev Base contract supporting async send for pull payments. Inherit from this
- * contract and use _asyncTransfer instead of send or transfer.
+ * contract and use asyncSend instead of send or transfer.
  */
 contract PullPayment {
-    Escrow private _escrow;
+  using SafeMath for uint256;
 
-    constructor () internal {
-        _escrow = new Escrow();
-    }
+  mapping(address => uint256) public payments;
+  uint256 public totalPayments;
 
-    /**
-    * @dev Withdraw accumulated balance.
-    * @param payee Whose balance will be withdrawn.
-    */
-    function withdrawPayments(address payee) public {
-        _escrow.withdraw(payee);
-    }
+  /**
+  * @dev Withdraw accumulated balance, called by payee.
+  */
+  function withdrawPayments() public {
+    address payee = msg.sender;
+    uint256 payment = payments[payee];
 
-    /**
-    * @dev Returns the credit owed to an address.
-    * @param dest The creditor's address.
-    */
-    function payments(address dest) public view returns (uint256) {
-        return _escrow.depositsOf(dest);
-    }
+    require(payment != 0);
+    require(address(this).balance >= payment);
 
-    /**
-    * @dev Called by the payer to store the sent amount as credit to be pulled.
-    * @param dest The destination address of the funds.
-    * @param amount The amount to transfer.
-    */
-    function _asyncTransfer(address dest, uint256 amount) internal {
-        _escrow.deposit.value(amount)(dest);
-    }
+    totalPayments = totalPayments.sub(payment);
+    payments[payee] = 0;
+
+    payee.transfer(payment);
+  }
+
+  /**
+  * @dev Called by the payer to store the sent amount as credit to be pulled.
+  * @param dest The destination address of the funds.
+  * @param amount The amount to transfer.
+  */
+  function asyncSend(address dest, uint256 amount) internal {
+    payments[dest] = payments[dest].add(amount);
+    totalPayments = totalPayments.add(amount);
+  }
 }

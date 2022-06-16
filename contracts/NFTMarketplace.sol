@@ -1,9 +1,9 @@
 //SPDX-License-Identifier: Unlicense
 pragma solidity ^0.4.0;
 
-import './openzeppelin/token/ERC721/IERC721.sol';
 import './openzeppelin/math/SafeMath.sol';
 
+import './interfaces/IERC721.sol';
 import './Management.sol';
 
 /// @title A contract of the marketplace.
@@ -13,7 +13,7 @@ contract NFTMarketplace is Management {
 
 
     /// @notice This event is fired when seller create the sell order
-    event OrderCreated(uint256 indexed orderIndex);
+    event OrderCreated(uint256 indexed tokenId, uint256 indexed orderIndex);
 
     /// @notice This event is fired when seller fill the sell order
     event OrderFilled(uint256 indexed orderIndex);
@@ -143,7 +143,7 @@ contract NFTMarketplace is Management {
             expirationTime: block.timestamp.add(_expirationDuration),
             paidFees: 0
         });
-        emit OrderCreated(_length);
+        emit OrderCreated(_nftToSell, _length);
         _length = _length.add(1);
     }
 
@@ -179,11 +179,16 @@ contract NFTMarketplace is Management {
     }
 
     function cancelBid(uint256 _at) external nonReentrant validIndex(_at) {
+        require((_sellOrders[_at].status != Status.PENDING) ||
+            (block.timestamp > _sellOrders[_at].expirationTime), "orderIsActive");
+        require(_sellOrders[_at].bids[msg.sender] > 0, "nothingToCancelAndReturn");
+
         uint256 bidToReturn = _sellOrders[_at].bids[msg.sender];
         uint256 feeAmount = bidToReturn.mul(feeInBps).div(MAX_FEE);
         uint256 toReturn = bidToReturn.add(feeAmount);
-        require(toReturn > 0, "nothingToCancelAndReturn");
+
         msg.sender.transfer(toReturn);
+        delete _sellOrders[_at].bids[msg.sender];
         emit BidCancelled(_at, msg.sender, toReturn);
     }
 
@@ -193,7 +198,7 @@ contract NFTMarketplace is Management {
         require(_sellOrders[_at].status == Status.PENDING, "orderIsFilledOrRejected");
         require(block.timestamp <= _sellOrders[_at].expirationTime, "orderIsExpired");
 
-        nftOnSale.safeTransferFrom(address(this), msg.sender, _sellOrders[_at].tokenId);
+        nftOnSale.safeTransferFrom(address(this), buyer, _sellOrders[_at].tokenId);
 
         uint256 price = _sellOrders[_at].bids[buyer];
         uint256 feeAmount = price.mul(feeInBps).div(MAX_FEE);
@@ -202,7 +207,7 @@ contract NFTMarketplace is Management {
         feeReceiver.transfer(feeAmount);
         _sellOrders[_at].paidFees = feeAmount;
         _sellOrders[_at].status = Status.FILLED;
-        _sellOrders[_at].bids[buyer] = 0;
+        delete _sellOrders[_at].bids[buyer];
         emit OrderFilled(_at);
     }
 }

@@ -1,82 +1,72 @@
-pragma solidity ^0.4.24;
+pragma solidity ^0.4.23;
+
 
 import "../../math/SafeMath.sol";
 import "./FinalizableCrowdsale.sol";
-import "../../payment/escrow/RefundEscrow.sol";
+import "./utils/RefundVault.sol";
+
 
 /**
  * @title RefundableCrowdsale
- * @dev Extension of Crowdsale contract that adds a funding goal, and the possibility of users getting a refund if goal
- * is not met.
- *
- * Deprecated, use RefundablePostDeliveryCrowdsale instead. Note that if you allow tokens to be traded before the goal
- * is met, then an attack is possible in which the attacker purchases tokens from the crowdsale and when they sees that
- * the goal is unlikely to be met, they sell their tokens (possibly at a discount). The attacker will be refunded when
- * the crowdsale is finalized, and the users that purchased from them will be left with worthless tokens.
+ * @dev Extension of Crowdsale contract that adds a funding goal, and
+ * the possibility of users getting a refund if goal is not met.
+ * Uses a RefundVault as the crowdsale's vault.
  */
 contract RefundableCrowdsale is FinalizableCrowdsale {
-    using SafeMath for uint256;
+  using SafeMath for uint256;
 
-    // minimum amount of funds to be raised in weis
-    uint256 private _goal;
+  // minimum amount of funds to be raised in weis
+  uint256 public goal;
 
-    // refund escrow used to hold funds while crowdsale is running
-    RefundEscrow private _escrow;
+  // refund vault used to hold funds while crowdsale is running
+  RefundVault public vault;
 
-    /**
-     * @dev Constructor, creates RefundEscrow.
-     * @param goal Funding goal
-     */
-    constructor (uint256 goal) public {
-        require(goal > 0);
-        _escrow = new RefundEscrow(wallet());
-        _goal = goal;
+  /**
+   * @dev Constructor, creates RefundVault.
+   * @param _goal Funding goal
+   */
+  constructor(uint256 _goal) public {
+    require(_goal > 0);
+    vault = new RefundVault(wallet);
+    goal = _goal;
+  }
+
+  /**
+   * @dev Investors can claim refunds here if crowdsale is unsuccessful
+   */
+  function claimRefund() public {
+    require(isFinalized);
+    require(!goalReached());
+
+    vault.refund(msg.sender);
+  }
+
+  /**
+   * @dev Checks whether funding goal was reached.
+   * @return Whether funding goal was reached
+   */
+  function goalReached() public view returns (bool) {
+    return weiRaised >= goal;
+  }
+
+  /**
+   * @dev vault finalization task, called when owner calls finalize()
+   */
+  function finalization() internal {
+    if (goalReached()) {
+      vault.close();
+    } else {
+      vault.enableRefunds();
     }
 
-    /**
-     * @return minimum amount of funds to be raised in wei.
-     */
-    function goal() public view returns (uint256) {
-        return _goal;
-    }
+    super.finalization();
+  }
 
-    /**
-     * @dev Investors can claim refunds here if crowdsale is unsuccessful
-     * @param refundee Whose refund will be claimed.
-     */
-    function claimRefund(address refundee) public {
-        require(finalized());
-        require(!goalReached());
+  /**
+   * @dev Overrides Crowdsale fund forwarding, sending funds to vault.
+   */
+  function _forwardFunds() internal {
+    vault.deposit.value(msg.value)(msg.sender);
+  }
 
-        _escrow.withdraw(refundee);
-    }
-
-    /**
-     * @dev Checks whether funding goal was reached.
-     * @return Whether funding goal was reached
-     */
-    function goalReached() public view returns (bool) {
-        return weiRaised() >= _goal;
-    }
-
-    /**
-     * @dev escrow finalization task, called when finalize() is called
-     */
-    function _finalization() internal {
-        if (goalReached()) {
-            _escrow.close();
-            _escrow.beneficiaryWithdraw();
-        } else {
-            _escrow.enableRefunds();
-        }
-
-        super._finalization();
-    }
-
-    /**
-     * @dev Overrides Crowdsale fund forwarding, sending funds to escrow.
-     */
-    function _forwardFunds() internal {
-        _escrow.deposit.value(msg.value)(msg.sender);
-    }
 }

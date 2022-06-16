@@ -1,6 +1,6 @@
 pragma solidity ^0.4.0;
 
-import "../interfaces/IERC721.sol";
+import '../interfaces/IERC721.sol';
 
 contract MockNFT is IERC721 {
 
