@@ -13,10 +13,10 @@ contract NFTSale is Management {
 
 
     /// @notice This event is fired when seller create the sell order
-    event OrderCreated(uint256 indexed tokenId, uint256 indexed orderIndex);
+    event OrderCreated(uint256 indexed tokenId, uint256 indexed orderIndex, address seller, uint256 expirationTime);
 
     /// @notice This event is fired when seller fill the sell order
-    event OrderFilled(uint256 indexed orderIndex);
+    event OrderFilled(uint256 indexed orderIndex, address buyer);
 
     /// @notice This event is fired when seller reject the sell order
     event OrderRejected(uint256 indexed orderIndex);
@@ -136,7 +136,7 @@ contract NFTSale is Management {
             expirationTime: block.timestamp.add(_expirationDuration),
             paidFees: 0
         });
-        emit OrderCreated(_nftToSell, _length);
+        emit OrderCreated(_nftToSell, _length, msg.sender, block.timestamp.add(_expirationDuration));
         _length = _length.add(1);
     }
 
@@ -175,6 +175,6 @@ contract NFTSale is Management {
         feeReceiver.transfer(feeAmount);
         _sellOrders[_at].paidFees = feeAmount;
         _sellOrders[_at].status = Status.FILLED;
-        emit OrderFilled(_at);
+        emit OrderFilled(_at, msg.sender);
     }
 }
