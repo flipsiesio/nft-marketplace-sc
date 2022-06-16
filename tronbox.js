@@ -1,3 +1,5 @@
+require("dotenv").config()
+
 const port = process.env.HOST_PORT || 18981
 
 module.exports = {
@@ -15,7 +17,7 @@ module.exports = {
             network_id: "2"
         },
         nile: {
-            privateKey: process.env.PRIVATE_KEY_NAIL,
+            privateKey: process.env.PRIVATE_KEY_NILE,
             fullHost: 'https://api.nileex.io',
             network_id: '3'
         },
