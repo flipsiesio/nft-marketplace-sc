@@ -170,6 +170,7 @@ contract NFTMarketplace is Management {
 
     function bid(uint256 _at, uint256 _amount) external payable validIndex(_at) {
         require(_amount > 0, "cannotBid0");
+        require(_sellOrders[_at].bids[msg.sender] == 0, "bidExists");
         uint256 feeAmount = _amount.mul(feeInBps).div(MAX_FEE);
         require(msg.value >= _amount.add(feeAmount), "notEnoughFunds");
         require(_sellOrders[_at].status == Status.PENDING, "orderIsFilledOrRejected");
