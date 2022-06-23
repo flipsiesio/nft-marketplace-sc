@@ -8,7 +8,7 @@ import "./interfaces/IRandomMinter.sol";
 
 contract CardRandomMinter is Ownable, IRandomMinter {
 
-    event Minted(uint8 _amount, address indexed _to);
+    event Minted(uint8 _amount, address indexed _to, string desc);
 
     IOptionMintable public factory;
 
@@ -53,7 +53,7 @@ contract CardRandomMinter is Ownable, IRandomMinter {
         revert('invalidOptionPickedRandomly');
     }
 
-    function _mintRandom(uint8 _itemsPerRandomMint, address _to) internal {
+    function _mintRandom(uint8 _itemsPerRandomMint, address _to, string desc) internal {
         require(allowedItemsPerRandomMint[_itemsPerRandomMint], "amountIsNotAllowed");
         uint8 minted = 0;
         for (uint8 i = 0; i < _itemsPerRandomMint; i++) {
@@ -71,17 +71,17 @@ contract CardRandomMinter is Ownable, IRandomMinter {
                 }
             }
         }
-        emit Minted(minted, _to);
+        emit Minted(minted, _to, desc);
     }
 
-    function mintRandomFree(uint8 _itemsPerRandomMint, address _to) external {
+    function mintRandomFree(uint8 _itemsPerRandomMint, address _to, string desc) external {
         require(isMinter[msg.sender], "onlyMinter");
-        _mintRandom(_itemsPerRandomMint, _to);
+        _mintRandom(_itemsPerRandomMint, _to, desc);
     }
 
     function mintRandom(uint8 _itemsPerRandomMint) external payable {
         require(msg.value >= price * uint256(_itemsPerRandomMint), "notEnoughAmountSent");
-        _mintRandom(_itemsPerRandomMint, msg.sender);
+        _mintRandom(_itemsPerRandomMint, msg.sender, "");
     }
 
     function _getRandomSingleOption(int256 _seed) internal view returns(uint8) {
