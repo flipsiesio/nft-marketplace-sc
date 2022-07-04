@@ -205,6 +205,7 @@ contract NFTMarketplace is Management {
 
         require(_sellOrders[_at].status == Status.PENDING, "orderIsFilledOrRejected");
         require(block.timestamp <= _sellOrders[_at].expirationTime, "orderIsExpired");
+        require(_bidID < _sellOrders[_at].bids[buyer].length, "!bid");
 
         nftOnSale.safeTransferFrom(address(this), buyer, _sellOrders[_at].tokenId);
 

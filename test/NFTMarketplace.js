@@ -44,10 +44,13 @@ describe("Marketplace", () => {
     expect(await market.getSellOrderStatus(order)).to.be.equal(0);
 
     await market.connect(accounts[2]).bid(order, price, {value: price + fee});
-    await market.connect(accounts[1]).performBuyOperation(accounts[2].address, order);
+    await expect(market.connect(accounts[1]).performBuyOperation(accounts[2].address, order, 1)).to.be.revertedWith("!bid");
+    await market.connect(accounts[1]).performBuyOperation(accounts[2].address, order, 0);
 
     expect(await token.ownerOf(n)).to.be.equal(accounts[2].address);
     expect(await market.getSellOrderStatus(order)).to.be.equal(1);
+
+    await expect(market.connect(accounts[1]).performBuyOperation(accounts[2].address, order, 0)).to.be.revertedWith("orderIsFilledOrRejected");
   });
 
   it('should cancel order', async () => {
@@ -65,7 +68,7 @@ describe("Marketplace", () => {
     expect(await market.getSellOrderStatus(order)).to.be.equal(2);
   });
 
-  it('should cancel bid', async () => {
+  it('should cancel bids', async () => {
     const price = 1000000000000000;
     const fee = price * (await market.feeInBps()) / (await market.MAX_FEE());
 
@@ -75,10 +78,20 @@ describe("Marketplace", () => {
     const order = findOrder(await market.queryFilter("OrderCreated"), n);
     expect(await market.getSellOrderStatus(order)).to.be.equal(0);
 
-    await market.connect(accounts[5]).bid(order, price, {value: price + fee});
-    await market.connect(accounts[5]).cancelBid(order);
+    const bids = 3;
+    for(let i = 0; i < bids; i++) {
+      await market.connect(accounts[5]).bid(order, price, {value: price + fee});
+    }
 
-    await expect(market.connect(accounts[5]).cancelBid(order)).to.be.revertedWith("nothingToCancelAndReturn");
+    const bidEvents = await market.queryFilter("Bid");
+    expect(bidEvents.length).to.be.equal(bids);
+
+    await expect(market.connect(accounts[5]).cancelBids(order)).to.be.revertedWith("orderIsActive");
+
+    await network.provider.send("evm_increaseTime", [60 * 60 * 24 * 14]);
+    await market.connect(accounts[5]).cancelBids(order);
+
+    await expect(market.connect(accounts[5]).cancelBids(order)).to.be.revertedWith("nothingToCancelAndReturn");
   });
 
   afterEach(() => {
