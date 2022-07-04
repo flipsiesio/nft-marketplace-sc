@@ -84,21 +84,23 @@ contract CardRandomMinter is Ownable, IRandomMinter {
         _mintRandom(_itemsPerRandomMint, msg.sender, "");
     }
 
-    function _getRandomSingleOption(int256 _seed) internal view returns(uint8) {
+    function _getRandomSingleOption(int256 _seed) internal returns(uint8) {
         return _pickRandomSingleOption(
           _seed,
           __classProbs
         );
     }
 
-    function _random(int256 seed) internal view returns(uint256) {
-        return uint256(keccak256(abi.encodePacked(blockhash(block.number - 1), msg.sender, seed, block.difficulty)));
+    function _random(int256 seed) internal returns(uint256) {
+        bytes32 res = keccak256(abi.encodePacked(blockhash(block.number - 1), msg.sender, seed, block.difficulty));
+        _currentSeed = int256(res);
+        return uint256(res);
     }
 
     function _pickRandomSingleOption(
         int256 seed,
         uint16[5] memory classProbabilities
-    ) internal view returns(uint8) {
+    ) internal returns(uint8) {
         uint16 value = uint16(_random(seed) % MAX_BPS);
         // Start at top class (length - 1)
         // skip common (0), we default to it
