@@ -16,13 +16,13 @@ contract NFTMarketplace is Management {
     event OrderCreated(uint256 indexed tokenId, uint256 indexed orderIndex, address seller, uint256 expirationTime);
 
     /// @notice This event is fired when seller fill the sell order
-    event OrderFilled(uint256 indexed orderIndex, address buyer);
+    event OrderFilled(uint256 indexed orderIndex, address indexed buyer, uint256 price);
 
     /// @notice This event is fired when seller reject the sell order
     event OrderRejected(uint256 indexed orderIndex);
 
-    /// @notice This event is fired when buyer places a bid
-    event Bid(uint256 indexed orderIndex, address indexed buyer, uint256 indexed amount);
+    /// @notice This event is fired when buyer places or updates a bid
+    event Bid(uint256 indexed orderIndex, address indexed buyer, uint256 added, uint256 indexed total);
 
     /// @notice This event is fired when buyer renounce the bid
     event BidCancelled(uint256 indexed orderIndex, address indexed buyer, uint256 indexed amount);
@@ -170,13 +170,14 @@ contract NFTMarketplace is Management {
 
     function bid(uint256 _at, uint256 _amount) external payable validIndex(_at) {
         require(_amount > 0, "cannotBid0");
-        require(_sellOrders[_at].bids[msg.sender] == 0, "bidExists");
-        uint256 feeAmount = _amount.mul(feeInBps).div(MAX_FEE);
-        require(msg.value >= _amount.add(feeAmount), "notEnoughFunds");
         require(_sellOrders[_at].status == Status.PENDING, "orderIsFilledOrRejected");
         require(block.timestamp <= _sellOrders[_at].expirationTime, "orderIsExpired");
-        _sellOrders[_at].bids[msg.sender] = _amount;
-        emit Bid(_at, msg.sender, _amount);
+
+        uint256 feeAmount = _amount.mul(feeInBps).div(MAX_FEE);
+        require(msg.value >= _amount.add(feeAmount), "notEnoughFunds");
+
+        _sellOrders[_at].bids[msg.sender] = _sellOrders[_at].bids[msg.sender].add(_amount);
+        emit Bid(_at, msg.sender, _amount, _sellOrders[_at].bids[msg.sender]);
     }
 
     function cancelBid(uint256 _at) external nonReentrant validIndex(_at) {
@@ -209,6 +210,6 @@ contract NFTMarketplace is Management {
         _sellOrders[_at].paidFees = feeAmount;
         _sellOrders[_at].status = Status.FILLED;
         delete _sellOrders[_at].bids[buyer];
-        emit OrderFilled(_at, buyer);
+        emit OrderFilled(_at, buyer, price);
     }
 }
