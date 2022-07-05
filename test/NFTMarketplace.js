@@ -1,4 +1,5 @@
 const { expect } = require("chai");
+const { BigNumber } = require("ethers");
 const { ethers } = require("hardhat");
 
 function findOrder(events, tokenID) {
@@ -34,8 +35,8 @@ describe("Marketplace", () => {
   });
 
   it('should sell token', async () => {
-    const price = 1000000000000000;
-    const fee = price * (await market.feeInBps()) / (await market.MAX_FEE());
+    const price = BigNumber.from(1000000000000000);
+    const fee = price.mul(await market.feeInBps()).div(await market.MAX_FEE());
 
     await token.mint(accounts[1].address, n);
     await token.connect(accounts[1]).approve(market.address, n);
@@ -43,8 +44,10 @@ describe("Marketplace", () => {
     const order = findOrder(await market.queryFilter("OrderCreated"), n);
     expect(await market.getSellOrderStatus(order)).to.be.equal(0);
 
-    await market.connect(accounts[2]).bid(order, price, {value: price + fee});
-    await market.connect(accounts[1]).performBuyOperation(accounts[2].address, order);
+    await market.connect(accounts[2]).bid(order, price, {value: price.add(fee)});
+    await market.connect(accounts[2]).bid(order, price, {value: price.add(fee)});
+    await expect(market.connect(accounts[1]).performBuyOperation(accounts[2].address, order))
+      .to.emit(market, "OrderFilled").withArgs(order, accounts[2].address, price.mul(2));
 
     expect(await token.ownerOf(n)).to.be.equal(accounts[2].address);
     expect(await market.getSellOrderStatus(order)).to.be.equal(1);
@@ -76,6 +79,9 @@ describe("Marketplace", () => {
     expect(await market.getSellOrderStatus(order)).to.be.equal(0);
 
     await market.connect(accounts[5]).bid(order, price, {value: price + fee});
+    await expect(market.connect(accounts[5]).cancelBid(order)).to.be.revertedWith("orderIsActive");
+
+    await network.provider.send("evm_increaseTime", [60 * 60 * 24 * 14]);
     await market.connect(accounts[5]).cancelBid(order);
 
     await expect(market.connect(accounts[5]).cancelBid(order)).to.be.revertedWith("nothingToCancelAndReturn");
