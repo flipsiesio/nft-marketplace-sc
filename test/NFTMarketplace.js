@@ -49,12 +49,16 @@ describe("Marketplace", () => {
     const order = findOrder(await market.queryFilter("OrderCreated"), n);
     expect(await market.getSellOrderStatus(order)).to.be.equal(0);
 
-    await market
-      .connect(accounts[2])
-      .bid(order, price, { value: price.add(fee) });
-    await market
-      .connect(accounts[2])
-      .bid(order, price, { value: price.add(fee) });
+    await expect(
+      market.connect(accounts[2]).bid(order, price, { value: price.add(fee) })
+    )
+      .to.emit(market, "Bid")
+      .withArgs(order, accounts[2].address, price, price);
+    await expect(
+      market.connect(accounts[2]).bid(order, price, { value: price.add(fee) })
+    )
+      .to.emit(market, "Bid")
+      .withArgs(order, accounts[2].address, price, price.mul(2));
     await expect(
       market
         .connect(accounts[1])
