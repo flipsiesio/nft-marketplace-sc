@@ -4,7 +4,6 @@ import "./HasNoEther.sol";
 import "./HasNoTokens.sol";
 import "./HasNoContracts.sol";
 
-
 /**
  * @title Base contract for contracts that should not own things.
  * @author Remco Bloemen <remco@2π.com>
@@ -12,4 +11,5 @@ import "./HasNoContracts.sol";
  * Owned contracts. See respective base contracts for details.
  */
 contract NoOwner is HasNoEther, HasNoTokens, HasNoContracts {
+
 }

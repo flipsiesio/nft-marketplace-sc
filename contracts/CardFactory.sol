@@ -1,14 +1,13 @@
 //SPDX-License-Identifier: Unlicense
 pragma solidity ^0.4.0;
 
-import './openzeppelin/ownership/Ownable.sol';
-import './openzeppelin/token/ERC721/ERC721Token.sol';
+import "./openzeppelin/ownership/Ownable.sol";
+import "./openzeppelin/token/ERC721/ERC721Token.sol";
 
 import "./interfaces/IOptionMintable.sol";
 import "./interfaces/IMintable.sol";
 
 contract CardFactory is Ownable, IOptionMintable {
-
     mapping(address => bool) public isOptionMinter;
 
     IMintable public mintableToken;
@@ -42,17 +41,10 @@ contract CardFactory is Ownable, IOptionMintable {
         uint8 optionId,
         uint256 startId,
         uint256 endId
-    )
-        external
-        onlyOwner
-        validOption(optionId)
-    {
+    ) external onlyOwner validOption(optionId) {
         // WARNING: BOUNDARY COLLISION MUST BE CHECKED ON ADMIN SIDE OFFCHAIN!!!
         require(startId < endId, "invalidBoundaries");
-        _idBoundaries[optionId] = Boundaries({
-          start: startId,
-          end: endId
-        });
+        _idBoundaries[optionId] = Boundaries({start: startId, end: endId});
     }
 
     // set CardRandomMinter as option minter
@@ -67,12 +59,16 @@ contract CardFactory is Ownable, IOptionMintable {
     function mint(uint8 optionId, address toAddress)
         external
         validOption(optionId)
-        returns(bool)
+        returns (bool)
     {
         require(isOptionMinter[msg.sender], "onlyOptionMinter");
 
-        for (uint256 i = _idBoundaries[optionId].start; i < _idBoundaries[optionId].end; i++) {
-            if(!mintableToken.exists(_idBoundaries[optionId].start)) {
+        for (
+            uint256 i = _idBoundaries[optionId].start;
+            i < _idBoundaries[optionId].end;
+            i++
+        ) {
+            if (!mintableToken.exists(_idBoundaries[optionId].start)) {
                 mintableToken.mint(toAddress, _idBoundaries[optionId].start);
                 _idBoundaries[optionId].start = i + 1;
                 return true;

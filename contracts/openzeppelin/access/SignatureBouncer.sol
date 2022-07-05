@@ -4,7 +4,6 @@ import "../ownership/Ownable.sol";
 import "../ownership/rbac/RBAC.sol";
 import "../ECRecovery.sol";
 
-
 /**
  * @title SignatureBouncer
  * @author PhABC and Shrugs
@@ -23,69 +22,57 @@ import "../ECRecovery.sol";
  * @dev See the tests Bouncer.test.js for specific usage examples.
  */
 contract SignatureBouncer is Ownable, RBAC {
-  using ECRecovery for bytes32;
+    using ECRecovery for bytes32;
 
-  string public constant ROLE_BOUNCER = "bouncer";
+    string public constant ROLE_BOUNCER = "bouncer";
 
-  /**
-   * @dev requires that a valid signature of a bouncer was provided
-   */
-  modifier onlyValidSignature(bytes _sig)
-  {
-    require(isValidSignature(msg.sender, _sig));
-    _;
-  }
+    /**
+     * @dev requires that a valid signature of a bouncer was provided
+     */
+    modifier onlyValidSignature(bytes _sig) {
+        require(isValidSignature(msg.sender, _sig));
+        _;
+    }
 
-  /**
-   * @dev allows the owner to add additional bouncer addresses
-   */
-  function addBouncer(address _bouncer)
-    onlyOwner
-    public
-  {
-    require(_bouncer != address(0));
-    addRole(_bouncer, ROLE_BOUNCER);
-  }
+    /**
+     * @dev allows the owner to add additional bouncer addresses
+     */
+    function addBouncer(address _bouncer) public onlyOwner {
+        require(_bouncer != address(0));
+        addRole(_bouncer, ROLE_BOUNCER);
+    }
 
-  /**
-   * @dev allows the owner to remove bouncer addresses
-   */
-  function removeBouncer(address _bouncer)
-    onlyOwner
-    public
-  {
-    require(_bouncer != address(0));
-    removeRole(_bouncer, ROLE_BOUNCER);
-  }
+    /**
+     * @dev allows the owner to remove bouncer addresses
+     */
+    function removeBouncer(address _bouncer) public onlyOwner {
+        require(_bouncer != address(0));
+        removeRole(_bouncer, ROLE_BOUNCER);
+    }
 
-  /**
-   * @dev is the signature of `this + sender` from a bouncer?
-   * @return bool
-   */
-  function isValidSignature(address _address, bytes _sig)
-    internal
-    view
-    returns (bool)
-  {
-    return isValidDataHash(
-      keccak256(address(this), _address),
-      _sig
-    );
-  }
+    /**
+     * @dev is the signature of `this + sender` from a bouncer?
+     * @return bool
+     */
+    function isValidSignature(address _address, bytes _sig)
+        internal
+        view
+        returns (bool)
+    {
+        return isValidDataHash(keccak256(address(this), _address), _sig);
+    }
 
-  /**
-   * @dev internal function to convert a hash to an eth signed message
-   * @dev and then recover the signature and check it against the bouncer role
-   * @return bool
-   */
-  function isValidDataHash(bytes32 hash, bytes _sig)
-    internal
-    view
-    returns (bool)
-  {
-    address signer = hash
-      .toEthSignedMessageHash()
-      .recover(_sig);
-    return hasRole(signer, ROLE_BOUNCER);
-  }
+    /**
+     * @dev internal function to convert a hash to an eth signed message
+     * @dev and then recover the signature and check it against the bouncer role
+     * @return bool
+     */
+    function isValidDataHash(bytes32 hash, bytes _sig)
+        internal
+        view
+        returns (bool)
+    {
+        address signer = hash.toEthSignedMessageHash().recover(_sig);
+        return hasRole(signer, ROLE_BOUNCER);
+    }
 }

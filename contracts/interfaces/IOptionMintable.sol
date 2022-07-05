@@ -14,5 +14,5 @@ interface IOptionMintable {
      * @param _optionId the option id
      * @param _toAddress address of the future owner of the asset(s)
      */
-     function mint(uint8 _optionId, address _toAddress) external returns(bool);
+    function mint(uint8 _optionId, address _toAddress) external returns (bool);
 }

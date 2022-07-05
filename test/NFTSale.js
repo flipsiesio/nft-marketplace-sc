@@ -20,22 +20,27 @@ describe("Sale", () => {
     const tokenFactory = await ethers.getContractFactory("Card");
     token = await tokenFactory.deploy();
     const saleFactory = await ethers.getContractFactory("NFTSale");
-    sale = await saleFactory.deploy(token.address, accounts[0].address, 100, 1000, 3000);
-    
+    sale = await saleFactory.deploy(
+      token.address,
+      accounts[0].address,
+      100,
+      1000,
+      3000
+    );
   });
 
-  it('should set fee receiver', async () => {
+  it("should set fee receiver", async () => {
     expect(await sale.feeReceiver()).to.be.equal(accounts[0].address);
   });
 
-  it('should mint a token', async () => {
+  it("should mint a token", async () => {
     await token.mint(accounts[1].address, n);
     expect(await token.ownerOf(n)).to.be.equal(accounts[1].address);
   });
 
-  it('should sell token', async () => {
+  it("should sell token", async () => {
     const price = 1000000000000000;
-    const fee = price * (await sale.feeInBps()) / (await sale.MAX_FEE());
+    const fee = (price * (await sale.feeInBps())) / (await sale.MAX_FEE());
 
     await token.mint(accounts[1].address, n);
     await token.connect(accounts[1]).approve(sale.address, n);
@@ -43,13 +48,13 @@ describe("Sale", () => {
     const order = findOrder(await sale.queryFilter("OrderCreated"), n);
     expect(await sale.getSellOrderStatus(order)).to.be.equal(0);
 
-    await sale.connect(accounts[2]).buy(order, {value: price + fee});
+    await sale.connect(accounts[2]).buy(order, { value: price + fee });
 
     expect(await token.ownerOf(n)).to.be.equal(accounts[2].address);
     expect(await sale.getSellOrderStatus(order)).to.be.equal(1);
   });
 
-  it('should cancel order', async () => {
+  it("should cancel order", async () => {
     const price = 1000000000000000;
 
     await token.mint(accounts[3].address, n);

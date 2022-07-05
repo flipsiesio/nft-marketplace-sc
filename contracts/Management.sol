@@ -1,16 +1,15 @@
 //SPDX-License-Identifier: Unlicense
 pragma solidity ^0.4.0;
 
-import './openzeppelin/ownership/Ownable.sol';
-import './openzeppelin/ReentrancyGuard.sol';
-import './openzeppelin/token/ERC721/ERC721Holder.sol';
+import "./openzeppelin/ownership/Ownable.sol";
+import "./openzeppelin/ReentrancyGuard.sol";
+import "./openzeppelin/token/ERC721/ERC721Holder.sol";
 
-import './interfaces/IERC721.sol';
+import "./interfaces/IERC721.sol";
 
 /// @title A contract for holding management functions and modifiers.
 /// @author Integral Team
 contract Management is Ownable, ReentrancyGuard, ERC721Holder {
-
     // This enumeration is describing different statuses of the different orders
     enum Status {
         PENDING,
@@ -66,7 +65,11 @@ contract Management is Ownable, ReentrancyGuard, ERC721Holder {
     /// @notice This custom modifier is to validate expiration duration of either sell order or auction
     /// @param _expirationDuration The duration which about to be used in auction or sell order
     modifier validExpirationDuration(uint256 _expirationDuration) {
-        require(_expirationDuration >= minExpirationDuration && _expirationDuration <= maxExpirationDuration, "invalidExpirationDuration");
+        require(
+            _expirationDuration >= minExpirationDuration &&
+                _expirationDuration <= maxExpirationDuration,
+            "invalidExpirationDuration"
+        );
         _;
     }
 
@@ -90,13 +93,19 @@ contract Management is Ownable, ReentrancyGuard, ERC721Holder {
 
     /// @notice A standard setter for the minimum expiration duration which available only for user
     /// @param _minExpirationDuration The new minimum expiration duration in seconds
-    function setMinExpirationDuration(uint256 _minExpirationDuration) external onlyOwner {
+    function setMinExpirationDuration(uint256 _minExpirationDuration)
+        external
+        onlyOwner
+    {
         minExpirationDuration = _minExpirationDuration;
     }
 
     /// @notice A standard setter for the maximum expiration duration which available only for user
     /// @param _maxExpirationDuration The new maximum expiration duration in seconds
-    function setMaxExpirationDuration(uint256 _maxExpirationDuration) external onlyOwner {
+    function setMaxExpirationDuration(uint256 _maxExpirationDuration)
+        external
+        onlyOwner
+    {
         maxExpirationDuration = _maxExpirationDuration;
     }
 

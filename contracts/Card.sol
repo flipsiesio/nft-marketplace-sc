@@ -1,11 +1,10 @@
 //SPDX-License-Identifier: Unlicense
 pragma solidity ^0.4.0;
 
-import './openzeppelin/ownership/Ownable.sol';
-import './openzeppelin/token/ERC721/ERC721Token.sol';
+import "./openzeppelin/ownership/Ownable.sol";
+import "./openzeppelin/token/ERC721/ERC721Token.sol";
 
 contract Card is Ownable, ERC721Token {
-
     mapping(address => bool) public isMinter;
     mapping(bytes4 => bool) private _supportedInterfaces;
 
@@ -14,8 +13,7 @@ contract Card is Ownable, ERC721Token {
     bytes4 private constant _INTERFACE_ID_TRC721_METADATA = 0x5b5e139f;
     bytes4 private constant _INTERFACE_ID_TRC721_ENUMERABLE = 0x780e9d63;
 
-
-    constructor() ERC721Token("Flipsies NFT", "FLP") public {
+    constructor() public ERC721Token("Flipsies NFT", "FLP") {
         isMinter[msg.sender] = true;
 
         _supportedInterfaces[_INTERFACE_ID_TRC165] = true;
@@ -34,11 +32,19 @@ contract Card is Ownable, ERC721Token {
         isMinter[_minter] = _status;
     }
 
-    function getNFTListByAddress(address _nftOwner) public view returns (uint256 []) {
+    function getNFTListByAddress(address _nftOwner)
+        public
+        view
+        returns (uint256[])
+    {
         return ownedTokens[_nftOwner];
     }
 
-    function supportsInterface(bytes4 interfaceId) external view returns (bool) {
+    function supportsInterface(bytes4 interfaceId)
+        external
+        view
+        returns (bool)
+    {
         return _supportedInterfaces[interfaceId];
     }
 }
