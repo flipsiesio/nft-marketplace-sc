@@ -1,26 +1,44 @@
 {
-  "name": "tronbox-poker-marketplace-sc",
-  "version": "2.1.0",
-  "description": "",
-  "directories": {
-    "test": "test"
+  "name": "poker-marketplace",
+  "version": "1.0.0",
+  "publishConfig": {
+    "access": "public"
   },
+  "files": [
+    "contracts/interfaces",
+    "contracts/mocks",
+    "contracts/openzeppelin",
+    "artifacts/contracts/UniswapV3Factory.sol/UniswapV3Factory.json",
+    "artifacts/contracts/UniswapV3Pool.sol/UniswapV3Pool.json",
+    "artifacts/contracts/interfaces/**/*.json",
+    "!artifacts/contracts/interfaces/**/*.dbg.json"
+  ],
+  "engines": {
+    "node": ">=10"
+  },
+  "description": "Poker NFT Marketplace Contract",
+  "main": ".eslintrc.js",
   "scripts": {
-    "dev": "bash scripts/dev.sh",
-    "migrate": "bash scripts/migrate.sh"
+    "compile": "hardhat compile",
+    "test": "hardhat test",
+    "coverage": "hardhat coverage",
+    "flatten": "hardhat flatten contracts/Card.sol > contracts/flattened/Card.sol && hardhat flatten contracts/CardFactory.sol > contracts/flattened/CardFactory.sol && hardhat flatten contracts/CardRandomMinter.sol > contracts/flattened/CardRandomMinter.sol && hardhat flatten contracts/NFTSale.sol > contracts/flattened/NFTSale.sol && hardhat flatten contracts/NFTMarketplace.sol > contracts/flattened/NFTMarketplace.sol"
   },
-  "originalAuthors": "truffle-box",
-  "author": {
-    "name": "Oleg Bedrin",
-    "email": "obedrin@sfxdx.com"
+  "repository": {
+    "type": "git",
+    "url": "git@git.sfxdx.ru:poker-dapp/sc.git"
   },
-  "license": "MIT",
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
   "devDependencies": {
-    "chalk": "^2.4.1",
-    "tronbox": "^2.7.25"
+    "@nomicfoundation/hardhat-toolbox": "^1.0.2",
+    "@nomiclabs/hardhat-etherscan": "^3.1.0",
+    "hardhat": "^2.10.1"
   },
   "dependencies": {
-    "@openzeppelin/test-helpers": "^0.5.15",
+    "@openzeppelin/contracts": "^4.7.1",
+    "delay": "^5.0.0",
     "dotenv": "^16.0.1"
   }
 }
