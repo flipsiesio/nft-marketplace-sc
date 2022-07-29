@@ -1,0 +1,50 @@
+{
+  "networks": {
+    "donau": {
+      "XTRXToken": {
+        "address": "0x3B451C045014B561D4059F09a45024594f58fD3c"
+      },
+      "Oracle": {
+        "address": "0xc0bAd7D7736558E7f4140823Bdd17447870c32B4",
+        "oracleOperatorAddress": "0xB41941063f09e478Fc9Bd1F8c398185f74b5Ac56"
+      },
+      "GameController": {
+        "address": "0xccf63ABfF86777f19d102Cd34fcB7D5838a28C54",
+        "oracleAddress": "0xc0bAd7D7736558E7f4140823Bdd17447870c32B4"
+      },
+      "PoolController": {
+        "address": "0x8DA4658EDf968c59B07ABE739fc5217e19f198b4"
+      },
+      "Poker": {
+        "address": "0xd36CCb036bC264650C2b513955125DFA4364813d",
+        "pokerOperatorAddress": "0xB41941063f09e478Fc9Bd1F8c398185f74b5Ac56"
+      },
+      "Migrations": {
+        "address": "0x81bc66e6E7F7A153a5BCbB11fDB16392843c55e2"
+      }
+    },
+    "mainnet": {
+      "XTRXToken": {
+        "address": ""
+      },
+      "Oracle": {
+        "address": "",
+        "oracleOperatorAddress": ""
+      },
+      "GameController": {
+        "address": "",
+        "oracleAddress": ""
+      },
+      "PoolController": {
+        "address": ""
+      },
+      "Poker": {
+        "address": "",
+        "pokerOperatorAddress": ""
+      },
+      "Migrations": {
+        "address": ""
+      }
+    }
+  }
+}
