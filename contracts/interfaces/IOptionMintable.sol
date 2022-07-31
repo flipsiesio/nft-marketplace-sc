@@ -1,5 +1,5 @@
-//SPDX-License-Identifier: Unlicense
-pragma solidity ^0.4.0;
+//SPDX-License-Identifier: MIT
+pragma solidity ^0.8.9;
 
 /**
  * This is a generic factory contract that can be used to mint tokens. The configuration

@@ -1,7 +1,7 @@
-//SPDX-License-Identifier: Unlicense
-pragma solidity ^0.4.0;
+//SPDX-License-Identifier: MIT
+pragma solidity ^0.8.9;
 
-import "./openzeppelin/ownership/Ownable.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
 
 import "./interfaces/IOptionMintable.sol";
 import "./interfaces/IRandomMinter.sol";
@@ -26,7 +26,7 @@ contract CardRandomMinter is Ownable, IRandomMinter {
     mapping(uint8 => bool) public allowedItemsPerRandomMint;
     mapping(address => bool) public isMinter;
 
-    constructor(IOptionMintable _factory) public {
+    constructor(IOptionMintable _factory) {
         factory = _factory;
         allowedItemsPerRandomMint[1] = true;
         allowedItemsPerRandomMint[3] = true;
@@ -84,7 +84,7 @@ contract CardRandomMinter is Ownable, IRandomMinter {
     function _mintRandom(
         uint8 _itemsPerRandomMint,
         address _to,
-        string desc
+        string memory desc
     ) internal {
         require(
             allowedItemsPerRandomMint[_itemsPerRandomMint],
@@ -112,7 +112,7 @@ contract CardRandomMinter is Ownable, IRandomMinter {
     function mintRandomFree(
         uint8 _itemsPerRandomMint,
         address _to,
-        string desc
+        string memory desc
     ) external {
         require(isMinter[msg.sender], "onlyMinter");
         _mintRandom(_itemsPerRandomMint, _to, desc);
@@ -139,7 +139,7 @@ contract CardRandomMinter is Ownable, IRandomMinter {
                 block.difficulty
             )
         );
-        _currentSeed = int256(res);
+        _currentSeed = int256(uint(res));
         return uint256(res);
     }
 
@@ -163,7 +163,7 @@ contract CardRandomMinter is Ownable, IRandomMinter {
     }
 
     function getRevenue() external onlyOwner {
-        owner.transfer(address(this).balance);
+        payable(owner()).transfer(address(this).balance);
     }
 
     function setPrice(uint256 _price) external onlyOwner {
@@ -196,5 +196,5 @@ contract CardRandomMinter is Ownable, IRandomMinter {
         __classProbs = _classProbs;
     }
 
-    function() external payable {}
+    receive() external payable {}
 }

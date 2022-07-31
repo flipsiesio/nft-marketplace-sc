@@ -1,11 +1,10 @@
-//SPDX-License-Identifier: Unlicense
-pragma solidity ^0.4.0;
+//SPDX-License-Identifier: MIT
+pragma solidity ^0.8.9;
 
-import "./openzeppelin/ownership/Ownable.sol";
-import "./openzeppelin/ReentrancyGuard.sol";
-import "./openzeppelin/token/ERC721/ERC721Holder.sol";
-
-import "./interfaces/IERC721.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
+import "@openzeppelin/contracts/token/ERC721/utils/ERC721Holder.sol";
+import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 
 /// @title A contract for holding management functions and modifiers.
 /// @author Integral Team
@@ -47,7 +46,7 @@ contract Management is Ownable, ReentrancyGuard, ERC721Holder {
         uint256 _minExpirationDuration,
         uint256 _maxExpirationDuration,
         uint256 _feeInBps
-    ) public {
+    ) {
         nftOnSale = IERC721(_nftOnSale);
         feeReceiver = _feeReceiver;
         minExpirationDuration = _minExpirationDuration;
@@ -110,5 +109,5 @@ contract Management is Ownable, ReentrancyGuard, ERC721Holder {
     }
 
     /// @notice Default fallback function which allows the contract to accept ether
-    function() external payable {}
+    receive() external payable {}
 }

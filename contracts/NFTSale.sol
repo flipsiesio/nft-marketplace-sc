@@ -1,9 +1,8 @@
-//SPDX-License-Identifier: Unlicense
-pragma solidity ^0.4.0;
+//SPDX-License-Identifier: MIT
+pragma solidity ^0.8.9;
 
-import "./openzeppelin/math/SafeMath.sol";
-
-import "./interfaces/IERC721.sol";
+import "@openzeppelin/contracts/utils/math/SafeMath.sol";
+import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "./Management.sol";
 
 /// @title A contract of the marketplace.
@@ -52,7 +51,6 @@ contract NFTSale is Management {
         uint256 _maxExpirationDuration,
         uint256 _feeInBps
     )
-        public
         Management(
             _nftOnSale,
             _feeReceiver,
@@ -230,8 +228,8 @@ contract NFTSale is Management {
             msg.sender,
             _sellOrders[_at].tokenId
         );
-        _sellOrders[_at].seller.transfer(_sellOrders[_at].price);
-        feeReceiver.transfer(feeAmount);
+        payable(_sellOrders[_at].seller).transfer(_sellOrders[_at].price);
+        payable(feeReceiver).transfer(feeAmount);
         _sellOrders[_at].paidFees = feeAmount;
         _sellOrders[_at].status = Status.FILLED;
         emit OrderFilled(_at, msg.sender);

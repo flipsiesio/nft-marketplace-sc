@@ -1,9 +1,9 @@
-//SPDX-License-Identifier: Unlicense
-pragma solidity ^0.4.0;
+//SPDX-License-Identifier: MIT
+pragma solidity ^0.8.9;
 
-import "./openzeppelin/math/SafeMath.sol";
+import "@openzeppelin/contracts/utils/math/SafeMath.sol";
+import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 
-import "./interfaces/IERC721.sol";
 import "./Management.sol";
 
 /// @title A contract of the marketplace.
@@ -72,7 +72,6 @@ contract NFTMarketplace is Management {
         uint256 _maxExpirationDuration,
         uint256 _feeInBps
     )
-        public
         Management(
             _nftOnSale,
             _feeReceiver,
@@ -187,14 +186,13 @@ contract NFTMarketplace is Management {
         uint256 _expirationDuration
     ) external validExpirationDuration(_expirationDuration) {
         nftOnSale.safeTransferFrom(msg.sender, address(this), _nftToSell);
-        _sellOrders[_length] = SellOrder({
-            tokenId: _nftToSell,
-            seller: msg.sender,
-            price: _price,
-            status: Status.PENDING,
-            expirationTime: block.timestamp.add(_expirationDuration),
-            paidFees: 0
-        });
+        SellOrder storage order = _sellOrders[_length];
+        order.tokenId = _nftToSell;
+        order.seller = msg.sender;
+        order.price = _price;
+        order.status = Status.PENDING;
+        order.expirationTime = block.timestamp.add(_expirationDuration);
+        order.paidFees = 0;
         emit OrderCreated(
             _nftToSell,
             _length,
@@ -269,7 +267,7 @@ contract NFTMarketplace is Management {
         uint256 feeAmount = bidToReturn.mul(feeInBps).div(MAX_FEE);
         uint256 toReturn = bidToReturn.add(feeAmount);
 
-        msg.sender.transfer(toReturn);
+        payable(msg.sender).transfer(toReturn);
         delete _sellOrders[_at].bids[msg.sender];
         emit BidCancelled(_at, msg.sender, toReturn);
     }
@@ -300,8 +298,8 @@ contract NFTMarketplace is Management {
         uint256 price = _sellOrders[_at].bids[buyer];
         uint256 feeAmount = price.mul(feeInBps).div(MAX_FEE);
 
-        _sellOrders[_at].seller.transfer(price);
-        feeReceiver.transfer(feeAmount);
+        payable(_sellOrders[_at].seller).transfer(price);
+        payable(feeReceiver).transfer(feeAmount);
         _sellOrders[_at].paidFees = feeAmount;
         _sellOrders[_at].status = Status.FILLED;
         delete _sellOrders[_at].bids[buyer];

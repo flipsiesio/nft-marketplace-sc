@@ -1,9 +1,9 @@
-//SPDX-License-Identifier: Unlicense
-pragma solidity ^0.4.0;
+//SPDX-License-Identifier: MIT
+pragma solidity ^0.8.9;
 
-import "./openzeppelin/math/SafeMath.sol";
+import "@openzeppelin/contracts/utils/math/SafeMath.sol";
+import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 
-import "./interfaces/IERC721.sol";
 import "./Management.sol";
 
 /// @title A contract for auctioning the NFTs.
@@ -51,7 +51,6 @@ contract NFTAuction is Management {
         uint256 _maxExpirationDuration,
         uint256 _feeInBps
     )
-        public
         Management(
             _nftOnSale,
             _feeReceiver,
@@ -237,8 +236,8 @@ contract NFTAuction is Management {
             msg.sender == _auctions[_at].lastBuyer,
             "senderMustBeBuyerWhoWon"
         );
-        _auctions[_at].seller.transfer(_auctions[_at].currentPrice);
-        feeReceiver.transfer(_auctions[_at].feesToPay);
+        payable(_auctions[_at].seller).transfer(_auctions[_at].currentPrice);
+        payable(feeReceiver).transfer(_auctions[_at].feesToPay);
         nftOnSale.safeTransferFrom(
             address(this),
             _auctions[_at].lastBuyer,

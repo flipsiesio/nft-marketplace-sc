@@ -1,6 +1,7 @@
-pragma solidity ^0.4.0;
+//SPDX-License-Identifier: MIT
+pragma solidity ^0.8.9;
 
-import "../interfaces/IERC721.sol";
+import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 
 contract MockNFT is IERC721 {
     // Mapping from token ID to owner address
@@ -52,7 +53,7 @@ contract MockNFT is IERC721 {
         address from,
         address to,
         uint256 tokenId,
-        bytes data
+        bytes memory data
     ) internal {
         require(
             _isApprovedOrOwner(msg.sender, tokenId),
@@ -65,7 +66,7 @@ contract MockNFT is IERC721 {
         address from,
         address to,
         uint256 tokenId,
-        bytes data
+        bytes memory data
     ) external {
         __safeTransferFrom(from, to, tokenId, data);
     }
@@ -189,4 +190,8 @@ contract MockNFT is IERC721 {
         address to,
         uint256 tokenId
     ) internal {}
+
+    function supportsInterface(bytes4 interfaceId) external view returns (bool) {
+        return true;
+    }
 }
