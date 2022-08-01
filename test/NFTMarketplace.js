@@ -30,16 +30,16 @@ describe("Marketplace", () => {
     );
   });
 
-  it("should set fee receiver", async () => {
+  it("Should Set Fee Receiver", async () => {
     expect(await market.feeReceiver()).to.be.equal(accounts[0].address);
   });
 
-  it("should mint a token", async () => {
+  it("Should Mint a Token", async () => {
     await token.mint(accounts[1].address, n);
     expect(await token.ownerOf(n)).to.be.equal(accounts[1].address);
   });
 
-  it("should sell token", async () => {
+  it("Should Sell Token", async () => {
     const price = BigNumber.from(1000000000000000);
     const fee = price.mul(await market.feeInBps()).div(await market.MAX_FEE());
 
@@ -71,7 +71,7 @@ describe("Marketplace", () => {
     expect(await market.getSellOrderStatus(order)).to.be.equal(1);
   });
 
-  it("should cancel order", async () => {
+  it("Should Cancel Order", async () => {
     const price = 1000000000000000;
 
     await token.mint(accounts[3].address, n);
@@ -86,7 +86,7 @@ describe("Marketplace", () => {
     expect(await market.getSellOrderStatus(order)).to.be.equal(2);
   });
 
-  it("should cancel bid", async () => {
+  it("Should Cancel Bid", async () => {
     const price = 1000000000000000;
     const fee = (price * (await market.feeInBps())) / (await market.MAX_FEE());
 
@@ -99,14 +99,14 @@ describe("Marketplace", () => {
     await market.connect(accounts[5]).bid(order, price, { value: price + fee });
     await expect(
       market.connect(accounts[5]).cancelBid(order)
-    ).to.be.revertedWith("orderIsActive");
+    ).to.be.revertedWith("NFTMarketplace: Order Is Active!");
 
     await network.provider.send("evm_increaseTime", [60 * 60 * 24 * 14]);
     await market.connect(accounts[5]).cancelBid(order);
 
     await expect(
       market.connect(accounts[5]).cancelBid(order)
-    ).to.be.revertedWith("nothingToCancelAndReturn");
+    ).to.be.revertedWith("NFTMarketplace: Nothing To Cancel And Return!");
   });
 
   afterEach(() => {

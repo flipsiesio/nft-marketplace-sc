@@ -40,7 +40,7 @@ contract NFTAuction is Management {
     /// @notice This custom modifier is to validate if msg.sender is the seller of the auction
     /// @param _at The index of the given auction in which seller is checked
     modifier onlySellerOf(uint256 _at) {
-        require(_auctions[_at].seller == msg.sender, "onlySeller");
+        require(_auctions[_at].seller == msg.sender, "NFTAuction: Caller Is Not a Seller!");
         _;
     }
 
@@ -184,7 +184,7 @@ contract NFTAuction is Management {
     {
         require(
             _auctions[_at].status == Status.PENDING,
-            "auctionIsEitherFilledOrRejectedOrExpired"
+            "NFTAuction: Auction Is Filled / Rejected / Expired!"
         );
         nftOnSale.safeTransferFrom(
             address(this),
@@ -206,16 +206,16 @@ contract NFTAuction is Management {
     function bid(uint256 _at, uint256 _newPrice) external validIndex(_at) {
         require(
             msg.sender.balance >= _newPrice,
-            "notEnoughFundsToProveYourBid"
+            "NFTAuction: Not Enough Funds To Prove the Bid!"
         );
         require(
             _auctions[_at].currentPrice < _newPrice,
-            "cannotBidOnLowerPrice"
+            "NFTAuction: Can Not Bid On Lower Price!"
         );
-        require(block.timestamp <= _auctions[_at].stopTime, "auctionIsStopped");
+        require(block.timestamp <= _auctions[_at].stopTime, "NFTAuction: Auction Is Stopped!");
         require(
             _auctions[_at].status == Status.PENDING,
-            "auctionMustBePending"
+            "NFTAuction: Auction Must Be Pending!"
         );
         _auctions[_at].currentPrice = _newPrice;
         _auctions[_at].lastBuyer = msg.sender;
@@ -229,12 +229,12 @@ contract NFTAuction is Management {
         require(
             msg.value >=
                 _auctions[_at].currentPrice.add(_auctions[_at].feesToPay),
-            "notEnoughFunds"
+            "NFTAuction: Not Enough Funds!"
         );
-        require(block.timestamp > _auctions[_at].stopTime, "auctionIsActive");
+        require(block.timestamp > _auctions[_at].stopTime, "NFTAuction: Auction Is Active!");
         require(
             msg.sender == _auctions[_at].lastBuyer,
-            "senderMustBeBuyerWhoWon"
+            "NFTAuction: Sender Must Be Buyer Who Won!"
         );
         payable(_auctions[_at].seller).transfer(_auctions[_at].currentPrice);
         payable(feeReceiver).transfer(_auctions[_at].feesToPay);

@@ -78,7 +78,7 @@ contract CardRandomMinter is Ownable, IRandomMinter {
                 COLORIZED_OPTION
             ];
         }
-        revert("invalidOptionPickedRandomly");
+        revert("CardRandomMinter: Invalid Option That Was Picked Randomly!");
     }
 
     function _mintRandom(
@@ -88,7 +88,7 @@ contract CardRandomMinter is Ownable, IRandomMinter {
     ) internal {
         require(
             allowedItemsPerRandomMint[_itemsPerRandomMint],
-            "amountIsNotAllowed"
+            "CardRandomMinter: Amount of items to mint is too large. Not allowed!"
         );
         uint8 minted = 0;
         for (uint8 i = 0; i < _itemsPerRandomMint; i++) {
@@ -114,7 +114,7 @@ contract CardRandomMinter is Ownable, IRandomMinter {
         address _to,
         string memory desc
     ) external {
-        require(isMinter[msg.sender], "onlyMinter");
+        require(isMinter[msg.sender], "CardRandomMinter:: Caller Is Not a Minter!");
         _mintRandom(_itemsPerRandomMint, _to, desc);
     }
 

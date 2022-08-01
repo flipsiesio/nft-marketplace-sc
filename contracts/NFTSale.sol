@@ -40,7 +40,7 @@ contract NFTSale is Management {
     /// @notice This custom modifier is to validate if msg.sender is the seller of the sell orders
     /// @param _at The index of the given sell roder in which seller is checked
     modifier onlySellerOf(uint256 _at) {
-        require(_sellOrders[_at].seller == msg.sender, "onlySeller");
+        require(_sellOrders[_at].seller == msg.sender, "NFTSalce: Caller Is Not a Seller!");
         _;
     }
 
@@ -141,7 +141,7 @@ contract NFTSale is Management {
     /// @notice The function cancel the sell order and return the token in the sell order to the seller.
     /// @param _at The index of the sell order
     function getBackFromSale(uint256 _at) external onlySellerOf(_at) {
-        require(_sellOrders[_at].status == Status.PENDING, "onlyWhenPending");
+        require(_sellOrders[_at].status == Status.PENDING, "NFTSalce: Possible Only While Pending!");
         nftOnSale.safeTransferFrom(
             address(this),
             msg.sender,
@@ -203,7 +203,7 @@ contract NFTSale is Management {
     {
         require(
             _sellOrders[_at].expirationTime <= _expirationTime,
-            "onlyFutureTimeAllowed"
+            "NFTSale: onlyFutureTimeAllowed!"
         );
         _sellOrders[_at].expirationTime = _expirationTime;
     }
@@ -213,14 +213,14 @@ contract NFTSale is Management {
     function buy(uint256 _at) external payable nonReentrant validIndex(_at) {
         uint256 price = _sellOrders[_at].price;
         uint256 feeAmount = price.mul(feeInBps).div(MAX_FEE);
-        require(msg.value >= price.add(feeAmount), "notEnoughFunds");
+        require(msg.value >= price.add(feeAmount), "NFTSale: Not Enough Funds!");
         require(
             _sellOrders[_at].status == Status.PENDING,
-            "orderIsFilledOrRejected"
+            "NFTSale: Order Is Filled / Rejected!"
         );
         require(
             block.timestamp <= _sellOrders[_at].expirationTime,
-            "orderIsExpired"
+            "NFTSale: Order Is Expired!"
         );
 
         nftOnSale.safeTransferFrom(

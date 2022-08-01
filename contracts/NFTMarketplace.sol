@@ -61,7 +61,7 @@ contract NFTMarketplace is Management {
     /// @notice This custom modifier is to validate if msg.sender is the seller of the sell orders
     /// @param _at The index of the given sell roder in which seller is checked
     modifier onlySellerOf(uint256 _at) {
-        require(_sellOrders[_at].seller == msg.sender, "onlySeller");
+        require(_sellOrders[_at].seller == msg.sender, "NFTMarketplace: Caller Is Not a Seller!");
         _;
     }
 
@@ -162,7 +162,7 @@ contract NFTMarketplace is Management {
     /// @notice The function cancel the sell order and return the token in the sell order to the seller.
     /// @param _at The index of the sell order
     function getBackFromSale(uint256 _at) external onlySellerOf(_at) {
-        require(_sellOrders[_at].status == Status.PENDING, "onlyWhenPending");
+        require(_sellOrders[_at].status == Status.PENDING, "NFTMarketplace: Possible Only While Pending!");
         nftOnSale.safeTransferFrom(
             address(this),
             msg.sender,
@@ -223,7 +223,7 @@ contract NFTMarketplace is Management {
     {
         require(
             _sellOrders[_at].expirationTime <= _expirationTime,
-            "onlyFutureTimeAllowed"
+            "NFTMarketplace: Only Future Time Is Allowed!"
         );
         _sellOrders[_at].expirationTime = _expirationTime;
     }
@@ -233,18 +233,18 @@ contract NFTMarketplace is Management {
         payable
         validIndex(_at)
     {
-        require(_amount > 0, "cannotBid0");
+        require(_amount > 0, "NFTMarketplace: Invalid Bid Amount");
         require(
             _sellOrders[_at].status == Status.PENDING,
-            "orderIsFilledOrRejected"
+            "NFTMarketplace: Order Is Filled / Rejected!"
         );
         require(
             block.timestamp <= _sellOrders[_at].expirationTime,
-            "orderIsExpired"
+            "NFTMarketplace: Order Is Expired!"
         );
 
         uint256 feeAmount = _amount.mul(feeInBps).div(MAX_FEE);
-        require(msg.value >= _amount.add(feeAmount), "notEnoughFunds");
+        require(msg.value >= _amount.add(feeAmount), "NFTMarketplace: Not Enough Funds!");
 
         _sellOrders[_at].bids[msg.sender] = _sellOrders[_at]
             .bids[msg.sender]
@@ -256,11 +256,11 @@ contract NFTMarketplace is Management {
         require(
             (_sellOrders[_at].status != Status.PENDING) ||
                 (block.timestamp > _sellOrders[_at].expirationTime),
-            "orderIsActive"
+            "NFTMarketplace: Order Is Active!"
         );
         require(
             _sellOrders[_at].bids[msg.sender] > 0,
-            "nothingToCancelAndReturn"
+            "NFTMarketplace: Nothing To Cancel And Return!"
         );
 
         uint256 bidToReturn = _sellOrders[_at].bids[msg.sender];
@@ -282,11 +282,11 @@ contract NFTMarketplace is Management {
     {
         require(
             _sellOrders[_at].status == Status.PENDING,
-            "orderIsFilledOrRejected"
+            "NFTMarketplace: Order Is Filled / Rejected!"
         );
         require(
             block.timestamp <= _sellOrders[_at].expirationTime,
-            "orderIsExpired"
+            "NFTMarketplace: Order Is Expired!"
         );
 
         nftOnSale.safeTransferFrom(

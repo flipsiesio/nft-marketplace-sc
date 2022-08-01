@@ -25,7 +25,7 @@ describe("Card", function () {
   });
 
   it("should fail to add minter from nonOwner account", async () => {
-    await expect(cardNFT.connect(accounts[3]).setMinterRole(accounts[3].address, true)).to.be.reverted;
+    await expect(cardNFT.connect(accounts[3]).setCardMinter(accounts[3].address, true)).to.be.reverted;
   });
 
   it("should mint from owner account", async () => {
@@ -34,7 +34,7 @@ describe("Card", function () {
   });
 
   it("should give minter's rights to another account and mint from it", async () => {
-    await cardNFT.setMinterRole(accounts[4].address, true);
+    await cardNFT.setCardMinter(accounts[4].address, true);
     await cardNFT.connect(accounts[4]).mint(accounts[5].address, 1);
     expect(await cardNFT.ownerOf(1)).to.equal(accounts[5].address);
   });

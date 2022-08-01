@@ -29,16 +29,16 @@ describe("Sale", () => {
     );
   });
 
-  it("should set fee receiver", async () => {
+  it("Should Set Fee Receiver", async () => {
     expect(await sale.feeReceiver()).to.be.equal(accounts[0].address);
   });
 
-  it("should mint a token", async () => {
+  it("Should Mint a Token", async () => {
     await token.mint(accounts[1].address, n);
     expect(await token.ownerOf(n)).to.be.equal(accounts[1].address);
   });
 
-  it("should sell token", async () => {
+  it("Should Sell Token", async () => {
     const price = 1000000000000000;
     const fee = (price * (await sale.feeInBps())) / (await sale.MAX_FEE());
 
@@ -54,7 +54,7 @@ describe("Sale", () => {
     expect(await sale.getSellOrderStatus(order)).to.be.equal(1);
   });
 
-  it("should cancel order", async () => {
+  it("Should Cancel Order", async () => {
     const price = 1000000000000000;
 
     await token.mint(accounts[3].address, n);

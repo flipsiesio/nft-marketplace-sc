@@ -29,16 +29,16 @@ describe("Auction", () => {
     );
   });
 
-  it("should set fee receiver", async () => {
+  it("Should Set Fee Receiver", async () => {
     expect(await auction.feeReceiver()).to.be.equal(accounts[0].address);
   });
 
-  it("should mint a token", async () => {
+  it("Should Mint a Token", async () => {
     await token.mint(accounts[1].address, n);
     expect(await token.ownerOf(n)).to.be.equal(accounts[1].address);
   });
 
-  it("should sell token", async () => {
+  it("Should Sell Token", async () => {
     const price = 1000000000000000;
     const fee = async (p) => {
       return Math.floor(
@@ -60,12 +60,12 @@ describe("Auction", () => {
 
     await expect(
       auction.connect(accounts[2]).take(order, { value: v })
-    ).to.be.revertedWith("auctionIsActive");
+    ).to.be.revertedWith("NFTAuction: Auction Is Active!");
 
     await network.provider.send("evm_increaseTime", [500]);
     await expect(
       auction.connect(accounts[2]).take(order, { value: v })
-    ).to.be.revertedWith("senderMustBeBuyerWhoWon");
+    ).to.be.revertedWith("NFTAuction: Sender Must Be Buyer Who Won!");
 
     await auction.connect(accounts[4]).take(order, { value: v });
 
@@ -73,7 +73,7 @@ describe("Auction", () => {
     expect(await auction.getStatusOfAuction(order)).to.be.equal(1);
   });
 
-  it("should cancel auction", async () => {
+  it("Should Cancel Auction", async () => {
     const price = 1000000000000000;
 
     await token.mint(accounts[3].address, n);
