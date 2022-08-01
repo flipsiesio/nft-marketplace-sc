@@ -1,52 +1,58 @@
-// TODO: Adapt for TRON
+// SPDX-License-Identifier: MIT
 
-let Card = artifacts.require("./Card.sol");
+const { expect } = require("chai");
+const { ethers } = require("hardhat");
+const { parseEther } = ethers.utils;
 
-contract("Card", (accounts) => {
+describe("Card", function () {
+
   let cardNFT;
+  let accounts;
 
   beforeEach(async () => {
-    cardNFT = await Card.deployed();
+    accounts = await ethers.getSigners();
+    const tokenFactory = await ethers.getContractFactory("Card");
+    cardNFT = await tokenFactory.deploy();
+    await cardNFT.deployed();
   });
 
   it("should verify that the contract has been deployed by accounts[0]", async () => {
-    assert.equal(await cardNFT.owner(), accounts[0]); // tronWeb.address.toHex(accounts[0])
+    await expect(await cardNFT.owner()).to.equal(accounts[0].address);
   });
 
   it("should fail to mint from nonMinter account", async () => {
-    try {
-      await cardNFT.mint(accounts[2], 0, { from: accounts[2] });
-    } catch (e) {
-      console.log("Reverted!");
-    }
+    await expect(cardNFT.connect(accounts[2]).mint(accounts[3].address, 0)).to.be.reverted;
   });
 
   it("should fail to add minter from nonOwner account", async () => {
-    try {
-      await cardNFT.setMinterRole(accounts[3], true, { from: accounts[3] });
-    } catch (e) {
-      console.log("Reverted!");
-    }
+    await expect(cardNFT.connect(accounts[3]).setMinterRole(accounts[3].address, true)).to.be.reverted;
   });
 
   it("should mint from owner account", async () => {
-    await cardNFT.mint(accounts[1], 0, { from: accounts[0] });
-    assert.equal(await cardNFT.ownerOf(0), accounts[1]);
+    await cardNFT.connect(accounts[0]).mint(accounts[1].address, 0);
+    expect(await cardNFT.ownerOf(0)).to.equal(accounts[1].address);
   });
 
   it("should give minter's rights to another account and mint from it", async () => {
-    await cardNFT.setMinterRole(accounts[4], true, { from: accounts[0] });
-    await cardNFT.mint(accounts[5], 1, { from: accounts[4] });
-    assert.equal(await cardNFT.ownerOf(1), accounts[5]);
+    await cardNFT.setMinterRole(accounts[4].address, true);
+    await cardNFT.connect(accounts[4]).mint(accounts[5].address, 1);
+    expect(await cardNFT.ownerOf(1)).to.equal(accounts[5].address);
   });
 
   it("should get all address' tokens", async () => {
-    await cardNFT.mint(accounts[5], 2, { from: accounts[4] });
-    await cardNFT.mint(accounts[5], 3, { from: accounts[0] });
-    await cardNFT.mint(accounts[5], 4, { from: accounts[4] });
-    assert.equal(
-      (await cardNFT.getNFTListByAddress(accounts[5])).length,
-      await cardNFT.balanceOf(accounts[5])
-    );
+    await cardNFT.mint(accounts[5].address, 2);
+    await cardNFT.mint(accounts[5].address, 3);
+    await cardNFT.mint(accounts[5].address, 4);
+    let tokens = await cardNFT.getNFTListByAddress(accounts[5].address);
+    // A BigNumber array does not support `.length`
+    let count = 0;
+    while (true) {
+      if (tokens[count] !== undefined) {
+        count += 1;
+      } else {
+        break;
+      }
+    }
+    expect(count).to.equal(await cardNFT.balanceOf(accounts[5].address));
   });
 });
