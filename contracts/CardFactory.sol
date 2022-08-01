@@ -1,8 +1,7 @@
-//SPDX-License-Identifier: Unlicense
-pragma solidity ^0.4.0;
+//SPDX-License-Identifier: MIT
+pragma solidity ^0.8.9;
 
-import "./openzeppelin/ownership/Ownable.sol";
-import "./openzeppelin/token/ERC721/ERC721Token.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
 
 import "./interfaces/IOptionMintable.sol";
 import "./interfaces/IMintable.sol";
@@ -31,7 +30,7 @@ contract CardFactory is Ownable, IOptionMintable {
         _;
     }
 
-    constructor(IMintable _mintableToken) public {
+    constructor(IMintable _mintableToken) {
         mintableToken = _mintableToken;
         isOptionMinter[msg.sender] = true;
     }
