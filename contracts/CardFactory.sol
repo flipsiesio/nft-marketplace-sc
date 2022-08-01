@@ -2,14 +2,13 @@
 pragma solidity ^0.8.9;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
-
+import "./Card.sol";
 import "./interfaces/IOptionMintable.sol";
-import "./interfaces/IMintable.sol";
 
 contract CardFactory is Ownable, IOptionMintable {
     mapping(address => bool) public isOptionMinter;
 
-    IMintable public mintableToken;
+    Card public card;
 
     uint8 public constant COLORIZED_OPTION = 0;
     uint8 public constant CARDS_WITH_EGGS_OPTION = 1;
@@ -30,8 +29,8 @@ contract CardFactory is Ownable, IOptionMintable {
         _;
     }
 
-    constructor(IMintable _mintableToken) {
-        mintableToken = _mintableToken;
+    constructor(Card _card) {
+        card = _card;
         isOptionMinter[msg.sender] = true;
     }
 
@@ -51,8 +50,8 @@ contract CardFactory is Ownable, IOptionMintable {
         isOptionMinter[_minter] = _status;
     }
 
-    function setMintableToken(IMintable _mintableToken) external onlyOwner {
-        mintableToken = _mintableToken;
+    function setMintableToken(Card _card) external onlyOwner {
+        card = _card;
     }
 
     function mint(uint8 optionId, address toAddress)
@@ -62,19 +61,18 @@ contract CardFactory is Ownable, IOptionMintable {
     {
         require(isOptionMinter[msg.sender], "onlyOptionMinter");
 
-        for (
-            uint256 i = _idBoundaries[optionId].start;
-            i < _idBoundaries[optionId].end;
-            i++
-        ) {
-            if (!mintableToken.exists(_idBoundaries[optionId].start)) {
-                mintableToken.mint(toAddress, _idBoundaries[optionId].start);
-                _idBoundaries[optionId].start = i + 1;
-                return true;
-            }
+        /// @dev Mark the start and the end of boundaries
+        uint256 start  = _idBoundaries[optionId].start;
+        uint256 end = _idBoundaries[optionId].end;
+        for (uint256 i = start; i < end; i++) {
+            /// @dev Mint 'end - start' cards
+            card.mint(toAddress, i);
+            /// @dev Update the start of the boundaries each time
+            _idBoundaries[optionId].start = i;
         }
 
-        return false;
+        /// @dev There is no scenario where it should return 'false'
+        return true;
     }
 
     function availableTokens(uint8 optionId) public view returns (uint256) {
