@@ -25,7 +25,7 @@ contract CardFactory is Ownable, IOptionMintable {
     mapping(uint8 => Boundaries) internal _idBoundaries;
 
     modifier validOption(uint8 _optionId) {
-        require(_optionId < 5, "invalidOptionId");
+        require(_optionId < 5, "CardFactory: Invalid Option ID!");
         _;
     }
 
@@ -41,12 +41,12 @@ contract CardFactory is Ownable, IOptionMintable {
         uint256 endId
     ) external onlyOwner validOption(optionId) {
         // WARNING: BOUNDARY COLLISION MUST BE CHECKED ON ADMIN SIDE OFFCHAIN!!!
-        require(startId < endId, "invalidBoundaries");
+        require(startId < endId, "CardFactory: Invalid Boundaries!");
         _idBoundaries[optionId] = Boundaries({start: startId, end: endId});
     }
 
-    // set CardRandomMinter as option minter
-    function setMinterRole(address _minter, bool _status) external onlyOwner {
+    // Set CardRandomMinter instance as minter
+    function setOptionMinter(address _minter, bool _status) external onlyOwner {
         isOptionMinter[_minter] = _status;
     }
 
@@ -54,25 +54,25 @@ contract CardFactory is Ownable, IOptionMintable {
         card = _card;
     }
 
+    function getMintableToken() public view returns(address) {
+        return address(card);
+    }
+
+    /// @dev Mints one card at a time but not more than _idBoundaries[optionId].end
     function mint(uint8 optionId, address toAddress)
         external
         validOption(optionId)
         returns (bool)
     {
-        require(isOptionMinter[msg.sender], "onlyOptionMinter");
-
-        /// @dev Mark the start and the end of boundaries
-        uint256 start  = _idBoundaries[optionId].start;
-        uint256 end = _idBoundaries[optionId].end;
-        for (uint256 i = start; i < end; i++) {
-            /// @dev Mint 'end - start' cards
-            card.mint(toAddress, i);
-            /// @dev Update the start of the boundaries each time
-            _idBoundaries[optionId].start = i;
+        require(isOptionMinter[msg.sender], "CardFactory: Caller Is Not an Option Minter!");
+        require(_idBoundaries[optionId].start < _idBoundaries[optionId].end, "CardFactory: No More Cards Are Left to Mint!");
+        for (uint256 i = _idBoundaries[optionId].start; i < _idBoundaries[optionId].end; i++) {
+            card.mint(toAddress, _idBoundaries[optionId].start);
+            _idBoundaries[optionId].start = i + 1;
+            return true;
         }
 
-        /// @dev There is no scenario where it should return 'false'
-        return true;
+        return false;
     }
 
     function availableTokens(uint8 optionId) public view returns (uint256) {

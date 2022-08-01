@@ -24,14 +24,14 @@ contract Card is Ownable, ERC721 {
     }
 
     function mint(address _to, uint256 _tokenId) external {
-        require(isMinter[msg.sender], "onlyMinter");
+        require(isMinter[msg.sender], "Card: Caller Is Not A Minter!");
         _mint(_to, _tokenId);
         ownedTokens[_to].push(_tokenId);
 
     }
 
     // Set CardFactory instance as minter
-    function setMinterRole(address _minter, bool _status) external onlyOwner {
+    function setCardMinter(address _minter, bool _status) external onlyOwner {
         isMinter[_minter] = _status;
     }
 
