@@ -11,7 +11,7 @@ import "./Management.sol";
 contract NFTAuction is Management {
     using SafeMath for uint256;
 
-    // This struct is describing the auction information
+    /// @dev This struct is describing the auction information
     struct Auction {
         uint256 tokenId; // id of the auctioning token
         address seller; // id of the seller who is selling the auctioning token
