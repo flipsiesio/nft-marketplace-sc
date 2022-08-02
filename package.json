@@ -22,7 +22,7 @@
     "compile": "hardhat compile",
     "test": "hardhat test",
     "coverage": "hardhat coverage",
-    "flatten": "hardhat flatten contracts/Card.sol > contracts/flattened/Card.sol && hardhat flatten contracts/CardFactory.sol > contracts/flattened/CardFactory.sol && hardhat flatten contracts/CardRandomMinter.sol > contracts/flattened/CardRandomMinter.sol && hardhat flatten contracts/NFTSale.sol > contracts/flattened/NFTSale.sol && hardhat flatten contracts/NFTMarketplace.sol > contracts/flattened/NFTMarketplace.sol"
+    "flatten": "hardhat flatten contracts/Card.sol > contracts/flat/Card.sol && hardhat flatten contracts/CardFactory.sol > contracts/flat/CardFactory.sol && hardhat flatten contracts/CardRandomMinter.sol > contracts/flat/CardRandomMinter.sol && hardhat flatten contracts/NFTSale.sol > contracts/flat/NFTSale.sol && hardhat flatten contracts/NFTMarketplace.sol > contracts/flat/NFTMarketplace.sol"
   },
   "repository": {
     "type": "git",
