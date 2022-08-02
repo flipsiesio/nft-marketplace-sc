@@ -16,30 +16,30 @@ describe("Card", function () {
     await cardNFT.deployed();
   });
 
-  it("should verify that the contract has been deployed by accounts[0]", async () => {
+  it("Should verify that the contract has been deployed by accounts[0]", async () => {
     await expect(await cardNFT.owner()).to.equal(accounts[0].address);
   });
 
-  it("should fail to mint from nonMinter account", async () => {
+  it("Should fail to mint if caller does not have enough rights", async () => {
     await expect(cardNFT.connect(accounts[2]).mint(accounts[3].address, 0)).to.be.reverted;
   });
 
-  it("should fail to add minter from nonOwner account", async () => {
+  it("Should fail to add minter if caller does not have enough rights", async () => {
     await expect(cardNFT.connect(accounts[3]).setCardMinter(accounts[3].address, true)).to.be.reverted;
   });
 
-  it("should mint from owner account", async () => {
+  it("Should mint from owner account", async () => {
     await cardNFT.connect(accounts[0]).mint(accounts[1].address, 0);
     expect(await cardNFT.ownerOf(0)).to.equal(accounts[1].address);
   });
 
-  it("should give minter's rights to another account and mint from it", async () => {
+  it("Should give minter's rights to another account and mint from it", async () => {
     await cardNFT.setCardMinter(accounts[4].address, true);
     await cardNFT.connect(accounts[4]).mint(accounts[5].address, 1);
     expect(await cardNFT.ownerOf(1)).to.equal(accounts[5].address);
   });
 
-  it("should get all address' tokens", async () => {
+  it("Should get list of tokens owned by the address", async () => {
     await cardNFT.mint(accounts[5].address, 2);
     await cardNFT.mint(accounts[5].address, 3);
     await cardNFT.mint(accounts[5].address, 4);
