@@ -1,49 +1,42 @@
 {
   "networks": {
     "donau": {
-      "XTRXToken": {
-        "address": "0x3B451C045014B561D4059F09a45024594f58fD3c"
+      "Card": {
+        "address": "0x8bE3e2F203e138A866839605385821F253472BF1"
       },
-      "Oracle": {
-        "address": "0xc0bAd7D7736558E7f4140823Bdd17447870c32B4",
-        "oracleOperatorAddress": "0xB41941063f09e478Fc9Bd1F8c398185f74b5Ac56"
+      "CardFactory": {
+        "address": "0x8bB304929578B3E2C14fB75078b050D75B09bD57"
       },
-      "GameController": {
-        "address": "0xccf63ABfF86777f19d102Cd34fcB7D5838a28C54",
-        "oracleAddress": "0xc0bAd7D7736558E7f4140823Bdd17447870c32B4"
+      "CardRandomMinter": {
+        "address": "0x092a78a160740361cCdcF6E29d5453b9B3e5920D"
       },
-      "PoolController": {
-        "address": "0x8DA4658EDf968c59B07ABE739fc5217e19f198b4"
+      "NFTSale": {
+        "address": "0x9e1e455ca4472126a672b9C3f929174919c8126F",
+        "feeReceiverAddress": "0xc50D266015C1612311bbe756d2472607CDaE97aE"
       },
-      "Poker": {
-        "address": "0xd36CCb036bC264650C2b513955125DFA4364813d",
-        "pokerOperatorAddress": "0xB41941063f09e478Fc9Bd1F8c398185f74b5Ac56"
-      },
-      "Migrations": {
-        "address": "0x81bc66e6E7F7A153a5BCbB11fDB16392843c55e2"
+      "NFTMarketplace": {
+        "address": "0x9CC0E8a65CAa15E8f4daE8bBE8BbFe19684c6196",
+        "feeReceiverAddress": "0x1Cea0b116D4e928e0FBca5c0B13f085A301B5644"
       }
     },
     "mainnet": {
-      "XTRXToken": {
+      "Card": {
         "address": ""
       },
-      "Oracle": {
+      "CardFactory": {
         "address": "",
         "oracleOperatorAddress": ""
       },
-      "GameController": {
-        "address": "",
-        "oracleAddress": ""
-      },
-      "PoolController": {
+      "CardRandomMinter": {
         "address": ""
       },
-      "Poker": {
+      "NFTSale": {
         "address": "",
-        "pokerOperatorAddress": ""
+        "feeReceiverAddress": ""
       },
-      "Migrations": {
-        "address": ""
+      "NFTMarketplace": {
+        "address": "",
+        "feeReceiverAddress": ""
       }
     }
   }

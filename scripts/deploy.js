@@ -7,86 +7,94 @@ const delay = require("delay");
 // JSON file to keep information about previous deployments
 const OUTPUT_DEPLOY = require("./deployOutput.json");
 
-let wallet = ethers.Wallet.createRandom();;
+// Creates a number of random wallers to be used while deploying contracts
+function createWallets(numberWallets) {
+  let createdWallets = [];
+  for (let i = 0; i < numberWallets; i++) {
+    let wallet = ethers.Wallet.createRandom();
+    createdWallets.push(wallet.address);
+    console.log(`New wallet №${i + 1}:`);
+    console.log(`    Private key: ${wallet.privateKey}`);
+    console.log(`    Address: ${wallet.address}`); 
+  }
+  return createdWallets;
+}
+
+
+// Create 2 new wallets
+// Use them in NFTSale and NFTMarketplace as fee receivers
+let [nftSaleFeeReceiver, nftMarketplaceFeeReceiver] = createWallets(2);
+
 let contractName;
-let token;
-let oracle;
-let gameController;
-let poolController;
-let poker;
-let migrations;
-let interfaces;
+let card;
+let cardFactory;
+let cardRandomMinter;
+let nftMarketplace;
+let nftSale;
 
 
 async function main() {
 
 
-  let userAddress = process.env.BTTC_ACC_ADDR || wallet.address;
-
-  // Contract #1: XTRXToken
-  contractName = "XTRXToken";
+  // Contract #1: Card
+  contractName = "Card";
   console.log(`[${contractName}]: Start of Deployment...`);
   _contractProto = await ethers.getContractFactory(contractName);
   contractDeployTx = await _contractProto.deploy();
-  token = await contractDeployTx.deployed();
+  card = await contractDeployTx.deployed();
   console.log(`[${contractName}]: Deployment Finished!`);
-  OUTPUT_DEPLOY.networks[network.name][contractName].address = token.address;
+  OUTPUT_DEPLOY.networks[network.name][contractName].address = card.address;
 
 
-  // Contract #2: Oracle
-  contractName = "Oracle";
+  // Contract #2: CardFactory
+  contractName = "CardFactory";
   console.log(`[${contractName}]: Start of Deployment...`);
   _contractProto = await ethers.getContractFactory(contractName);
-  // Provide the oracle with operator address.
-  contractDeployTx = await _contractProto.deploy(userAddress);
-  oracle = await contractDeployTx.deployed();
+  // Provide the factory with card address.
+  contractDeployTx = await _contractProto.deploy(card.address);
+  cardFactory = await contractDeployTx.deployed();
   console.log(`[${contractName}]: Deployment Finished!`);
-  OUTPUT_DEPLOY.networks[network.name][contractName].oracleOperatorAddress = userAddress;
-  OUTPUT_DEPLOY.networks[network.name][contractName].address = oracle.address;
+  OUTPUT_DEPLOY.networks[network.name][contractName].address = cardFactory.address;
   
-  // Contract #3: GameController
-  contractName = "GameController";
+  // Contract #3: cardRandomMinter
+  contractName = "CardRandomMinter";
   console.log(`[${contractName}]: Start of Deployment...`);
   _contractProto = await ethers.getContractFactory(contractName);
-  // Provide the game controller with oracle address 
-  contractDeployTx = await _contractProto.deploy(oracle.address);
-  gameController = await contractDeployTx.deployed();
+  // Provide the game controller with factory address 
+  contractDeployTx = await _contractProto.deploy(cardFactory.address);
+  cardRandomMinter = await contractDeployTx.deployed();
   console.log(`[${contractName}]: Deployment Finished!`);
-  OUTPUT_DEPLOY.networks[network.name][contractName].oracleAddress = oracle.address;
-  OUTPUT_DEPLOY.networks[network.name][contractName].address = gameController.address;
+  OUTPUT_DEPLOY.networks[network.name][contractName].address = cardRandomMinter.address;
 
-
-  // Contract #4: PoolController
-  contractName = "PoolController";
+  // Contract #4: NFTSale
+  contractName = "NFTSale";
   console.log(`[${contractName}]: Start of Deployment...`);
   _contractProto = await ethers.getContractFactory(contractName);
-  // Provide the pool controller with token address 
-  contractDeployTx = await _contractProto.deploy(token.address);
-  poolController = await contractDeployTx.deployed();
+  let oneDay = 86400;
+  let tenDays = 864000;
+  // One BP 0.0001
+  // One percent is 0.01
+  // One percent in BP is 100BP
+  let onePercent = 100;
+  contractDeployTx = await _contractProto.deploy(card.address, nftSaleFeeReceiver, oneDay, tenDays, onePercent);
+  nftSale = await contractDeployTx.deployed();
   console.log(`[${contractName}]: Deployment Finished!`);
-  OUTPUT_DEPLOY.networks[network.name][contractName].address = poolController.address;
+  OUTPUT_DEPLOY.networks[network.name][contractName].address = nftSale.address;
+  OUTPUT_DEPLOY.networks[network.name][contractName].feeReceiverAddress = nftSaleFeeReceiver;
 
-  // Contract #5: Poker
-  contractName = "Poker";
+  // Contract #5: NFTMarketplace
+  contractName = "NFTMarketplace";
   console.log(`[${contractName}]: Start of Deployment...`);
   _contractProto = await ethers.getContractFactory(contractName);
-  // Provide the game with oracle, pool controller, game owner address (same as oracle operator) 
-  contractDeployTx = await _contractProto.deploy(oracle.address, poolController.address, userAddress);
-  poker = await contractDeployTx.deployed();
+  // Same as in NFTSale
+  oneDay = 86400;
+  tenDays = 864000;
+  onePercent = 100;
+  contractDeployTx = await _contractProto.deploy(card.address, nftMarketplaceFeeReceiver, oneDay, tenDays, onePercent);
+  nftMarketplace = await contractDeployTx.deployed();
   console.log(`[${contractName}]: Deployment Finished!`);
-  OUTPUT_DEPLOY.networks[network.name][contractName].pokerOperatorAddress = userAddress;
-  OUTPUT_DEPLOY.networks[network.name][contractName].address = poker.address;
-
-  // Contract #6: Migrations
-  contractName = "Migrations";
-  console.log(`[${contractName}]: Start of Deployment...`);
-  _contractProto = await ethers.getContractFactory(contractName);
-  contractDeployTx = await _contractProto.deploy();
-  migrations = await contractDeployTx.deployed();
-  console.log(`[${contractName}]: Deployment Finished!`);
-  OUTPUT_DEPLOY.networks[network.name][contractName].address = migrations.address;
-
-  // Interfaces from `Interfaces.sol` are abstract and can't be deployed
+  OUTPUT_DEPLOY.networks[network.name][contractName].address = nftMarketplace.address;
+  OUTPUT_DEPLOY.networks[network.name][contractName].feeReceiverAddress = nftMarketplaceFeeReceiver;
 
   console.log(`See Results in "${__dirname + '/deployOutput.json'}" File`);
 
@@ -94,9 +102,7 @@ async function main() {
     path.resolve(__dirname, "./deployOutput.json"),
     JSON.stringify(OUTPUT_DEPLOY, null, "  ")
   );
-
 }
-
 
 main()
   .then(() => process.exit(0))
