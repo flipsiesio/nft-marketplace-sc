@@ -53,3 +53,5 @@ npx hardhat run scripts/createOwnerWallet.js
 ```  
 Make sure __to save__ wallet's address and private key that will be printed in the terminal! They _are not_ saved to any file!  
 Then you can provide a freshly created wallet with some real / test BTT and place its private key into `.env` file instead of a previous private key imported from MetaMask. Run deployment scripts after that.
+
+Please note that all deployed contracts __are not verified__ on either [BttcScan](https://bttcscan.com/) or [BttcTestScan](https://testnet.bttcscan.com/). You __have__ to do it manually!
