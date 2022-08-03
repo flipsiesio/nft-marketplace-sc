@@ -89,7 +89,7 @@ contract CardFactory is Ownable, IOptionMintable {
      * @notice Mints a card with provided card option ID
      * @dev Mints one card at a time but not more than _idBoundaries[optionId].end
      * @param optionId ID of card option
-     * @toAddress Address of receiver of minted card
+     * @param toAddress Address of receiver of minted card
      * @return 'True' if mint was successful, 'false' - if mint failed
      */
     function mint(uint8 optionId, address toAddress)

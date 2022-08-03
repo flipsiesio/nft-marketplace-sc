@@ -186,7 +186,7 @@ contract CardRandomMinter is Ownable, IRandomMinter {
 
     /**
      * @notice Returns one random item (card)
-     * @param _seed Seed used to increase randomness
+     * @param seed Seed used to increase randomness
      * @param classProbabilities Probability of card of each class to be picked
      * @return Random card option
      */
@@ -254,7 +254,7 @@ contract CardRandomMinter is Ownable, IRandomMinter {
 
     /**
      * @notice Changes the seed to change the source of randomness
-     * @param _newSees A new seed to be set
+     * @param _newSeed A new seed to be set
      */
     function setCurrentSeed(int256 _newSeed) external onlyOwner {
         _currentSeed = _newSeed;
