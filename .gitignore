@@ -26,4 +26,4 @@ artifacts
 
 package-lock.json
 
-contracts/flat/
+flat/
