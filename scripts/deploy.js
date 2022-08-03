@@ -7,7 +7,7 @@ const delay = require("delay");
 // JSON file to keep information about previous deployments
 const OUTPUT_DEPLOY = require("./deployOutput.json");
 
-// Creates a number of random wallers to be used while deploying contracts
+// Creates a number of random wallets to be used while deploying contracts
 function createWallets(numberWallets) {
   let createdWallets = [];
   for (let i = 0; i < numberWallets; i++) {
