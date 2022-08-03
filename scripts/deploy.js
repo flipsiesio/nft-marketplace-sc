@@ -12,10 +12,10 @@ function createWallets(numberWallets) {
   let createdWallets = [];
   for (let i = 0; i < numberWallets; i++) {
     let wallet = ethers.Wallet.createRandom();
-    createdWallets.push(wallet.address);
+    createdWallets.push(wallet);
     console.log(`New wallet №${i + 1}:`);
-    console.log(`    Private key: ${wallet.privateKey}`);
     console.log(`    Address: ${wallet.address}`); 
+    console.log(`    Private key: ${wallet.privateKey}`);
   }
   return createdWallets;
 }
@@ -76,11 +76,12 @@ async function main() {
   // One percent is 0.01
   // One percent in BP is 100BP
   let onePercent = 100;
-  contractDeployTx = await _contractProto.deploy(card.address, nftSaleFeeReceiver, oneDay, tenDays, onePercent);
+  contractDeployTx = await _contractProto.deploy(card.address, nftSaleFeeReceiver.address, oneDay, tenDays, onePercent);
   nftSale = await contractDeployTx.deployed();
   console.log(`[${contractName}]: Deployment Finished!`);
   OUTPUT_DEPLOY.networks[network.name][contractName].address = nftSale.address;
-  OUTPUT_DEPLOY.networks[network.name][contractName].feeReceiverAddress = nftSaleFeeReceiver;
+  OUTPUT_DEPLOY.networks[network.name][contractName].feeReceiverAddress = nftSaleFeeReceiver.address;
+  OUTPUT_DEPLOY.networks[network.name][contractName].feeReceiverPrivateKey = nftSaleFeeReceiver.privateKey;
 
   // Contract #5: NFTMarketplace
   contractName = "NFTMarketplace";
@@ -90,11 +91,12 @@ async function main() {
   oneDay = 86400;
   tenDays = 864000;
   onePercent = 100;
-  contractDeployTx = await _contractProto.deploy(card.address, nftMarketplaceFeeReceiver, oneDay, tenDays, onePercent);
+  contractDeployTx = await _contractProto.deploy(card.address, nftMarketplaceFeeReceiver.address, oneDay, tenDays, onePercent);
   nftMarketplace = await contractDeployTx.deployed();
   console.log(`[${contractName}]: Deployment Finished!`);
   OUTPUT_DEPLOY.networks[network.name][contractName].address = nftMarketplace.address;
-  OUTPUT_DEPLOY.networks[network.name][contractName].feeReceiverAddress = nftMarketplaceFeeReceiver;
+  OUTPUT_DEPLOY.networks[network.name][contractName].feeReceiverAddress = nftMarketplaceFeeReceiver.address;
+  OUTPUT_DEPLOY.networks[network.name][contractName].feeReceiverPrivateKey = nftMarketplaceFeeReceiver.privateKey;
 
   console.log(`See Results in "${__dirname + '/deployOutput.json'}" File`);
 
