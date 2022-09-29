@@ -102,11 +102,12 @@ contract CardFactory is Ownable, IOptionMintable {
 
         // If no tokens available in group we need to return false
         // This way random minter will try to mint tokens of other groups
+        // Should be tested before next require, otherwise it could be incorrectly
+        // triggered if first token of next group is minted
         if(_idBoundaries[optionId].start >= _idBoundaries[optionId].end)  {
             return false;
         }
 
-        // start will be equal to end if group fully minted, so we need to check it before
         require(!card.exists(_idBoundaries[optionId].start), string.concat(
             string.concat(
                 "CardFactory: Invalid Boundaries! Token ID ",
@@ -114,8 +115,7 @@ contract CardFactory is Ownable, IOptionMintable {
             ), string.concat(", Option ID ", Strings.toString(optionId))
         ));
 
-        card.mint(toAddress, _idBoundaries[optionId].start);
-        _idBoundaries[optionId].start += 1;
+        card.mint(toAddress, _idBoundaries[optionId].start++);
         return true;
     }
 

@@ -40,7 +40,7 @@ contract NFTSale is Management {
     /// @notice This custom modifier is to validate if msg.sender is the seller of the sell orders
     /// @param _at The index of the given sell roder in which seller is checked
     modifier onlySellerOf(uint256 _at) {
-        require(_sellOrders[_at].seller == msg.sender, "NFTSalce: Caller Is Not a Seller!");
+        require(_sellOrders[_at].seller == msg.sender, "NFTSale: Caller Is Not a Seller!");
         _;
     }
 
@@ -141,17 +141,20 @@ contract NFTSale is Management {
     /// @notice The function cancel the sell order and return the token in the sell order to the seller.
     /// @param _at The index of the sell order
     function getBackFromSale(uint256 _at) external onlySellerOf(_at) {
-        require(_sellOrders[_at].status == Status.PENDING, "NFTSalce: Possible Only While Pending!");
-        nftOnSale.safeTransferFrom(
-            address(this),
-            msg.sender,
-            _sellOrders[_at].tokenId
-        );
+        require(_sellOrders[_at].status == Status.PENDING, "NFTSale: Possible Only While Pending!");
+        
         if (block.timestamp <= _sellOrders[_at].expirationTime) {
             _sellOrders[_at].status = Status.REJECTED;
         } else {
             _sellOrders[_at].status = Status.EXPIRED;
         }
+        
+        nftOnSale.safeTransferFrom(
+            address(this),
+            msg.sender,
+            _sellOrders[_at].tokenId
+        );
+        
         emit OrderRejected(_at);
     }
 
@@ -223,6 +226,9 @@ contract NFTSale is Management {
             "NFTSale: Order Is Expired!"
         );
 
+        _sellOrders[_at].paidFees = feeAmount;
+        _sellOrders[_at].status = Status.FILLED;
+
         nftOnSale.safeTransferFrom(
             address(this),
             msg.sender,
@@ -230,8 +236,7 @@ contract NFTSale is Management {
         );
         payable(_sellOrders[_at].seller).transfer(_sellOrders[_at].price);
         payable(feeReceiver).transfer(feeAmount);
-        _sellOrders[_at].paidFees = feeAmount;
-        _sellOrders[_at].status = Status.FILLED;
+        
         emit OrderFilled(_at, msg.sender);
     }
 }

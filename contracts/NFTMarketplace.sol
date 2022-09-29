@@ -163,16 +163,18 @@ contract NFTMarketplace is Management {
     /// @param _at The index of the sell order
     function getBackFromSale(uint256 _at) external onlySellerOf(_at) {
         require(_sellOrders[_at].status == Status.PENDING, "NFTMarketplace: Possible Only While Pending!");
-        nftOnSale.safeTransferFrom(
-            address(this),
-            msg.sender,
-            _sellOrders[_at].tokenId
-        );
+
         if (block.timestamp <= _sellOrders[_at].expirationTime) {
             _sellOrders[_at].status = Status.REJECTED;
         } else {
             _sellOrders[_at].status = Status.EXPIRED;
         }
+
+        nftOnSale.safeTransferFrom(
+            address(this),
+            msg.sender,
+            _sellOrders[_at].tokenId
+        );
         emit OrderRejected(_at);
     }
 
@@ -289,20 +291,21 @@ contract NFTMarketplace is Management {
             "NFTMarketplace: Order Is Expired!"
         );
 
+        uint256 price = _sellOrders[_at].bids[buyer];
+        uint256 feeAmount = price.mul(feeInBps).div(MAX_FEE);
+        _sellOrders[_at].paidFees = feeAmount;
+        _sellOrders[_at].status = Status.FILLED;
+        delete _sellOrders[_at].bids[buyer];
+
         nftOnSale.safeTransferFrom(
             address(this),
             buyer,
             _sellOrders[_at].tokenId
         );
 
-        uint256 price = _sellOrders[_at].bids[buyer];
-        uint256 feeAmount = price.mul(feeInBps).div(MAX_FEE);
-
-        payable(_sellOrders[_at].seller).transfer(price);
+            payable(_sellOrders[_at].seller).transfer(price);
         payable(feeReceiver).transfer(feeAmount);
-        _sellOrders[_at].paidFees = feeAmount;
-        _sellOrders[_at].status = Status.FILLED;
-        delete _sellOrders[_at].bids[buyer];
+        
         emit OrderFilled(_at, buyer, price);
     }
 }
