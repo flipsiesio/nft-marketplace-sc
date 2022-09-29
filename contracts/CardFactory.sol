@@ -108,8 +108,10 @@ contract CardFactory is Ownable, IOptionMintable {
 
         // start will be equal to end if group fully minted, so we need to check it before
         require(!card.exists(_idBoundaries[optionId].start), string.concat(
-            "CardFactory: Invalid Boundaries! Token ID ",
-            Strings.toString(_idBoundaries[optionId].start)
+            string.concat(
+                "CardFactory: Invalid Boundaries! Token ID ",
+                Strings.toString(_idBoundaries[optionId].start)
+            ), string.concat(", Option ID ", Strings.toString(optionId))
         ));
 
         card.mint(toAddress, _idBoundaries[optionId].start);
@@ -124,5 +126,14 @@ contract CardFactory is Ownable, IOptionMintable {
      */
     function availableTokens(uint8 optionId) public view returns (uint256) {
         return _idBoundaries[optionId].end - _idBoundaries[optionId].start;
+    }
+
+    /**
+     * @notice Shows the boundaries for the option
+     * @param optionId ID of card option
+     * @return Start and end of card option
+     */
+    function getIdBoundaryForOption(uint8 optionId) public view returns (uint256, uint256) {
+        return (_idBoundaries[optionId].start, _idBoundaries[optionId].end);
     }
 }
