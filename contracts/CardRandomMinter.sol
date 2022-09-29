@@ -29,7 +29,7 @@ contract CardRandomMinter is Ownable, IRandomMinter {
     uint256 public constant MAX_BPS = 10000;
     /// @dev Probability in bps made by golden ratio of 10k
     uint16[5] internal __classProbs = [6180, 2361, 902, 344, 213];
-    int256 internal _currentSeed = -125026;
+    uint256 internal _currentSeed = 125026;
 
     /// @dev List of items any of which can be picked and minted (others can't)
     mapping(uint8 => bool) public allowedItemsPerRandomMint;
@@ -162,7 +162,7 @@ contract CardRandomMinter is Ownable, IRandomMinter {
      * @param _seed Seed used to increase randomness
      * @return Random card option
      */
-    function _getRandomSingleOption(int256 _seed) internal returns (uint8) {
+    function _getRandomSingleOption(uint256 _seed) internal returns (uint8) {
         return _pickRandomSingleOption(_seed, __classProbs);
     }
 
@@ -171,17 +171,17 @@ contract CardRandomMinter is Ownable, IRandomMinter {
      * @param seed Seed used to increase randomness
      * @return Random number
      */
-    function _random(int256 seed) internal returns (uint256) {
-        bytes32 res = keccak256(
+    function _random(uint256 seed) internal returns (uint256) {
+        uint256 res = uint256(keccak256(
             abi.encodePacked(
                 blockhash(block.number - 1),
                 msg.sender,
                 seed,
                 block.difficulty
             )
-        );
-        _currentSeed = int256(uint(res));
-        return uint256(res);
+        ));
+        _currentSeed = res;
+        return res;
     }
 
     /**
@@ -191,7 +191,7 @@ contract CardRandomMinter is Ownable, IRandomMinter {
      * @return Random card option
      */
     function _pickRandomSingleOption(
-        int256 seed,
+        uint256 seed,
         uint16[5] memory classProbabilities
     ) internal returns (uint8) {
         uint16 value = uint16(_random(seed) % MAX_BPS);
@@ -256,7 +256,7 @@ contract CardRandomMinter is Ownable, IRandomMinter {
      * @notice Changes the seed to change the source of randomness
      * @param _newSeed A new seed to be set
      */
-    function setCurrentSeed(int256 _newSeed) external onlyOwner {
+    function setCurrentSeed(uint256 _newSeed) external onlyOwner {
         _currentSeed = _newSeed;
     }
 
