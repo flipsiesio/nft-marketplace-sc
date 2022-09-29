@@ -65,6 +65,10 @@ contract Card is Ownable, ERC721 {
         return ownedTokens[_nftOwner];
     }
 
+    function exists(uint256 tokenID) public view returns(bool) {
+        return _exists(tokenID);
+    }
+
     /**
      * @notice Checks whether this contract supports the provided interface
      * @param interfaceId 4 bytes representing ID of the interface to check

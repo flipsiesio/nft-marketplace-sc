@@ -38,23 +38,16 @@ describe("CardFactory", function () {
     expect(await factory.availableTokens(0)).to.equal(15);
   });
 
-  it("Should mint 2 of 15 allowed tokens and fail to mint 14 more", async () => {
+  it("Should mint 15 allowed tokens and fail to mint 1 more", async () => {
     // Give minter's rights to the factory
     await cardNFT.connect(accounts[0]).setCardMinter(factory.address, true);
-    // Mint 2 of 15 tokens of option 0
-    for (let i = 0; i < 2; i++) {
+
+    for (let i = 0; i < 15; i++) {
       await factory.mint(0, accounts[1].address);
+      expect(await cardNFT.ownerOf(i)).to.be.equal(accounts[1].address)
     }
-    expect(await cardNFT.balanceOf(accounts[1].address)).to.equal(2);
-    // Try to mint 14 more tokens (2 + 14 > 15)
-    for (let i = 0; i < 14; i++) {
-      if (i < 13) {
-        await factory.mint(0, accounts[1].address);
-      } else {
-        // The last one should fail
-        await expect(factory.mint(0, accounts[1].address)).to.be.reverted;
-      }
-    }
+    await factory.mint(0, accounts[1].address);
+    expect(await cardNFT.exists(15)).to.be.false
   });
 
   it("Should fail to mint cards if caller does not have minter's rights", async () => {

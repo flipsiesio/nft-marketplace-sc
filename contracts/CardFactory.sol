@@ -107,7 +107,7 @@ contract CardFactory is Ownable, IOptionMintable {
         }
 
         // start will be equal to end if group fully minted, so we need to check it before
-        require(card.ownerOf(_idBoundaries[optionId].start) == address(0), string.concat(
+        require(!card.exists(_idBoundaries[optionId].start), string.concat(
             "CardFactory: Invalid Boundaries! Token ID ",
             Strings.toString(_idBoundaries[optionId].start)
         ));
