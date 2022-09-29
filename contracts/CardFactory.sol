@@ -1,7 +1,8 @@
 //SPDX-License-Identifier: MIT
-pragma solidity ^0.8.9;
+pragma solidity ^0.8.12;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/utils/Strings.sol";
 import "./Card.sol";
 import "./interfaces/IOptionMintable.sol";
 
@@ -98,14 +99,22 @@ contract CardFactory is Ownable, IOptionMintable {
         returns (bool)
     {
         require(isOptionMinter[msg.sender], "CardFactory: Caller Is Not an Option Minter!");
-        require(_idBoundaries[optionId].start < _idBoundaries[optionId].end, "CardFactory: No More Cards Are Left to Mint!");
-        for (uint256 i = _idBoundaries[optionId].start; i < _idBoundaries[optionId].end; i++) {
-            card.mint(toAddress, _idBoundaries[optionId].start);
-            _idBoundaries[optionId].start = i + 1;
-            return true;
+
+        // If no tokens available in group we need to return false
+        // This way random minter will try to mint tokens of other groups
+        if(_idBoundaries[optionId].start >= _idBoundaries[optionId].end)  {
+            return false;
         }
 
-        return false;
+        // start will be equal to end if group fully minted, so we need to check it before
+        require(card.ownerOf(_idBoundaries[optionId].start) == address(0), string.concat(
+            "CardFactory: Invalid Boundaries! Token ID ",
+            Strings.toString(_idBoundaries[optionId].start)
+        ));
+
+        card.mint(toAddress, _idBoundaries[optionId].start);
+        _idBoundaries[optionId].start += 1;
+        return true;
     }
 
     /**
