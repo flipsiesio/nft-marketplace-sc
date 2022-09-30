@@ -2,23 +2,23 @@
   "networks": {
     "donau": {
       "Card": {
-        "address": "0x32Face4E44FA577EE1942Ad0cCD71531713e36bd"
+        "address": "0x254AaC865408B57e8f0a6Bba9796590E060B452f"
       },
       "CardFactory": {
-        "address": "0x7b0949b5c3d47D4fcCec780821D3eEE40d0790b2"
+        "address": "0xce95ba2ec5d8419B9fBCB0014eA59eCD41E3DaA3"
       },
       "CardRandomMinter": {
-        "address": "0x6E42F1Ce80a28108aE7BBEf3E2De12680ec50561"
+        "address": "0x080512B0db6c32AA90AF2E83999dDeB2409A603A"
       },
       "NFTSale": {
-        "address": "0xe35874F9f347a02dC443441a331962C8BD3b7091",
-        "feeReceiverAddress": "0xA794f52a4c692f9F26b32c855b592441F326685F",
-        "feeReceiverPrivateKey": "0x558bf0632da7f95238e4bfd4f0a80cbd9315e78c1e5a1f635bcb3eabe48de7cc"
+        "address": "0x12F008DFE3cFf416ac32094f49F48Ae77750EaCF",
+        "feeReceiverAddress": "0x2f51bEfaE582E70F268D30d5Fb40f9DeE3376fd0",
+        "feeReceiverPrivateKey": "0x859f1acd705d7ce32be3a3df4a0809c69a3a01012dd07efe896fa26cc377e6a8"
       },
       "NFTMarketplace": {
-        "address": "0x9fE9D00318ADFB180E54050fb064E3f7bB4FD7e6",
-        "feeReceiverAddress": "0x7D68467Cd53C18C9459326ce2C6eB9c6cb7b5300",
-        "feeReceiverPrivateKey": "0x36f3210c76fd0d8a26e7553c2b525ada61ebe7e29f5d4a7b78138969b1078d80"
+        "address": "0xB6C935C90ad4F0dA5670ec6E5e7e7a389751AE70",
+        "feeReceiverAddress": "0x5afB7A6F857eC5b80f0484234Dda0943D82d8dFF",
+        "feeReceiverPrivateKey": "0xbc1127afa613c65120a135425ded804314e09ee808387e42816041be05f96408"
       }
     },
     "mainnet": {

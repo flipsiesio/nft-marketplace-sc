@@ -5,6 +5,7 @@ require("@nomicfoundation/hardhat-toolbox");
 
 // Add some .env individual variables
 const BTTC_PRIVATE_KEY = process.env.BTTC_PRIVATE_KEY;
+const BTTC_SCAN_KEY = process.env.BTTC_SCAN_KEY
 
 
 module.exports = {
@@ -18,16 +19,16 @@ module.exports = {
     // BTTC Donau testnet
     donau: {
       url: "https://pre-rpc.bt.io/",
-      accounts: [process.env.BTTC_PRIVATE_KEY]
+      accounts: [BTTC_PRIVATE_KEY]
     },
     // BTTC mainnet
     bttc: {
       url: "https://rpc.bt.io/",
-      accounts: [process.env.BTTC_PRIVATE_KEY]
+      accounts: [BTTC_PRIVATE_KEY]
     }
   },
   solidity: {
-    version: "0.8.9",
+    version: "0.8.12",
     settings: {
       optimizer: {
         enabled: true,
@@ -43,5 +44,18 @@ module.exports = {
   },
   mocha: {
     timeout: 20000000000
+  },
+  etherscan: {
+    apiKey: BTTC_SCAN_KEY,
+    customChains: [
+      {
+        network: "donau",
+        chainId: 1029,
+        urls: {
+          apiURL: "https://api-testnet.bttcscan.com/api",
+          browserURL: "https://testnet.bttcscan.com/"
+        }
+      }
+    ]
   }
 }

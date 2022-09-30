@@ -7,6 +7,14 @@ const delay = require("delay");
 // JSON file to keep information about previous deployments
 const OUTPUT_DEPLOY = require("./deployOutput.json");
 
+const oneDay = 86400
+const tenDays = 864000
+
+// One BP 0.0001
+// One percent is 0.01
+// One percent in BP is 100BP
+const onePercent = 100;
+
 // Creates a number of random wallets to be used while deploying contracts
 function createWallets(numberWallets) {
   let createdWallets = [];
@@ -79,12 +87,7 @@ async function main() {
   contractName = "NFTSale";
   console.log(`[${contractName}]: Start of Deployment...`);
   _contractProto = await ethers.getContractFactory(contractName);
-  let oneDay = 86400;
-  let tenDays = 864000;
-  // One BP 0.0001
-  // One percent is 0.01
-  // One percent in BP is 100BP
-  let onePercent = 100;
+
   contractDeployTx = await _contractProto.deploy(card.address, nftSaleFeeReceiver.address, oneDay, tenDays, onePercent);
   nftSale = await contractDeployTx.deployed();
   console.log(`[${contractName}]: Deployment Finished!`);
@@ -96,10 +99,7 @@ async function main() {
   contractName = "NFTMarketplace";
   console.log(`[${contractName}]: Start of Deployment...`);
   _contractProto = await ethers.getContractFactory(contractName);
-  // Same as in NFTSale
-  oneDay = 86400;
-  tenDays = 864000;
-  onePercent = 100;
+
   contractDeployTx = await _contractProto.deploy(card.address, nftMarketplaceFeeReceiver.address, oneDay, tenDays, onePercent);
   nftMarketplace = await contractDeployTx.deployed();
   console.log(`[${contractName}]: Deployment Finished!`);
