@@ -62,11 +62,11 @@ contract CardFactory is Ownable, IOptionMintable {
 
     /**
      * @notice Gives the '_minter' address a right to call factory 'mint' function (that calls card 'mint' function)
-     * @notice Usually you have to call this function oт CardRandomMinter instance
+     * @notice Usually you have to call this function for CardRandomMinter instance
      * @param _minter The address that gets the rights to mint cards
      * @param _status If 'true' - allows to mint cards, if 'false - forbids to do that
      */
-    function setOptionMinter(address _minter, bool _status) external onlyOwner {
+    function setMinterRole(address _minter, bool _status) external onlyOwner {
         isOptionMinter[_minter] = _status;
     }
 

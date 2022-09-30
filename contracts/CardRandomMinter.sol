@@ -228,7 +228,7 @@ contract CardRandomMinter is Ownable, IRandomMinter {
      * @param who Address to be given rights to mint cards
      * @param status 'True' gives the address the right to mint cards, 'false' - forbids to mint cards
      */
-    function setMinter(address who, bool status) external onlyOwner {
+    function setMinterRole(address who, bool status) external onlyOwner {
         isMinter[who] = status;
     }
 

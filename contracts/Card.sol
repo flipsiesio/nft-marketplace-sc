@@ -44,11 +44,11 @@ contract Card is Ownable, ERC721 {
 
     /**
      * @notice Gives the '_minter' address a right to call card 'mint' function
-     * @notice Usually you have to call this function oт CardFactory instance
+     * @notice Usually you have to call this function for CardFactory instance
      * @param _minter The address that gets the rights to mint cards
      * @param _status If 'true' - allows to mint cards, if 'false - forbids to do that
      */
-    function setCardMinter(address _minter, bool _status) external onlyOwner {
+    function setMinterRole(address _minter, bool _status) external onlyOwner {
         isMinter[_minter] = _status;
     }
 

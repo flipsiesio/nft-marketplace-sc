@@ -53,6 +53,14 @@ async function main() {
   // Provide the factory with card address.
   contractDeployTx = await _contractProto.deploy(card.address);
   cardFactory = await contractDeployTx.deployed();
+
+  await card.setMinterRole(cardFactory.address, true);
+  await cardFactory.setIdBoundaryForOption(0, 0, 6500);
+  await cardFactory.setIdBoundaryForOption(1, 6500, 7271);
+  await cardFactory.setIdBoundaryForOption(2, 7271, 7771);
+  await cardFactory.setIdBoundaryForOption(3, 7771, 7796);
+  await cardFactory.setIdBoundaryForOption(4, 7796, 7803);
+
   console.log(`[${contractName}]: Deployment Finished!`);
   OUTPUT_DEPLOY.networks[network.name][contractName].address = cardFactory.address;
   
@@ -63,6 +71,7 @@ async function main() {
   // Provide the game controller with factory address 
   contractDeployTx = await _contractProto.deploy(cardFactory.address);
   cardRandomMinter = await contractDeployTx.deployed();
+  await cardFactory.setMinterRole(cardRandomMinter.address, true);
   console.log(`[${contractName}]: Deployment Finished!`);
   OUTPUT_DEPLOY.networks[network.name][contractName].address = cardRandomMinter.address;
 
@@ -97,6 +106,10 @@ async function main() {
   OUTPUT_DEPLOY.networks[network.name][contractName].address = nftMarketplace.address;
   OUTPUT_DEPLOY.networks[network.name][contractName].feeReceiverAddress = nftMarketplaceFeeReceiver.address;
   OUTPUT_DEPLOY.networks[network.name][contractName].feeReceiverPrivateKey = nftMarketplaceFeeReceiver.privateKey;
+
+  
+  
+    
 
   console.log(`See Results in "${__dirname + '/deployOutput.json'}" File`);
 

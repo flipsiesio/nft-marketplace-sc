@@ -40,7 +40,7 @@ describe("CardFactory", function () {
 
   it("Should mint 15 allowed tokens and fail to mint 1 more", async () => {
     // Give minter's rights to the factory
-    await cardNFT.connect(accounts[0]).setCardMinter(factory.address, true);
+    await cardNFT.connect(accounts[0]).setMinterRole(factory.address, true);
 
     for (let i = 0; i < 15; i++) {
       await factory.mint(0, accounts[1].address);
@@ -56,9 +56,9 @@ describe("CardFactory", function () {
 
   it("Should give minter's rights to another account", async () => {
     // Give Option Minter rights from factory to another account
-    await factory.connect(accounts[0]).setOptionMinter(accounts[1].address, true);
+    await factory.connect(accounts[0]).setMinterRole(accounts[1].address, true);
     // Give factory rights to call card mint function
-    await cardNFT.connect(accounts[0]).setCardMinter(factory.address, true);
+    await cardNFT.connect(accounts[0]).setMinterRole(factory.address, true);
     // Mint tokens from that account
     await factory.connect(accounts[1]).mint(0, accounts[3].address);
     expect(await cardNFT.balanceOf(accounts[3].address)).to.equal(1);

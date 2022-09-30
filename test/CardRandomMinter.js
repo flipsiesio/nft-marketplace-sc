@@ -30,9 +30,9 @@ describe("CardRandomMinter", function () {
     await minter.deployed();
 
     // Give Minter's rights to the factory
-    await cardNFT.connect(accounts[0]).setCardMinter(factory.address, true);
+    await cardNFT.connect(accounts[0]).setMinterRole(factory.address, true);
     // Give Option Minter's rights from factory to another account
-    await factory.connect(accounts[0]).setOptionMinter(minter.address, true);
+    await factory.connect(accounts[0]).setMinterRole(minter.address, true);
 
     // Allow to mint some tokens
     await factory.setIdBoundaryForOption(0, 0, 15);
@@ -44,7 +44,7 @@ describe("CardRandomMinter", function () {
 
 
   it("Should give minter rights to admin and mint 3 tokens to another account", async () => {
-    await minter.connect(accounts[0]).setMinter(accounts[0].address, true);
+    await minter.connect(accounts[0]).setMinterRole(accounts[0].address, true);
     await minter.connect(accounts[0]).mintRandomFree(3, accounts[1].address, "simple_description");
     expect(await cardNFT.balanceOf(accounts[1].address)).to.equal(3);
   });
