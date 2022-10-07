@@ -6,6 +6,8 @@ const delay = require("delay");
 
 // JSON file to keep information about previous deployments
 const OUTPUT_DEPLOY = require("./deployOutput.json");
+// JSON file to get the list of supported tokens and their prices from
+const SUPPORTED_TOKENS = require("../supportedTokens.json");
 
 const oneDay = 86400
 const tenDays = 864000
@@ -79,6 +81,7 @@ async function main() {
   // Provide the game controller with factory address 
   contractDeployTx = await _contractProto.deploy(cardFactory.address);
   cardRandomMinter = await contractDeployTx.deployed();
+  // TODO add supported tokens and prices in them here
   await cardFactory.setMinterRole(cardRandomMinter.address, true);
   console.log(`[${contractName}]: Deployment Finished!`);
   OUTPUT_DEPLOY.networks[network.name][contractName].address = cardRandomMinter.address;
