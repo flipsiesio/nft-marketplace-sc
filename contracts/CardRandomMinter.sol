@@ -22,9 +22,11 @@ contract CardRandomMinter is Ownable, IRandomMinter {
     uint8 public constant JOKERS_OPTION = 3;
     uint8 public constant RARE_OPTION = 4;
 
-    /// @dev Price of mint of a single card
-    uint256 public price;
 
+    /// @dev The list of supported tokens to pay for mint of a card
+    mapping(address => bool) internal _supportedTokens;
+    /// @dev The list of mint price in each of supported tokens
+    mapping(address => uint256) internal _pricesInTokens;
 
     uint256 public constant MAX_BPS = 10000;
     /// @dev Probability in bps made by golden ratio of 10k
@@ -41,6 +43,76 @@ contract CardRandomMinter is Ownable, IRandomMinter {
         allowedItemsPerRandomMint[1] = true;
         allowedItemsPerRandomMint[3] = true;
         allowedItemsPerRandomMint[5] = true;
+        // These addresses must be supported by default
+        // TODO move it to JSON file
+        // ETH
+        _supportedTokens[0x1249C65AfB11D179FFB3CE7D4eEDd1D9b98AD006] = true;
+        // BNB
+        _supportedTokens[0x185a4091027E2dB459a2433F85f894dC3013aeB5] = true;
+        // TRX
+        _supportedTokens[0xEdf53026aeA60f8F75FcA25f8830b7e2d6200662] = true;
+        // USDT (Ethereum)
+        _supportedTokens[0xE887512ab8BC60BcC9224e1c3b5Be68E26048B8B] = true;
+        // USDC (Ethereum)
+        _supportedTokens[0xAE17940943BA9440540940DB0F1877f101D39e8b] = true;
+    }
+
+    /**
+     * @notice Adds a supported token to pay for mint in
+     * @param tokenAddress The address of the token to add
+     */
+    function addSupportedToken(address tokenAddress) public onlyOwner {
+        // It shouldn't be added yet. Cleaner usage
+        require(!_supportedTokens[tokenAddress], "CardRandomMinter: token has already been added!");
+        _supportedTokens[tokenAddress] = true;
+    }
+
+    /**
+     * @notice Removes a supported token to pay for mint in
+     * @param tokenAddress The address of the token to remove
+     */
+    function removeSupportedToken(address tokenAddress) public onlyOwner {
+        // It shouldn't be removed yet. Cleaner usage
+        require(_supportedTokens[tokenAddress], "CardRandomMinter: trying to remove non-existent token!");
+        _supportedTokens[tokenAddress] = false;
+    }
+
+    /** 
+     * @notice Checks if provided token is supported
+     * @param tokenAddress The address of the token to check
+     * @return True if token is supported. False - if token is not supported.
+     */
+    function isSupported(address tokenAddress) public view returns(bool) {
+        return _supportedTokens[tokenAddress];
+    }
+
+    /**
+     * @notice Returns the number of supported tokens
+     * @return The number of supported tokens
+     */
+    function getSupportedLength() public view returns(uint256) {
+        return _supportedTokens.length;
+    }
+
+    /**
+     * @notice Sets the mint price for each supported token
+     * @param tokenAddress The address of the token to set the price in
+     * @param priceInTokens The price in tokens to set
+     * TODO demicals here???
+     */
+    function setMintPrice(address tokenAddress, uint256 priceInTokens) public onlyOwner {
+        require(_supportedTokens[tokenAddress], "CardRandomMinter: token is not supported!")
+        require(priceInTokens > 0, )
+        _pricesInTokens[tokenAddress] = priceInTokens;
+    }
+
+    /**
+     * @notice Gets the card mint price in provided tokens
+     * @param tokenAddress The address of the token to check the card mint price in
+     * TODO demicals here???
+     */
+    function getMintPrice(address tokenAddress) public view returns(uint256) {  
+        return _pricesInTokens[tokenAddress];
     }
 
 
@@ -215,13 +287,6 @@ contract CardRandomMinter is Ownable, IRandomMinter {
         payable(owner()).transfer(address(this).balance);
     }
 
-    /**
-     * @notice Sets the new price for card mint
-     * @param _price A new card mint price
-     */
-    function setPrice(uint256 _price) external onlyOwner {
-        price = _price;
-    }
 
     /**
      * @notice Gives rights to call card mint function
