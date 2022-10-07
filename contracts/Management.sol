@@ -39,73 +39,73 @@ contract Management is Ownable, ReentrancyGuard, ERC721Holder {
     IERC721 public nftOnSale;
 
     /// @notice This is a standard constructor with one argument
-    /// @param _nftOnSale The NFT which could be sold in marketplace or auction
+    /// @param nftOnSale_ The NFT which could be sold in marketplace or auction
     constructor(
-        address _nftOnSale,
-        address _feeReceiver,
-        uint256 _minExpirationDuration,
-        uint256 _maxExpirationDuration,
-        uint256 _feeInBps
+        address nftOnSale_,
+        address feeReceiver_,
+        uint256 minExpirationDuration_,
+        uint256 maxExpirationDuration_,
+        uint256 feeInBps_
     ) {
-        nftOnSale = IERC721(_nftOnSale);
-        feeReceiver = _feeReceiver;
-        minExpirationDuration = _minExpirationDuration;
-        maxExpirationDuration = _maxExpirationDuration;
-        feeInBps = _feeInBps;
+        nftOnSale = IERC721(nftOnSale_);
+        feeReceiver = feeReceiver_;
+        minExpirationDuration = minExpirationDuration_;
+        maxExpirationDuration = maxExpirationDuration_;
+        feeInBps = feeInBps_;
     }
 
     /// @notice This custom modifier is to validate index of either sell order or auction
-    /// @param _at An index in the mapping of auctions or sell orders
-    modifier validIndex(uint256 _at) {
-        require(_at < _length, "invalidIndex");
+    /// @param at An index in the mapping of auctions or sell orders
+    modifier validIndex(uint256 at) {
+        require(at < _length, "invalidIndex");
         _;
     }
 
     /// @notice This custom modifier is to validate expiration duration of either sell order or auction
-    /// @param _expirationDuration The duration which about to be used in auction or sell order
-    modifier validExpirationDuration(uint256 _expirationDuration) {
+    /// @param expirationDuration The duration which about to be used in auction or sell order
+    modifier validExpirationDuration(uint256 expirationDuration) {
         require(
-            _expirationDuration >= minExpirationDuration &&
-                _expirationDuration <= maxExpirationDuration,
+            expirationDuration >= minExpirationDuration &&
+                expirationDuration <= maxExpirationDuration,
             "invalidExpirationDuration"
         );
         _;
     }
 
     /// @notice A standard setter for the working NFT which available only for user
-    /// @param _newNFTOnSale The new NFT token address
-    function setWorkingNFT(address _newNFTOnSale) external onlyOwner {
-        nftOnSale = IERC721(_newNFTOnSale);
+    /// @param newNFTOnSale The new NFT token address
+    function setWorkingNFT(address newNFTOnSale) external onlyOwner {
+        nftOnSale = IERC721(newNFTOnSale);
     }
 
     /// @notice A standard setter for the fee receiver address which available only for user
-    /// @param _feeReceiver The new fee receiver address
-    function setFeeReceiver(address _feeReceiver) external onlyOwner {
-        feeReceiver = _feeReceiver;
+    /// @param feeReceiver_ The new fee receiver address
+    function setFeeReceiver(address feeReceiver_) external onlyOwner {
+        feeReceiver = feeReceiver_;
     }
 
     /// @notice A standard setter for the fee BPS amount which available only for user
-    /// @param _fee The new amount of fee in BPS
-    function setFee(uint256 _fee) external onlyOwner {
-        feeInBps = _fee;
+    /// @param fee The new amount of fee in BPS
+    function setFee(uint256 fee) external onlyOwner {
+        feeInBps = fee;
     }
 
     /// @notice A standard setter for the minimum expiration duration which available only for user
-    /// @param _minExpirationDuration The new minimum expiration duration in seconds
-    function setMinExpirationDuration(uint256 _minExpirationDuration)
+    /// @param minExpirationDuration_ The new minimum expiration duration in seconds
+    function setMinExpirationDuration(uint256 minExpirationDuration_)
         external
         onlyOwner
     {
-        minExpirationDuration = _minExpirationDuration;
+        minExpirationDuration = minExpirationDuration_;
     }
 
     /// @notice A standard setter for the maximum expiration duration which available only for user
-    /// @param _maxExpirationDuration The new maximum expiration duration in seconds
-    function setMaxExpirationDuration(uint256 _maxExpirationDuration)
+    /// @param maxExpirationDuration_ The new maximum expiration duration in seconds
+    function setMaxExpirationDuration(uint256 maxExpirationDuration_)
         external
         onlyOwner
     {
-        maxExpirationDuration = _maxExpirationDuration;
+        maxExpirationDuration = maxExpirationDuration_;
     }
 
     /// @notice Default fallback function which allows the contract to accept ether

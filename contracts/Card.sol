@@ -33,36 +33,36 @@ contract Card is Ownable, ERC721 {
     /**
      * @notice Mints an NFT token with 'tokenID' to the 'to' address 
      * @dev Adds the minted token to the list of owned tokens of the 'to' address
-     * @param _to The address that receives minted toke
-     * @param _tokenId The ID of the minted token
+     * @param to The address that receives minted toke
+     * @param tokenId The ID of the minted token
      */
-    function mint(address _to, uint256 _tokenId) external {
+    function mint(address to, uint256 tokenId) external {
         require(isMinter[msg.sender], "Card: Caller Is Not A Minter!");
-        _mint(_to, _tokenId);
-        ownedTokens[_to].push(_tokenId);
+        _mint(to, tokenId);
+        ownedTokens[to].push(tokenId);
     }
 
     /**
-     * @notice Gives the '_minter' address a right to call card 'mint' function
+     * @notice Gives the 'minter' address a right to call card 'mint' function
      * @notice Usually you have to call this function for CardFactory instance
-     * @param _minter The address that gets the rights to mint cards
-     * @param _status If 'true' - allows to mint cards, if 'false - forbids to do that
+     * @param minter The address that gets the rights to mint cards
+     * @param status If 'true' - allows to mint cards, if 'false - forbids to do that
      */
-    function setMinterRole(address _minter, bool _status) external onlyOwner {
-        isMinter[_minter] = _status;
+    function setMinterRole(address minter, bool status) external onlyOwner {
+        isMinter[minter] = status;
     }
 
     /**
-     *  @notice Returns all tokens owned by the '_nftOwner' address
-     *  @param _nftOwner The address of tokens owner
+     *  @notice Returns all tokens owned by the 'nftOwner' address
+     *  @param nftOwner The address of tokens owner
      *  @return List of IDs of tokens owned by the address
      */
-    function getNFTListByAddress(address _nftOwner)
+    function getNFTListByAddress(address nftOwner)
         public
         view
         returns (uint256[] memory)
     {
-        return ownedTokens[_nftOwner];
+        return ownedTokens[nftOwner];
     }
 
     function exists(uint256 tokenID) public view returns(bool) {

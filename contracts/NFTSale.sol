@@ -38,25 +38,25 @@ contract NFTSale is Management {
     mapping(uint256 => SellOrder) internal _sellOrders;
 
     /// @notice This custom modifier is to validate if msg.sender is the seller of the sell orders
-    /// @param _at The index of the given sell roder in which seller is checked
-    modifier onlySellerOf(uint256 _at) {
-        require(_sellOrders[_at].seller == msg.sender, "NFTSale: Caller Is Not a Seller!");
+    /// @param at The index of the given sell roder in which seller is checked
+    modifier onlySellerOf(uint256 at) {
+        require(_sellOrders[at].seller == msg.sender, "NFTSale: Caller Is Not a Seller!");
         _;
     }
 
     constructor(
         address _nftOnSale,
-        address _feeReceiver,
-        uint256 _minExpirationDuration,
-        uint256 _maxExpirationDuration,
-        uint256 _feeInBps
+        address feeReceiver,
+        uint256 minExpirationDuration,
+        uint256 maxExpirationDuration,
+        uint256 feeInBps
     )
         Management(
             _nftOnSale,
-            _feeReceiver,
-            _minExpirationDuration,
-            _maxExpirationDuration,
-            _feeInBps
+            feeReceiver,
+            minExpirationDuration,
+            maxExpirationDuration,
+            feeInBps
         )
     {}
 
@@ -67,176 +67,176 @@ contract NFTSale is Management {
     }
 
     /// @notice The standard getter to return a token ID of the given sell order
-    /// @param _at The index of the sell order
+    /// @param at The index of the sell order
     /// @return The ID of the selling token
-    function getSellOrderTokenId(uint256 _at)
+    function getSellOrderTokenId(uint256 at)
         external
         view
-        validIndex(_at)
+        validIndex(at)
         returns (uint256)
     {
-        return _sellOrders[_at].tokenId;
+        return _sellOrders[at].tokenId;
     }
 
     /// @notice The standard getter to return a seller address of the given sell order
-    /// @param _at The index of the sell order
+    /// @param at The index of the sell order
     /// @return The seller address of the sell order
-    function getSellOrderSeller(uint256 _at)
+    function getSellOrderSeller(uint256 at)
         external
         view
-        validIndex(_at)
+        validIndex(at)
         returns (address)
     {
-        return _sellOrders[_at].seller;
+        return _sellOrders[at].seller;
     }
 
     /// @notice The standard getter to return a price in ETH of the given sell order
-    /// @param _at The index of the sell order
+    /// @param at The index of the sell order
     /// @return Price in ETH
-    function getSellOrderPrice(uint256 _at)
+    function getSellOrderPrice(uint256 at)
         external
         view
-        validIndex(_at)
+        validIndex(at)
         returns (uint256)
     {
-        return _sellOrders[_at].price;
+        return _sellOrders[at].price;
     }
 
     /// @notice The standard getter to return a fees to pay amount of the given sell order
-    /// @param _at The index of the sell order
+    /// @param at The index of the sell order
     /// @return Amount fees to pay
-    function getSellOrderFeesPaid(uint256 _at)
+    function getSellOrderFeesPaid(uint256 at)
         external
         view
-        validIndex(_at)
+        validIndex(at)
         returns (uint256)
     {
-        return _sellOrders[_at].paidFees;
+        return _sellOrders[at].paidFees;
     }
 
     /// @notice The standard getter to return an expiration time of the given sell order
-    /// @param _at The index of the sell order
+    /// @param at The index of the sell order
     /// @return Expiration timestamp in future
-    function getSellOrderExpirationTime(uint256 _at)
+    function getSellOrderExpirationTime(uint256 at)
         external
         view
-        validIndex(_at)
+        validIndex(at)
         returns (uint256)
     {
-        return _sellOrders[_at].expirationTime;
+        return _sellOrders[at].expirationTime;
     }
 
     /// @notice The standard getter to return a status of the given sell order
-    /// @param _at The index of the auction
+    /// @param at The index of the auction
     /// @return Status enumeration member as uint256
-    function getSellOrderStatus(uint256 _at)
+    function getSellOrderStatus(uint256 at)
         external
         view
-        validIndex(_at)
+        validIndex(at)
         returns (uint256)
     {
-        return uint256(_sellOrders[_at].status);
+        return uint256(_sellOrders[at].status);
     }
 
     /// @notice The function cancel the sell order and return the token in the sell order to the seller.
-    /// @param _at The index of the sell order
-    function getBackFromSale(uint256 _at) external onlySellerOf(_at) {
-        require(_sellOrders[_at].status == Status.PENDING, "NFTSale: Possible Only While Pending!");
+    /// @param at The index of the sell order
+    function getBackFromSale(uint256 at) external onlySellerOf(at) {
+        require(_sellOrders[at].status == Status.PENDING, "NFTSale: Possible Only While Pending!");
         
-        if (block.timestamp <= _sellOrders[_at].expirationTime) {
-            _sellOrders[_at].status = Status.REJECTED;
+        if (block.timestamp <= _sellOrders[at].expirationTime) {
+            _sellOrders[at].status = Status.REJECTED;
         } else {
-            _sellOrders[_at].status = Status.EXPIRED;
+            _sellOrders[at].status = Status.EXPIRED;
         }
         
         nftOnSale.safeTransferFrom(
             address(this),
             msg.sender,
-            _sellOrders[_at].tokenId
+            _sellOrders[at].tokenId
         );
         
-        emit OrderRejected(_at);
+        emit OrderRejected(at);
     }
 
     /// @notice The function cancel the sell order and return the token in the sell order to the seller.
-    /// @param _nftToSell The token ID to sell through sell order
-    /// @param _price The price of the sell order
-    /// @param _expirationDuration The duration of the sell order, and when it passed the sell order could not be filled without restarting of the sell order.
+    /// @param nftToSell The token ID to sell through sell order
+    /// @param price The price of the sell order
+    /// @param expirationDuration The duration of the sell order, and when it passed the sell order could not be filled without restarting of the sell order.
     function acceptTokenToSell(
-        uint256 _nftToSell,
-        uint256 _price,
-        uint256 _expirationDuration
-    ) external validExpirationDuration(_expirationDuration) {
-        nftOnSale.safeTransferFrom(msg.sender, address(this), _nftToSell);
+        uint256 nftToSell,
+        uint256 price,
+        uint256 expirationDuration
+    ) external validExpirationDuration(expirationDuration) {
+        nftOnSale.safeTransferFrom(msg.sender, address(this), nftToSell);
         _sellOrders[_length] = SellOrder({
-            tokenId: _nftToSell,
+            tokenId: nftToSell,
             seller: msg.sender,
-            price: _price,
+            price: price,
             status: Status.PENDING,
-            expirationTime: block.timestamp.add(_expirationDuration),
+            expirationTime: block.timestamp.add(expirationDuration),
             paidFees: 0
         });
         emit OrderCreated(
-            _nftToSell,
+            nftToSell,
             _length,
             msg.sender,
-            block.timestamp.add(_expirationDuration)
+            block.timestamp.add(expirationDuration)
         );
         _length = _length.add(1);
     }
 
     /// @notice The function allows seller to change price.
-    /// @param _at The seller order index
-    /// @param _price The new price for the sell order
-    function setPriceFor(uint256 _at, uint256 _price)
+    /// @param at The seller order index
+    /// @param price The new price for the sell order
+    function setPriceFor(uint256 at, uint256 price)
         external
-        validIndex(_at)
-        onlySellerOf(_at)
+        validIndex(at)
+        onlySellerOf(at)
     {
-        _sellOrders[_at].price = _price;
+        _sellOrders[at].price = price;
     }
 
     /// @notice The function allows seller continue selling by expanding the expiration time of the sell order.
-    /// @param _at The seller order index
-    /// @param _expirationTime The new expiration time for the sell order
-    function setExpirationTimeFor(uint256 _at, uint256 _expirationTime)
+    /// @param at The seller order index
+    /// @param expirationTime The new expiration time for the sell order
+    function setExpirationTimeFor(uint256 at, uint256 expirationTime)
         external
-        validIndex(_at)
-        onlySellerOf(_at)
+        validIndex(at)
+        onlySellerOf(at)
     {
         require(
-            _sellOrders[_at].expirationTime <= _expirationTime,
+            _sellOrders[at].expirationTime <= expirationTime,
             "NFTSale: onlyFutureTimeAllowed!"
         );
-        _sellOrders[_at].expirationTime = _expirationTime;
+        _sellOrders[at].expirationTime = expirationTime;
     }
 
     /// @notice The function allows anyone to fill sell order.
-    /// @param _at The seller order index
-    function buy(uint256 _at) external payable nonReentrant validIndex(_at) {
-        uint256 price = _sellOrders[_at].price;
+    /// @param at The seller order index
+    function buy(uint256 at) external payable nonReentrant validIndex(at) {
+        uint256 price = _sellOrders[at].price;
         uint256 feeAmount = price.mul(feeInBps).div(MAX_FEE);
         require(msg.value >= price.add(feeAmount), "NFTSale: Not Enough Funds!");
         require(
-            _sellOrders[_at].status == Status.PENDING,
+            _sellOrders[at].status == Status.PENDING,
             "NFTSale: Order Is Filled / Rejected!"
         );
         require(
-            block.timestamp <= _sellOrders[_at].expirationTime,
+            block.timestamp <= _sellOrders[at].expirationTime,
             "NFTSale: Order Is Expired!"
         );
 
-        _sellOrders[_at].paidFees = feeAmount;
-        _sellOrders[_at].status = Status.FILLED;
+        _sellOrders[at].paidFees = feeAmount;
+        _sellOrders[at].status = Status.FILLED;
 
         nftOnSale.safeTransferFrom(
             address(this),
             msg.sender,
-            _sellOrders[_at].tokenId
+            _sellOrders[at].tokenId
         );
-        payable(_sellOrders[_at].seller).transfer(_sellOrders[_at].price);
+        payable(_sellOrders[at].seller).transfer(_sellOrders[at].price);
         payable(feeReceiver).transfer(feeAmount);
         
-        emit OrderFilled(_at, msg.sender);
+        emit OrderFilled(at, msg.sender);
     }
 }

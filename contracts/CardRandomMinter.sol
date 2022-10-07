@@ -11,7 +11,7 @@ import "./interfaces/ICardRandomMinter.sol";
 /// @title Minter of random cards deck
 contract CardRandomMinter is Ownable, ICardRandomMinter {
     /// @dev Event emitted when a card is minted
-    event Minted(uint8 _amount, address indexed _to, string desc);
+    event Minted(uint8 amount, address indexed to , string desc);
 
     /// @dev Factory that mints cards
     IOptionMintable public factory;
@@ -29,11 +29,11 @@ contract CardRandomMinter is Ownable, ICardRandomMinter {
     /// @dev The map of supported tokens to save gas
     mapping(address => bool) _supportedTokensMap;
     /// @dev The list of mint price in each of supported tokens
-    mapping(address => uint256) internal _pricesInTokens;
+    mapping(address => uint256) internal pricesInTokens;
 
     uint256 public constant MAX_BPS = 10000;
     /// @dev Probability in bps made by golden ratio of 10k
-    uint16[5] internal __classProbs = [6180, 2361, 902, 344, 213];
+    uint16[5] internal _classProbs = [6180, 2361, 902, 344, 213];
     uint256 internal _currentSeed = 125026;
 
     /// @dev List of items any of which can be picked and minted (others can't)
@@ -127,7 +127,7 @@ contract CardRandomMinter is Ownable, ICardRandomMinter {
     function setMintPrice(address tokenAddress, uint256 priceInTokens) public onlyOwner {
         require(isSupported(tokenAddress), "CardRandomMinter: token is not supported!");
         require(priceInTokens > 0, "CardRandomMinter: price can not be zero!");
-        _pricesInTokens[tokenAddress] = priceInTokens;
+        pricesInTokens[tokenAddress] = priceInTokens;
     }
 
     /**
@@ -136,21 +136,21 @@ contract CardRandomMinter is Ownable, ICardRandomMinter {
      * @return A card mint price. Should be divided by `demicals` (18 in most cases) for UI
      */
     function getMintPrice(address tokenAddress) public view returns(uint256) {  
-        return _pricesInTokens[tokenAddress];
+        return pricesInTokens[tokenAddress];
     }
 
 
     /**
      *  @notice Generates card options different from the given one
-     *  @param _baseOption The option that is used to generate other options from
+     *  @param baseOption The option that is used to generate other options from
      *  @return List of different generated options
      */
-    function _getOtherOptions(uint256 _baseOption)
+    function _getOtherOptions(uint256 baseOption)
         internal
         pure
         returns (uint8[4] memory)
     {
-        if (_baseOption == COLORIZED_OPTION) {
+        if (baseOption == COLORIZED_OPTION) {
             return [
                 CARDS_WITH_EGGS_OPTION,
                 CARDS_WITH_TEARS_OPTION,
@@ -158,7 +158,7 @@ contract CardRandomMinter is Ownable, ICardRandomMinter {
                 RARE_OPTION
             ];
         }
-        if (_baseOption == CARDS_WITH_EGGS_OPTION) {
+        if (baseOption == CARDS_WITH_EGGS_OPTION) {
             return [
                 COLORIZED_OPTION,
                 CARDS_WITH_TEARS_OPTION,
@@ -166,7 +166,7 @@ contract CardRandomMinter is Ownable, ICardRandomMinter {
                 RARE_OPTION
             ];
         }
-        if (_baseOption == CARDS_WITH_TEARS_OPTION) {
+        if (baseOption == CARDS_WITH_TEARS_OPTION) {
             return [
                 CARDS_WITH_EGGS_OPTION,
                 COLORIZED_OPTION,
@@ -174,7 +174,7 @@ contract CardRandomMinter is Ownable, ICardRandomMinter {
                 RARE_OPTION
             ];
         }
-        if (_baseOption == JOKERS_OPTION) {
+        if (baseOption == JOKERS_OPTION) {
             return [
                 CARDS_WITH_EGGS_OPTION,
                 CARDS_WITH_TEARS_OPTION,
@@ -182,7 +182,7 @@ contract CardRandomMinter is Ownable, ICardRandomMinter {
                 RARE_OPTION
             ];
         }
-        if (_baseOption == RARE_OPTION) {
+        if (baseOption == RARE_OPTION) {
             return [
                 CARDS_WITH_EGGS_OPTION,
                 CARDS_WITH_TEARS_OPTION,
@@ -195,84 +195,84 @@ contract CardRandomMinter is Ownable, ICardRandomMinter {
 
     /**
      * @notice Mints a set of random items (cards)
-     * @param _numCards Number of cards to be minted
-     * @param _to Receiver of minted cards
+     * @param numCards Number of cards to be minted
+     * @param to  Receiver of minted cards
      * @param desc Description used in emitted event
      */
     function _mintRandom(
-        uint8 _numCards,
-        address _to,
+        uint8 numCards,
+        address to,
         string memory desc
     ) internal {
         require(
-            allowedItemsPerRandomMint[_numCards],
+            allowedItemsPerRandomMint[numCards],
             "CardRandomMinter: Amount of items to mint is too large. Not allowed!"
         );
         uint8 minted = 0;
-        for (uint8 i = 0; i < _numCards; i++) {
+        for (uint8 i = 0; i < numCards; i++) {
             uint8 randomOption = _getRandomSingleOption(_currentSeed);
             uint8[4] memory _otherOptions = _getOtherOptions(randomOption);
-            if (factory.mint(randomOption, _to)) {
+            if (factory.mint(randomOption, to )) {
                 minted++;
             } else {
                 for (uint256 j = 0; j < 4; j++) {
-                    if (factory.mint(_otherOptions[j], _to)) {
+                    if (factory.mint(_otherOptions[j], to )) {
                         minted++;
                         break;
                     }
                 }
             }
         }
-        emit Minted(minted, _to, desc);
+        emit Minted(minted, to , desc);
     }
 
     /**
      * @notice Mints a set of random items (cards) for free
-     * @param _numCards Number of cards to be minted
-     * @param _to Receiver of minted cards
+     * @param numCards Number of cards to be minted
+     * @param to  Receiver of minted cards
      * @param desc Description used in emitted event
      */
     function mintRandomFree(
-        uint8 _numCards,
-        address _to,
+        uint8 numCards,
+        address to ,
         string memory desc
     ) external {
         require(isMinter[msg.sender], "CardRandomMinter: Caller Is Not a Minter!");
-        _mintRandom(_numCards, _to, desc);
+        _mintRandom(numCards, to , desc);
     }
 
     /**
      * @notice Mints a set of random items (cards) for provided funds
-     * @param _numCards Number of cards to be minted
-     * @param _tokenToPay Address of the token that will be payed to mint a card
+     * @param numCards Number of cards to be minted
+     * @param tokenToPay Address of the token that will be payed to mint a card
      *                    NOTE: Zero address for native tokens
      */            
-    function mintRandom(uint8 _numCards, address _tokenToPay) external payable {
-        require(_numCards > 0, "CardRandomMinter: can not mint zero cards!");
-        require(isSupported(_tokenToPay), "CardRandomMinter: token is not supported!");
-        if (_tokenToPay == address(0)) {
+    function mintRandom(uint8 numCards, address tokenToPay) external payable {
+        require(numCards > 0, "CardRandomMinter: can not mint zero cards!");
+        require(isSupported(tokenToPay), "CardRandomMinter: token is not supported!");
+        if (tokenToPay == address(0)) {
             // If user wishes to pay in native tokens, he should send them with the transaction
             require( 
-                msg.value >= _pricesInTokens[_tokenToPay] * uint256(_numCards), 
+                msg.value >= pricesInTokens[tokenToPay] * uint256(numCards), 
                 "CardRandomMinter: not enough native tokens were provided to pay for mint!"
             );
         } else {
             // If user wishes to pay in ERC20 tokens he first needs to call this token's `approve` method to 
             // allow `CardRandomMinter` to transfer his tokens
-            IERC20(_tokenToPay).transferFrom(msg.sender, address(this), _pricesInTokens[_tokenToPay]);
+            IERC20(tokenToPay).transferFrom(msg.sender, address(this), pricesInTokens[tokenToPay]);
 
         }
-        _mintRandom(_numCards, msg.sender, "");
+        _mintRandom(numCards, msg.sender, "");
 
     }
 
     /**
      * @notice Returns one random item (card)
-     * @param _seed Seed used to increase randomness
+     * @param seed Seed used to increase randomness
      * @return Random card option
      */
-    function _getRandomSingleOption(uint256 _seed) internal returns (uint8) {
-        return _pickRandomSingleOption(_seed, __classProbs);
+    function _getRandomSingleOption(uint256 seed) internal returns (uint8) {
+        return _pickRandomSingleOption(seed, _classProbs);
     }
 
     /**
@@ -336,14 +336,14 @@ contract CardRandomMinter is Ownable, ICardRandomMinter {
 
     /**
      * @notice Sets the amount of items that can be randomly minted
-     * @param _amount The amount of items that can be randomly minted
-     * @param _status 'True' allows to mint that amount of cards, 'false' - forbids to mint that amount of cards
+     * @param amount The amount of items that can be randomly minted
+     * @param status 'True' allows to mint that amount of cards, 'false' - forbids to mint that amount of cards
      */
-    function setAllowedAmountOfItemsPerRandomMint(uint8 _amount, bool _status)
+    function setAllowedAmountOfItemsPerRandomMint(uint8 amount, bool status)
         external
         onlyOwner
     {
-        allowedItemsPerRandomMint[_amount] = _status;
+        allowedItemsPerRandomMint[amount] = status;
     }
 
     /**
@@ -356,21 +356,21 @@ contract CardRandomMinter is Ownable, ICardRandomMinter {
 
     /**
      * @notice Changes the seed to change the source of randomness
-     * @param _newSeed A new seed to be set
+     * @param newSeed A new seed to be set
      */
-    function setCurrentSeed(uint256 _newSeed) external onlyOwner {
-        _currentSeed = _newSeed;
+    function setCurrentSeed(uint256 newSeed) external onlyOwner {
+        _currentSeed = newSeed;
     }
 
     /**
      * @notice Sets probabilty of each class of cards to be randomly picked
-     * @param _classProbs List of probabilities for all classes of cards
+     * @param classProbs List of probabilities for all classes of cards
      */
-    function setProbabilitiesForClasses(uint16[5] memory _classProbs)
+    function setProbabilitiesForClasses(uint16[5] memory classProbs)
         public
         onlyOwner
     {
-        __classProbs = _classProbs;
+        _classProbs = classProbs;
     }
 
     /// @dev Allows the contracts to receive funds from other addresses

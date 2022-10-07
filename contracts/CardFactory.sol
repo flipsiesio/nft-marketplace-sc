@@ -32,14 +32,14 @@ contract CardFactory is Ownable, IOptionMintable {
     /// @dev Each card option has a limited number of cards to be minted
     mapping(uint8 => Boundaries) internal _idBoundaries;
 
-    modifier validOption(uint8 _optionId) {
-        require(_optionId < 5, "CardFactory: Invalid Option ID!");
+    modifier validOption(uint8 optionId) {
+        require(optionId < 5, "CardFactory: Invalid Option ID!");
         _;
     }
 
     /// @dev Caller gets the option minter's rights
-    constructor(Card _card) {
-        card = _card;
+    constructor(Card card_) {
+        card = card_;
         isOptionMinter[msg.sender] = true;
     }
 
@@ -61,21 +61,21 @@ contract CardFactory is Ownable, IOptionMintable {
     }
 
     /**
-     * @notice Gives the '_minter' address a right to call factory 'mint' function (that calls card 'mint' function)
+     * @notice Gives the 'minter' address a right to call factory 'mint' function (that calls card 'mint' function)
      * @notice Usually you have to call this function for CardRandomMinter instance
-     * @param _minter The address that gets the rights to mint cards
-     * @param _status If 'true' - allows to mint cards, if 'false - forbids to do that
+     * @param minter The address that gets the rights to mint cards
+     * @param status If 'true' - allows to mint cards, if 'false - forbids to do that
      */
-    function setMinterRole(address _minter, bool _status) external onlyOwner {
-        isOptionMinter[_minter] = _status;
+    function setMinterRole(address minter, bool status) external onlyOwner {
+        isOptionMinter[minter] = status;
     }
 
     /**
      * @notice Sets token for factory to mint
-     * @param _card Address of the deployed token
+     * @param card_ Address of the deployed token
      */
-    function setMintableToken(Card _card) external onlyOwner {
-        card = _card;
+    function setMintableToken(Card card_) external onlyOwner {
+        card = card_;
     }
     
     /**

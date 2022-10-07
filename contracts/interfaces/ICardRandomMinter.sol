@@ -47,17 +47,17 @@ interface ICardRandomMinter {
 
     /**
      * @notice Mints a set of random items (cards) for free
-     * @param _numCards Number of cards to be minted
-     * @param _to Receiver of minted cards
+     * @param numCards Number of cards to be minted
+     * @param to Receiver of minted cards
      * @param desc Description used in emitted event
      */
-    function mintRandomFree(uint8 _numCards, address _to, string memory desc) external;
+    function mintRandomFree(uint8 numCards, address to, string memory desc) external;
 
     /**
      * @notice Mints a set of random items (cards) for provided funds
-     * @param _numCards Number of cards to be minted
-     * @param _tokenToPay Address of the token that will be payed to mint a card
+     * @param numCards Number of cards to be minted
+     * @param tokenToPay Address of the token that will be payed to mint a card
      */            
-    function mintRandom(uint8 _numCards, address _tokenToPay) external payable;
+    function mintRandom(uint8 numCards, address tokenToPay) external payable;
 
 }
