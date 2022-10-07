@@ -212,7 +212,7 @@ contract CardRandomMinter is Ownable, ICardRandomMinter {
         for (uint8 i = 0; i < numCards; i++) {
             uint8 randomOption = _getRandomSingleOption(_currentSeed);
             uint8[4] memory _otherOptions = _getOtherOptions(randomOption);
-            if (factory.mint(randomOption, to )) {
+            if (factory.mint(randomOption, to)) {
                 minted++;
             } else {
                 for (uint256 j = 0; j < 4; j++) {
@@ -321,7 +321,19 @@ contract CardRandomMinter is Ownable, ICardRandomMinter {
 
     /// @notice Transfers all funds to the owner
     function getRevenue() external onlyOwner {
-        payable(owner()).transfer(address(this).balance);
+        for (uint256 i = 0; i < _supportedTokens.length; i++) {
+            address token = _supportedTokens[i];
+            if (token == address(0)) {
+                // Transfer all native tokens
+                payable(owner()).transfer(address(this).balance);     
+            } else {   
+                uint256 tokenBalance = IERC20(token).balanceOf(address(this));
+                if (tokenBalance > 0) {
+                    // Transfer ERC20 tokens
+                    IERC20(token).transfer(msg.sender, tokenBalance);
+                }
+            }
+        }
     }
 
 
