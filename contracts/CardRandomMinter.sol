@@ -2,13 +2,14 @@
 pragma solidity ^0.8.9;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 import "./interfaces/IOptionMintable.sol";
-import "./interfaces/IRandomMinter.sol";
+import "./interfaces/ICardRandomMinter.sol";
 
 
 /// @title Minter of random cards deck
-contract CardRandomMinter is Ownable, IRandomMinter {
+contract CardRandomMinter is Ownable, ICardRandomMinter {
     /// @dev Event emitted when a card is minted
     event Minted(uint8 _amount, address indexed _to, string desc);
 
@@ -23,8 +24,10 @@ contract CardRandomMinter is Ownable, IRandomMinter {
     uint8 public constant RARE_OPTION = 4;
 
 
-    /// @dev The list of supported tokens to pay for mint of a card
-    mapping(address => bool) internal _supportedTokens;
+    /// @dev The list of supported tokens to iterate over
+    address[] internal _supportedTokens;
+    /// @dev The map of supported tokens to save gas
+    mapping(address => bool) _supportedTokensMap;
     /// @dev The list of mint price in each of supported tokens
     mapping(address => uint256) internal _pricesInTokens;
 
@@ -45,36 +48,25 @@ contract CardRandomMinter is Ownable, IRandomMinter {
         allowedItemsPerRandomMint[5] = true;
         // These addresses must be supported by default
         // TODO move it to JSON file
+        // TODO zero address (native) is not a must have, it can be either supported or not
+        // native
+        _supportedTokens.push(address(0));
+        _supportedTokensMap[address(0)] = true;
         // ETH
-        _supportedTokens[0x1249C65AfB11D179FFB3CE7D4eEDd1D9b98AD006] = true;
+        _supportedTokens.push(0x1249C65AfB11D179FFB3CE7D4eEDd1D9b98AD006);
+        _supportedTokensMap[0x1249C65AfB11D179FFB3CE7D4eEDd1D9b98AD006] = true;
         // BNB
-        _supportedTokens[0x185a4091027E2dB459a2433F85f894dC3013aeB5] = true;
+        _supportedTokens.push(0x185a4091027E2dB459a2433F85f894dC3013aeB5);
+        _supportedTokensMap[0x185a4091027E2dB459a2433F85f894dC3013aeB5] = true;
         // TRX
-        _supportedTokens[0xEdf53026aeA60f8F75FcA25f8830b7e2d6200662] = true;
+        _supportedTokens.push(0xEdf53026aeA60f8F75FcA25f8830b7e2d6200662);
+        _supportedTokensMap[0x185a4091027E2dB459a2433F85f894dC3013aeB5] = true;
         // USDT (Ethereum)
-        _supportedTokens[0xE887512ab8BC60BcC9224e1c3b5Be68E26048B8B] = true;
+        _supportedTokens.push(0xE887512ab8BC60BcC9224e1c3b5Be68E26048B8B);
+        _supportedTokensMap[0xE887512ab8BC60BcC9224e1c3b5Be68E26048B8B] = true;
         // USDC (Ethereum)
-        _supportedTokens[0xAE17940943BA9440540940DB0F1877f101D39e8b] = true;
-    }
-
-    /**
-     * @notice Adds a supported token to pay for mint in
-     * @param tokenAddress The address of the token to add
-     */
-    function addSupportedToken(address tokenAddress) public onlyOwner {
-        // It shouldn't be added yet. Cleaner usage
-        require(!_supportedTokens[tokenAddress], "CardRandomMinter: token has already been added!");
-        _supportedTokens[tokenAddress] = true;
-    }
-
-    /**
-     * @notice Removes a supported token to pay for mint in
-     * @param tokenAddress The address of the token to remove
-     */
-    function removeSupportedToken(address tokenAddress) public onlyOwner {
-        // It shouldn't be removed yet. Cleaner usage
-        require(_supportedTokens[tokenAddress], "CardRandomMinter: trying to remove non-existent token!");
-        _supportedTokens[tokenAddress] = false;
+        _supportedTokens.push(0xAE17940943BA9440540940DB0F1877f101D39e8b);
+        _supportedTokensMap[0xAE17940943BA9440540940DB0F1877f101D39e8b] = true;
     }
 
     /** 
@@ -83,8 +75,37 @@ contract CardRandomMinter is Ownable, IRandomMinter {
      * @return True if token is supported. False - if token is not supported.
      */
     function isSupported(address tokenAddress) public view returns(bool) {
-        return _supportedTokens[tokenAddress];
+        return _supportedTokensMap[tokenAddress];
     }
+
+    /**
+     * @notice Adds a supported token to pay for mint in
+     * @param tokenAddress The address of the token to add
+     */
+    function addSupportedToken(address tokenAddress) public onlyOwner {
+        // It shouldn't be added yet. Cleaner usage
+        require(!isSupported(tokenAddress), "CardRandomMinter: token has already been added!");
+        _supportedTokens.push(tokenAddress);
+        _supportedTokensMap[tokenAddress] = true;
+    }
+
+    /**
+     * @notice Removes a supported token to pay for mint in
+     * @param tokenAddress The address of the token to remove
+     */
+    function removeSupportedToken(address tokenAddress) public onlyOwner {
+        // It shouldn't be removed yet. Cleaner usage
+        require(isSupported(tokenAddress), "CardRandomMinter: trying to remove non-existent token!");
+        _supportedTokensMap[tokenAddress] = false;
+        // There should not be too many chains, so its ok to iterate through the array
+        for (uint256 i = 0; i < _supportedTokens.length; i++) {
+            if (_supportedTokens[i] == tokenAddress) {
+                delete _supportedTokens[i];
+            }
+        }
+
+    }
+
 
     /**
      * @notice Returns the number of supported tokens
@@ -98,18 +119,21 @@ contract CardRandomMinter is Ownable, IRandomMinter {
      * @notice Sets the mint price for each supported token
      * @param tokenAddress The address of the token to set the price in
      * @param priceInTokens The price in tokens to set
-     * TODO demicals here???
+     *        NOTE: In UI the `priceInTokens` value is divided in `decimals` (10^18 im most cases)
+     *        For example, to set the price of 0.5 BTTC (native token) per token, you have to set `priceInTokens` to 0.5 * 10^18 (in wei)
+     *        To set the price of 0.5 USDT per token, you have to set `priceInTokens` to 0.5 * 10^18 as well
+     * TODO not sure about ERC20 here. Can we spend a half of ERC20???
      */
     function setMintPrice(address tokenAddress, uint256 priceInTokens) public onlyOwner {
-        require(_supportedTokens[tokenAddress], "CardRandomMinter: token is not supported!")
-        require(priceInTokens > 0, )
+        require(isSupported(tokenAddress), "CardRandomMinter: token is not supported!");
+        require(priceInTokens > 0, "CardRandomMinter: price can not be zero!");
         _pricesInTokens[tokenAddress] = priceInTokens;
     }
 
     /**
      * @notice Gets the card mint price in provided tokens
      * @param tokenAddress The address of the token to check the card mint price in
-     * TODO demicals here???
+     * @return A card mint price. Should be divided by `demicals` (18 in most cases) for UI
      */
     function getMintPrice(address tokenAddress) public view returns(uint256) {  
         return _pricesInTokens[tokenAddress];
@@ -171,21 +195,21 @@ contract CardRandomMinter is Ownable, IRandomMinter {
 
     /**
      * @notice Mints a set of random items (cards)
-     * @param _itemsPerRandomMint Number of cards to be minted
+     * @param _numCards Number of cards to be minted
      * @param _to Receiver of minted cards
      * @param desc Description used in emitted event
      */
     function _mintRandom(
-        uint8 _itemsPerRandomMint,
+        uint8 _numCards,
         address _to,
         string memory desc
     ) internal {
         require(
-            allowedItemsPerRandomMint[_itemsPerRandomMint],
+            allowedItemsPerRandomMint[_numCards],
             "CardRandomMinter: Amount of items to mint is too large. Not allowed!"
         );
         uint8 minted = 0;
-        for (uint8 i = 0; i < _itemsPerRandomMint; i++) {
+        for (uint8 i = 0; i < _numCards; i++) {
             uint8 randomOption = _getRandomSingleOption(_currentSeed);
             uint8[4] memory _otherOptions = _getOtherOptions(randomOption);
             if (factory.mint(randomOption, _to)) {
@@ -204,29 +228,42 @@ contract CardRandomMinter is Ownable, IRandomMinter {
 
     /**
      * @notice Mints a set of random items (cards) for free
-     * @param _itemsPerRandomMint Number of cards to be minted
+     * @param _numCards Number of cards to be minted
      * @param _to Receiver of minted cards
      * @param desc Description used in emitted event
      */
     function mintRandomFree(
-        uint8 _itemsPerRandomMint,
+        uint8 _numCards,
         address _to,
         string memory desc
     ) external {
         require(isMinter[msg.sender], "CardRandomMinter: Caller Is Not a Minter!");
-        _mintRandom(_itemsPerRandomMint, _to, desc);
+        _mintRandom(_numCards, _to, desc);
     }
 
     /**
      * @notice Mints a set of random items (cards) for provided funds
-     * @param _itemsPerRandomMint Number of cards to be minted
-     */
-    function mintRandom(uint8 _itemsPerRandomMint) external payable {
-        require(
-            msg.value >= price * uint256(_itemsPerRandomMint),
-            "notEnoughAmountSent"
-        );
-        _mintRandom(_itemsPerRandomMint, msg.sender, "");
+     * @param _numCards Number of cards to be minted
+     * @param _tokenToPay Address of the token that will be payed to mint a card
+     *                    NOTE: Zero address for native tokens
+     */            
+    function mintRandom(uint8 _numCards, address _tokenToPay) external payable {
+        require(_numCards > 0, "CardRandomMinter: can not mint zero cards!");
+        require(isSupported(_tokenToPay), "CardRandomMinter: token is not supported!");
+        if (_tokenToPay == address(0)) {
+            // If user wishes to pay in native tokens, he should send them with the transaction
+            require( 
+                msg.value >= _pricesInTokens[_tokenToPay] * uint256(_numCards), 
+                "CardRandomMinter: not enough native tokens were provided to pay for mint!"
+            );
+        } else {
+            // If user wishes to pay in ERC20 tokens he first needs to call this token's `approve` method to 
+            // allow `CardRandomMinter` to transfer his tokens
+            IERC20(_tokenToPay).transferFrom(msg.sender, address(this), _pricesInTokens[_tokenToPay]);
+
+        }
+        _mintRandom(_numCards, msg.sender, "");
+
     }
 
     /**
