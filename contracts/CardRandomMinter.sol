@@ -84,7 +84,7 @@ contract CardRandomMinter is Ownable, ICardRandomMinter {
      */
     function addSupportedToken(address tokenAddress) public onlyOwner {
         // It shouldn't be added yet. Cleaner usage
-        require(!isSupported(tokenAddress), "CardRandomMinter: token has already been added!");
+        require(!isSupported(tokenAddress), "CardRandomMinter: Token has already been added!");
         _supportedTokens.push(tokenAddress);
         _supportedTokensMap[tokenAddress] = true;
     }
@@ -95,7 +95,7 @@ contract CardRandomMinter is Ownable, ICardRandomMinter {
      */
     function removeSupportedToken(address tokenAddress) public onlyOwner {
         // It shouldn't be removed yet. Cleaner usage
-        require(isSupported(tokenAddress), "CardRandomMinter: trying to remove non-existent token!");
+        require(isSupported(tokenAddress), "CardRandomMinter: Trying to remove non-existent token!");
         _supportedTokensMap[tokenAddress] = false;
         // There should not be too many chains, so its ok to iterate through the array
         for (uint256 i = 0; i < _supportedTokens.length; i++) {
@@ -125,8 +125,8 @@ contract CardRandomMinter is Ownable, ICardRandomMinter {
      * TODO not sure about ERC20 here. Can we spend a half of ERC20???
      */
     function setMintPrice(address tokenAddress, uint256 priceInTokens) public onlyOwner {
-        require(isSupported(tokenAddress), "CardRandomMinter: token is not supported!");
-        require(priceInTokens > 0, "CardRandomMinter: price can not be zero!");
+        require(isSupported(tokenAddress), "CardRandomMinter: Token is not supported!");
+        require(priceInTokens > 0, "CardRandomMinter: Price can not be zero!");
         pricesInTokens[tokenAddress] = priceInTokens;
     }
 
@@ -248,13 +248,13 @@ contract CardRandomMinter is Ownable, ICardRandomMinter {
      *                    NOTE: Zero address for native tokens
      */            
     function mintRandom(uint8 numCards, address tokenToPay) external payable {
-        require(numCards > 0, "CardRandomMinter: can not mint zero cards!");
-        require(isSupported(tokenToPay), "CardRandomMinter: token is not supported!");
+        require(numCards > 0, "CardRandomMinter: Can not mint zero cards!");
+        require(isSupported(tokenToPay), "CardRandomMinter: Token is not supported!");
         if (tokenToPay == address(0)) {
             // If user wishes to pay in native tokens, he should send them with the transaction
             require( 
                 msg.value >= pricesInTokens[tokenToPay] * uint256(numCards), 
-                "CardRandomMinter: not enough native tokens were provided to pay for mint!"
+                "CardRandomMinter: Not enough native tokens were provided to pay for mint!"
             );
         } else {
             // If user wishes to pay in ERC20 tokens he first needs to call this token's `approve` method to 
