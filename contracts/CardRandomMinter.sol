@@ -141,7 +141,7 @@ contract CardRandomMinter is Ownable, ICardRandomMinter {
         external
         onlyOwner
     {
-        require(amount > 0, "CardRandomMinter: can not mint zero cards!");
+        require(amount > 0, "CardRandomMinter: Can not mint zero cards!");
         allowedItemsPerRandomMint[amount] = status;
     }
 
@@ -150,7 +150,7 @@ contract CardRandomMinter is Ownable, ICardRandomMinter {
      * @param newFactoryAddress An address of a new factory
      */
     function setFactory(address newFactoryAddress) external onlyOwner {
-        require(newFactoryAddress != address(0), "CardRandomMinter: factory can not have a zero address!");
+        require(newFactoryAddress != address(0), "CardRandomMinter: Factory can not have a zero address!");
         factory = IOptionMintable(newFactoryAddress);
     }
 
