@@ -74,7 +74,7 @@ async function main() {
 
   console.log(`[${contractName}]: Deployment Finished!`);
   OUTPUT_DEPLOY.networks[network.name][contractName].address = cardFactory.address;
-  
+
   // Contract #3: Card Random Minter
   contractName = "CardRandomMinter";
   console.log(`[${contractName}]: Start of Deployment...`);
@@ -86,8 +86,8 @@ async function main() {
   // Read supported addresses from the JSON file and add them to the minter
   for (let [token, info] of Object.entries(SUPPORTED_TOKENS)) {
     let [address, price] = Object.values(info);
-      console.log(`Adding ${address} and setting its price to ${price} ${token}`);
       await cardRandomMinter.addSupportedToken(address);
+      await delay(5000);
       await cardRandomMinter.setMintPrice(address, parseUnits(price.toString(), 18));
   }
   console.log(`[${contractName}]: Deployment Finished!`);
@@ -116,9 +116,6 @@ async function main() {
   OUTPUT_DEPLOY.networks[network.name][contractName].feeReceiverAddress = nftMarketplaceFeeReceiver.address;
   OUTPUT_DEPLOY.networks[network.name][contractName].feeReceiverPrivateKey = nftMarketplaceFeeReceiver.privateKey;
 
-  
-  
-    
 
   console.log(`See Results in "${__dirname + '/deployOutput.json'}" File`);
 
