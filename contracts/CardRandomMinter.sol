@@ -48,6 +48,9 @@ contract CardRandomMinter is Ownable, ICardRandomMinter {
         allowedItemsPerRandomMint[5] = true;
     }
 
+    /// @dev Allows the contracts to receive funds from other addresses
+    receive() external payable {}
+
     /** 
      * @notice Checks if provided token is supported
      * @param tokenAddress The address of the token to check
@@ -74,7 +77,7 @@ contract CardRandomMinter is Ownable, ICardRandomMinter {
      */
     function removeSupportedToken(address tokenAddress) public onlyOwner {
         // It shouldn't be removed yet. Cleaner usage
-        require(isSupported(tokenAddress), "CardRandomMinter: Trying to remove non-existent token!");
+        require(isSupported(tokenAddress), "CardRandomMinter: Token is not supported!");
         _supportedTokensMap[tokenAddress] = false;
         // There should not be too many chains, so its ok to iterate through the array
         for (uint256 i = 0; i < _supportedTokens.length; i++) {
@@ -115,7 +118,59 @@ contract CardRandomMinter is Ownable, ICardRandomMinter {
      * @return A card mint price. Should be divided by `demicals` (18 in most cases) for UI
      */
     function getMintPrice(address tokenAddress) public view returns(uint256) {  
+        require(isSupported(tokenAddress), "CardRandomMinter: Token is not supported!");
         return pricesInTokens[tokenAddress];
+    }
+
+
+   /**
+     * @notice Gives rights to call card mint function
+     * @param who Address to be given rights to mint cards
+     * @param status 'True' gives the address the right to mint cards, 'false' - forbids to mint cards
+     */
+    function setMinterRole(address who, bool status) external onlyOwner {
+        isMinter[who] = status;
+    }
+
+    /**
+     * @notice Sets the amount of items that can be randomly minted
+     * @param amount The amount of items that can be randomly minted
+     * @param status 'True' allows to mint that amount of cards, 'false' - forbids to mint that amount of cards
+     */
+    function setAllowedAmountOfItemsPerRandomMint(uint8 amount, bool status)
+        external
+        onlyOwner
+    {
+        require(amount > 0, "CardRandomMinter: can not mint zero cards!");
+        allowedItemsPerRandomMint[amount] = status;
+    }
+
+    /**
+     * @notice Changes the factory that mints cards
+     * @param newFactoryAddress An address of a new factory
+     */
+    function setFactory(address newFactoryAddress) external onlyOwner {
+        require(newFactoryAddress != address(0), "CardRandomMinter: factory can not have a zero address!");
+        factory = IOptionMintable(newFactoryAddress);
+    }
+
+    /**
+     * @notice Changes the seed to change the source of randomness
+     * @param newSeed A new seed to be set
+     */
+    function setCurrentSeed(uint256 newSeed) external onlyOwner {
+        _currentSeed = newSeed;
+    }
+
+    /**
+     * @notice Sets probabilty of each class of cards to be randomly picked
+     * @param classProbs List of probabilities for all classes of cards
+     */
+    function setProbabilitiesForClasses(uint16[5] memory classProbs)
+        public
+        onlyOwner
+    {
+        _classProbs = classProbs;
     }
 
 
@@ -315,55 +370,4 @@ contract CardRandomMinter is Ownable, ICardRandomMinter {
         }
     }
 
-
-    /**
-     * @notice Gives rights to call card mint function
-     * @param who Address to be given rights to mint cards
-     * @param status 'True' gives the address the right to mint cards, 'false' - forbids to mint cards
-     */
-    function setMinterRole(address who, bool status) external onlyOwner {
-        isMinter[who] = status;
-    }
-
-    /**
-     * @notice Sets the amount of items that can be randomly minted
-     * @param amount The amount of items that can be randomly minted
-     * @param status 'True' allows to mint that amount of cards, 'false' - forbids to mint that amount of cards
-     */
-    function setAllowedAmountOfItemsPerRandomMint(uint8 amount, bool status)
-        external
-        onlyOwner
-    {
-        allowedItemsPerRandomMint[amount] = status;
-    }
-
-    /**
-     * @notice Changes the factory that mints cards
-     * @param newFactoryAddress An address of a new factory
-     */
-    function setFactory(address newFactoryAddress) external onlyOwner {
-        factory = IOptionMintable(newFactoryAddress);
-    }
-
-    /**
-     * @notice Changes the seed to change the source of randomness
-     * @param newSeed A new seed to be set
-     */
-    function setCurrentSeed(uint256 newSeed) external onlyOwner {
-        _currentSeed = newSeed;
-    }
-
-    /**
-     * @notice Sets probabilty of each class of cards to be randomly picked
-     * @param classProbs List of probabilities for all classes of cards
-     */
-    function setProbabilitiesForClasses(uint16[5] memory classProbs)
-        public
-        onlyOwner
-    {
-        _classProbs = classProbs;
-    }
-
-    /// @dev Allows the contracts to receive funds from other addresses
-    receive() external payable {}
 }
