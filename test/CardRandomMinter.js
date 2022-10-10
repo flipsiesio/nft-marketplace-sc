@@ -179,7 +179,7 @@ describe("CardRandomMinter", function () {
       await minter.setProbabilitiesForClasses([0, 0, 1, 5000, 777]);
     });
 
-    it("Should fail set new mint probabilities if caller is not the owner", async () => {
+    it("Should fail to set new mint probabilities if caller is not the owner", async () => {
       await expect(minter.connect(clientAcc1).setProbabilitiesForClasses([0, 0, 1, 5000, 777]))
       .to.be.revertedWith("Ownable: caller is not the owner");
     });
@@ -187,26 +187,20 @@ describe("CardRandomMinter", function () {
   });
 
 
+  describe("Mint Functions", () => {
 
-  // it("Should give minter rights to admin and mint 3 tokens to another account", async () => {
-  //   await minter.connect(accounts[0]).setMinterRole(accounts[0].address, true);
-  //   await minter.connect(accounts[0]).mintRandomFree(3, accounts[1].address, "simple_description");
-  //   expect(await cardNFT.balanceOf(accounts[1].address)).to.equal(3);
-  // });
+    it("Should mint cards for free", async () => {
+      await minter.setAllowedAmountOfItemsPerRandomMint(10, true);
+      await minter.setMinterRole(ownerAcc.address, true);
+      await minter.mintRandomFree(5, clientAcc1.address, "");
+    });
 
-  // it("Should set mint price", async () => {
-  //   await minter.setPrice("1500");
-  //   expect(await minter.price()).to.equal(1500);
-  // });
+    it("Should fail to mint cards for free if caller is not a minter", async () => {
+      await minter.setAllowedAmountOfItemsPerRandomMint(10, true);
+      await expect(minter.mintRandomFree(5, clientAcc1.address, ""))
+      .to.be.revertedWith("CardRandomMinter: Caller Is Not a Minter!");
+    });
 
-  // it("Should sell tokens if enough funds was transfered", async () => {
-  //   await minter.connect(accounts[0]).setPrice(1500);
-  //   let result = await minter.connect(accounts[2]).mintRandom(3, { value: 4500 });
-  //   expect(await cardNFT.balanceOf(accounts[2].address)).to.equal(3);
-  // });
+  });
 
-  // it("Should not sell tokens if not enough funds were transfered", async () => {
-  //   await minter.connect(accounts[0]).setPrice(1500);
-  //   await expect(minter.connect(accounts[3]).mintRandom(3, { value: 4499 })).to.be.reverted;
-  // });
 });
