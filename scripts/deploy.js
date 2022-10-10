@@ -3,6 +3,7 @@ const { ethers, network } = require("hardhat");
 const fs = require("fs");
 const path = require("path");
 const delay = require("delay");
+const { parseUnits, parseEther } = ethers.utils;
 
 // JSON file to keep information about previous deployments
 const OUTPUT_DEPLOY = require("./deployOutput.json");
@@ -56,7 +57,7 @@ async function main() {
   OUTPUT_DEPLOY.networks[network.name][contractName].address = card.address;
 
 
-  // Contract #2: CardFactory
+  // Contract #2: Card Factory
   contractName = "CardFactory";
   console.log(`[${contractName}]: Start of Deployment...`);
   _contractProto = await ethers.getContractFactory(contractName);
@@ -74,23 +75,28 @@ async function main() {
   console.log(`[${contractName}]: Deployment Finished!`);
   OUTPUT_DEPLOY.networks[network.name][contractName].address = cardFactory.address;
   
-  // Contract #3: cardRandomMinter
+  // Contract #3: Card Random Minter
   contractName = "CardRandomMinter";
   console.log(`[${contractName}]: Start of Deployment...`);
   _contractProto = await ethers.getContractFactory(contractName);
   // Provide the game controller with factory address 
   contractDeployTx = await _contractProto.deploy(cardFactory.address);
   cardRandomMinter = await contractDeployTx.deployed();
-  // TODO add supported tokens and prices in them here
   await cardFactory.setMinterRole(cardRandomMinter.address, true);
+  // Read supported addresses from the JSON file and add them to the minter
+  for (let [token, info] of Object.entries(SUPPORTED_TOKENS)) {
+    let [address, price] = Object.values(info);
+      console.log(`Adding ${address} and setting its price to ${price} ${token}`);
+      await cardRandomMinter.addSupportedToken(address);
+      await cardRandomMinter.setMintPrice(address, parseUnits(price.toString(), 18));
+  }
   console.log(`[${contractName}]: Deployment Finished!`);
   OUTPUT_DEPLOY.networks[network.name][contractName].address = cardRandomMinter.address;
 
-  // Contract #4: NFTSale
+  // Contract #4: NFT Sale
   contractName = "NFTSale";
   console.log(`[${contractName}]: Start of Deployment...`);
   _contractProto = await ethers.getContractFactory(contractName);
-
   contractDeployTx = await _contractProto.deploy(card.address, nftSaleFeeReceiver.address, oneDay, tenDays, onePercent);
   nftSale = await contractDeployTx.deployed();
   console.log(`[${contractName}]: Deployment Finished!`);
@@ -98,7 +104,7 @@ async function main() {
   OUTPUT_DEPLOY.networks[network.name][contractName].feeReceiverAddress = nftSaleFeeReceiver.address;
   OUTPUT_DEPLOY.networks[network.name][contractName].feeReceiverPrivateKey = nftSaleFeeReceiver.privateKey;
 
-  // Contract #5: NFTMarketplace
+  // Contract #5: NFT Marketplace
   contractName = "NFTMarketplace";
   console.log(`[${contractName}]: Start of Deployment...`);
   _contractProto = await ethers.getContractFactory(contractName);
