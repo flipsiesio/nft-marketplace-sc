@@ -46,27 +46,6 @@ contract CardRandomMinter is Ownable, ICardRandomMinter {
         allowedItemsPerRandomMint[1] = true;
         allowedItemsPerRandomMint[3] = true;
         allowedItemsPerRandomMint[5] = true;
-        // These addresses must be supported by default
-        // TODO move it to JSON file
-        // TODO zero address (native) is not a must have, it can be either supported or not
-        // native
-        _supportedTokens.push(address(0));
-        _supportedTokensMap[address(0)] = true;
-        // ETH
-        _supportedTokens.push(0x1249C65AfB11D179FFB3CE7D4eEDd1D9b98AD006);
-        _supportedTokensMap[0x1249C65AfB11D179FFB3CE7D4eEDd1D9b98AD006] = true;
-        // BNB
-        _supportedTokens.push(0x185a4091027E2dB459a2433F85f894dC3013aeB5);
-        _supportedTokensMap[0x185a4091027E2dB459a2433F85f894dC3013aeB5] = true;
-        // TRX
-        _supportedTokens.push(0xEdf53026aeA60f8F75FcA25f8830b7e2d6200662);
-        _supportedTokensMap[0x185a4091027E2dB459a2433F85f894dC3013aeB5] = true;
-        // USDT (Ethereum)
-        _supportedTokens.push(0xE887512ab8BC60BcC9224e1c3b5Be68E26048B8B);
-        _supportedTokensMap[0xE887512ab8BC60BcC9224e1c3b5Be68E26048B8B] = true;
-        // USDC (Ethereum)
-        _supportedTokens.push(0xAE17940943BA9440540940DB0F1877f101D39e8b);
-        _supportedTokensMap[0xAE17940943BA9440540940DB0F1877f101D39e8b] = true;
     }
 
     /** 
@@ -229,7 +208,7 @@ contract CardRandomMinter is Ownable, ICardRandomMinter {
     /**
      * @notice Mints a set of random items (cards) for free
      * @param numCards Number of cards to be minted
-     * @param to  Receiver of minted cards
+     * @param to Receiver of minted cards
      * @param desc Description used in emitted event
      */
     function mintRandomFree(
@@ -238,7 +217,7 @@ contract CardRandomMinter is Ownable, ICardRandomMinter {
         string memory desc
     ) external {
         require(isMinter[msg.sender], "CardRandomMinter: Caller Is Not a Minter!");
-        _mintRandom(numCards, to , desc);
+        _mintRandom(numCards, to, desc);
     }
 
     /**
