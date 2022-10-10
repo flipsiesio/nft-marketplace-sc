@@ -27,7 +27,7 @@ contract CardRandomMinter is Ownable, ICardRandomMinter {
     /// @dev The list of supported tokens to iterate over
     address[] internal _supportedTokens;
     /// @dev The map of supported tokens to save gas
-    mapping(address => bool) _supportedTokensMap;
+    mapping(address => bool) internal _supportedTokensMap;
     /// @dev The list of mint price in each of supported tokens
     mapping(address => uint256) internal pricesInTokens;
 
