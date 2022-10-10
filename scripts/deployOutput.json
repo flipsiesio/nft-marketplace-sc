@@ -26,19 +26,20 @@
         "address": ""
       },
       "CardFactory": {
-        "address": "",
-        "oracleOperatorAddress": ""
+        "address": ""
       },
       "CardRandomMinter": {
         "address": ""
       },
       "NFTSale": {
         "address": "",
-        "feeReceiverAddress": ""
+        "feeReceiverAddress": "",
+        "feeReceiverPrivateKey": ""
       },
       "NFTMarketplace": {
         "address": "",
-        "feeReceiverAddress": ""
+        "feeReceiverAddress": "",
+        "feeReceiverPrivateKey": ""
       }
     }
   }
