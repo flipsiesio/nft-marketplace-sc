@@ -66,7 +66,7 @@ contract CardRandomMinter is Ownable, ICardRandomMinter {
      */
     function addSupportedToken(address tokenAddress) public onlyOwner {
         // It shouldn't be added yet. Cleaner usage
-        require(!isSupported(tokenAddress), "CardRandomMinter: Token has already been added!");
+        require(!isSupported(tokenAddress), "CardRandomMinter: token has already been added!");
         _supportedTokens.push(tokenAddress);
         _supportedTokensMap[tokenAddress] = true;
     }
@@ -77,7 +77,7 @@ contract CardRandomMinter is Ownable, ICardRandomMinter {
      */
     function removeSupportedToken(address tokenAddress) public onlyOwner {
         // It shouldn't be removed yet. Cleaner usage
-        require(isSupported(tokenAddress), "CardRandomMinter: Token is not supported!");
+        require(isSupported(tokenAddress), "CardRandomMinter: token is not supported!");
         _supportedTokensMap[tokenAddress] = false;
         // There should not be too many chains, so its ok to iterate through the array
         for (uint256 i = 0; i < _supportedTokens.length; i++) {
@@ -107,8 +107,8 @@ contract CardRandomMinter is Ownable, ICardRandomMinter {
      * TODO not sure about ERC20 here. Can we spend a half of ERC20???
      */
     function setMintPrice(address tokenAddress, uint256 priceInTokens) public onlyOwner {
-        require(isSupported(tokenAddress), "CardRandomMinter: Token is not supported!");
-        require(priceInTokens > 0, "CardRandomMinter: Price can not be zero!");
+        require(isSupported(tokenAddress), "CardRandomMinter: token is not supported!");
+        require(priceInTokens > 0, "CardRandomMinter: price can not be zero!");
         pricesInTokens[tokenAddress] = priceInTokens;
     }
 
@@ -118,7 +118,7 @@ contract CardRandomMinter is Ownable, ICardRandomMinter {
      * @return A card mint price. Should be divided by `demicals` (18 in most cases) for UI
      */
     function getMintPrice(address tokenAddress) public view returns(uint256) {  
-        require(isSupported(tokenAddress), "CardRandomMinter: Token is not supported!");
+        require(isSupported(tokenAddress), "CardRandomMinter: token is not supported!");
         return pricesInTokens[tokenAddress];
     }
 
@@ -141,7 +141,7 @@ contract CardRandomMinter is Ownable, ICardRandomMinter {
         external
         onlyOwner
     {
-        require(amount > 0, "CardRandomMinter: Can not mint zero cards!");
+        require(amount > 0, "CardRandomMinter: can not mint zero cards!");
         allowedItemsPerRandomMint[amount] = status;
     }
 
@@ -150,7 +150,7 @@ contract CardRandomMinter is Ownable, ICardRandomMinter {
      * @param newFactoryAddress An address of a new factory
      */
     function setFactory(address newFactoryAddress) external onlyOwner {
-        require(newFactoryAddress != address(0), "CardRandomMinter: Factory can not have a zero address!");
+        require(newFactoryAddress != address(0), "CardRandomMinter: factory can not have a zero address!");
         factory = IOptionMintable(newFactoryAddress);
     }
 
@@ -224,7 +224,7 @@ contract CardRandomMinter is Ownable, ICardRandomMinter {
                 COLORIZED_OPTION
             ];
         }
-        revert("CardRandomMinter: Invalid Option That Was Picked Randomly!");
+        revert("CardRandomMinter: invalid option that was picked randomly!");
     }
 
     /**
@@ -240,7 +240,7 @@ contract CardRandomMinter is Ownable, ICardRandomMinter {
     ) internal {
         require(
             allowedItemsPerRandomMint[numCards],
-            "CardRandomMinter: Amount of items to mint is too large. Not allowed!"
+            "CardRandomMinter: amount of items to mint is too large. Not allowed!"
         );
         uint8 minted = 0;
         for (uint8 i = 0; i < numCards; i++) {
@@ -271,7 +271,7 @@ contract CardRandomMinter is Ownable, ICardRandomMinter {
         address to ,
         string memory desc
     ) external {
-        require(isMinter[msg.sender], "CardRandomMinter: Caller Is Not a Minter!");
+        require(isMinter[msg.sender], "CardRandomMinter: caller is not a minter!");
         _mintRandom(numCards, to, desc);
     }
 
@@ -282,13 +282,13 @@ contract CardRandomMinter is Ownable, ICardRandomMinter {
      *                    NOTE: Zero address for native tokens
      */            
     function mintRandom(uint8 numCards, address tokenToPay) external payable {
-        require(numCards > 0, "CardRandomMinter: Can not mint zero cards!");
-        require(isSupported(tokenToPay), "CardRandomMinter: Token is not supported!");
+        require(numCards > 0, "CardRandomMinter: can not mint zero cards!");
+        require(isSupported(tokenToPay), "CardRandomMinter: token is not supported!");
         if (tokenToPay == address(0)) {
             // If user wishes to pay in native tokens, he should send them with the transaction
             require( 
                 msg.value >= pricesInTokens[tokenToPay] * uint256(numCards), 
-                "CardRandomMinter: Not enough native tokens were provided to pay for mint!"
+                "CardRandomMinter: not enough native tokens were provided to pay for mint!"
             );
         } else {
             // If user wishes to pay in ERC20 tokens he first needs to call this token's `approve` method to 
