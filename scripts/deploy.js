@@ -88,7 +88,8 @@ async function main() {
     let [address, price] = Object.values(info);
       await cardRandomMinter.addSupportedToken(address);
       await delay(5000);
-      await cardRandomMinter.setMintPrice(address, parseUnits(price.toString(), 18));
+      // `price` in JSON file is withoud `decimals`, so we have to multiply it by `decimals` using `parseEther`
+      await cardRandomMinter.setMintPrice(address, parseEther(price.toString()));
   }
   console.log(`[${contractName}]: Deployment Finished!`);
   OUTPUT_DEPLOY.networks[network.name][contractName].address = cardRandomMinter.address;
