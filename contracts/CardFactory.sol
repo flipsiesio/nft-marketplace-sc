@@ -56,7 +56,6 @@ contract CardFactory is Ownable, IOptionMintable {
         uint256 endId
     ) external onlyOwner validOption(optionId) {
         /// @dev Boundary collisions must be checked offchain!
-        require(startId < endId, "CardFactory: Invalid Boundaries!");
         _idBoundaries[optionId] = Boundaries({start: startId, end: endId});
     }
 
