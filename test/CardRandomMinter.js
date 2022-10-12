@@ -35,13 +35,6 @@ describe("CardRandomMinter", function () {
     let minterTx = await ethers.getContractFactory("CardRandomMinter");
     minter = await minterTx.deploy(factory.address);
     await minter.deployed();
-    // Read supported addresses from the JSON file and add them to the minter
-    for (let [token, info] of Object.entries(SUPPORTED_TOKENS)) {
-      let [address, price] = Object.values(info);
-        await minter.addSupportedToken(address);
-        // `price` in JSON file is withoud `decimals`, so we have to multiply it by `decimals` using `parseEther`
-        await minter.setMintPrice(address, parseEther(price.toString()));
-    }
 
     // Give Minter's rights to the factory
     await cardNFT.connect(ownerAcc).setMinterRole(factory.address, true);
@@ -55,7 +48,12 @@ describe("CardRandomMinter", function () {
     await factory.setIdBoundaryForOption(3, 45, 60);
     await factory.setIdBoundaryForOption(4, 60, 75);
 
-    // Deploy a new ERC20 to be used in tests
+    // Make minter support native tokens
+    await minter.addSupportedToken(zeroAddress);
+    await minter.setMintPrice(zeroAddress, parseEther("0.1"));
+
+    // Deploy a new ERC20 to be used in tests for payment for mint
+    // NOTE In testnet and mainnet all tokens from JSON file should be used instead of this single mock.
     let newToken = await ethers.getContractFactory("Rummy");
     token = await newToken.deploy();
     await token.deployed();
@@ -77,13 +75,12 @@ describe("CardRandomMinter", function () {
   describe("Getters and Setters", () => {
 
     it("Should have a correct amount of supported tokens", async () => {
-      let len = Object.entries(SUPPORTED_TOKENS).length;
-      // +1 because of a new ERC20 supported token in `beforeEach` hook
-      expect(await minter.getSupportedLength()).to.equal(len + 1);
+      // 2 tokens: custom ERC20 and native
+      expect(await minter.getSupportedLength()).to.equal(2);
     });
 
     it("Should support existing address", async () => {
-      expect(await minter.isSupported(zeroAddress)).to.equal(true);
+      expect(await minter.isSupported(token.address)).to.equal(true);
     });
 
     it("Should not support non-existent address", async () => {
@@ -228,6 +225,7 @@ describe("CardRandomMinter", function () {
         .to.be.revertedWith("CardRandomMinter: caller is not a minter!");
       });
 
+
     });
 
     describe("Payed Mint", () => {
@@ -247,7 +245,7 @@ describe("CardRandomMinter", function () {
           await minter.setAllowedAmountOfItemsPerRandomMint(10, true);
           await minter.setMinterRole(ownerAcc.address, true);
           // Default price is 0.1
-          await expect(minter.mintRandom(5, zeroAddress, {value: parseEther("0.000001")}))
+          await expect(minter.mintRandom(5, zeroAddress, {value: parseEther("0.000000000001")}))
           .to.be.revertedWith("CardRandomMinter: not enough native tokens were provided to pay for mint!");
         });
 
@@ -263,6 +261,15 @@ describe("CardRandomMinter", function () {
           await minter.setMinterRole(ownerAcc.address, true);
           await expect(minter.mintRandom(5, randomAddress, {value: parseEther("1")}))
           .to.be.revertedWith("CardRandomMinter: token is not supported!");
+        });
+
+        it("Should fail to mint cards for native tokens if amount was not allowed", async () => {
+          // Allow 10 cards
+          await minter.setAllowedAmountOfItemsPerRandomMint(10, true);
+          await minter.setMinterRole(ownerAcc.address, true);
+          // Try to mint 8 cards
+          await expect(minter.mintRandom(8, zeroAddress, {value: parseEther("1")}))
+          .to.be.revertedWith("CardRandomMinter: this exact amount of tokens is not allowed to be minted!");
         });
 
       });
@@ -285,18 +292,30 @@ describe("CardRandomMinter", function () {
           .to.be.revertedWith("CardRandomMinter: not enough ERC20 tokens to pay for the mint!");
         });
 
-        it("Should fail to mint cards for native tokens if card number is zero", async () => {
+        it("Should fail to mint cards for ERC20 tokens if card number is zero", async () => {
           await minter.setAllowedAmountOfItemsPerRandomMint(10, true);
           await minter.setMinterRole(ownerAcc.address, true);
           await expect(minter.mintRandom(0, token.address))
           .to.be.revertedWith("CardRandomMinter: can not mint zero cards!");
         });
 
-        it("Should fail to mint cards for native tokens if token is not supported", async () => {
+        it("Should fail to mint cards for ERC20 tokens if token is not supported", async () => {
           await minter.setAllowedAmountOfItemsPerRandomMint(10, true);
           await minter.setMinterRole(ownerAcc.address, true);
           await expect(minter.mintRandom(5, randomAddress)) 
           .to.be.revertedWith("CardRandomMinter: token is not supported!");
+        });
+
+        it("Should fail to mint cards for ERC20 tokens if mint price was not set", async () => {
+          // Deploy a new token and add it to supported
+          // But do not set a mint price for it
+          let newToken = await ethers.getContractFactory("Rummy");
+          let dummy = await newToken.deploy();
+          await minter.addSupportedToken(dummy.address);
+          await minter.setAllowedAmountOfItemsPerRandomMint(10, true);
+          await minter.setMinterRole(ownerAcc.address, true);
+          await expect(minter.mintRandom(5, dummy.address)) 
+          .to.be.revertedWith("CardRandomMinter: mint price was not set for this token!");
         });
 
       });
@@ -305,6 +324,22 @@ describe("CardRandomMinter", function () {
   });
 
   describe("Get Revenue", () => {
+    
+    it("Should withdraw all native tokens revenue from the contract", async () => {
+      await minter.setAllowedAmountOfItemsPerRandomMint(15, true);
+      await minter.setMinterRole(ownerAcc.address, true);
+      // First mint some tokens to pay for the mint
+      // 2 native tokens go to the minter
+      await minter.mintRandom(15, zeroAddress, {value: parseEther("2")});
+      let startBalance = await provider.getBalance(ownerAcc.address);
+      // Now get the revenue
+      // 2 native tokens should go to the owner
+      await minter.connect(ownerAcc).getRevenue();
+      let endBalance = await provider.getBalance(ownerAcc.address);
+      // `lt` because some of tokens are spent for gas
+      expect(endBalance.sub(startBalance)).to.be.lt(parseEther("2"));
+
+    }); 
 
     it("Should withdraw all ERC20 tokens revenue from the contract", async () => {
       await minter.setAllowedAmountOfItemsPerRandomMint(15, true);
@@ -314,25 +349,18 @@ describe("CardRandomMinter", function () {
       await minter.connect(ownerAcc).mintRandom(15, token.address);
       let startBalance = await token.balanceOf(ownerAcc.address);
       // Now get the revenue
-      minter.connect(ownerAcc).getRevenue();
+      await minter.connect(ownerAcc).getRevenue();
       let endBalance = await token.balanceOf(ownerAcc.address);
       expect(endBalance.sub(startBalance)).to.equal(parseEther("1.5"));
     }); 
 
-    it("Should withdraw all native tokens revenue from the contract", async () => {
-      await minter.setAllowedAmountOfItemsPerRandomMint(15, true);
-      await minter.setMinterRole(ownerAcc.address, true);
-      // First mint some tokens to pay for the mint
-      // 15 * 0.1 = 1.5 ETH
-      await minter.mintRandom(15, zeroAddress, {value: parseEther("2")});
-      let startBalance = await provider.getBalance(ownerAcc.address);
-      // Now get the revenue
-      minter.connect(ownerAcc).getRevenue();
-      let endBalance = await provider.getBalance(ownerAcc.address);
-      expect(endBalance.sub(startBalance)).to.equal(parseEther("1.5"));
-
+    it("Should withdraw no revenue if no cards were minted", async () => {
+      let startBalance = await token.balanceOf(ownerAcc.address);
+      await minter.connect(ownerAcc).getRevenue();
+      let endBalance = await token.balanceOf(ownerAcc.address);
+      // Balance should stay the same
+      expect(endBalance).to.equal(startBalance);
     }); 
 
   });
-
 });
