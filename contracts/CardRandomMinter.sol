@@ -3,6 +3,7 @@ pragma solidity ^0.8.9;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
 import "./interfaces/IOptionMintable.sol";
 import "./interfaces/ICardRandomMinter.sol";
@@ -102,9 +103,9 @@ contract CardRandomMinter is Ownable, ICardRandomMinter {
      * @param tokenAddress The address of the token to set the price in
      * @param priceInTokens The price in tokens to set
      *        NOTE: In UI the `priceInTokens` value is divided in `decimals` (10^18 im most cases)
-     *        For example, to set the price of 0.5 BTTC (native token) per token, you have to set `priceInTokens` to 0.5 * 10^18 (in wei)
+     *        For example, if a user wants to set the price of 0.5 BTTC (native token) per token, then `priceInTokens` parameter 
+     *        should be eqaul to 0.5 * 10^18
      *        To set the price of 0.5 USDT per token, you have to set `priceInTokens` to 0.5 * 10^18 as well
-     * TODO not sure about ERC20 here. Can we spend a half of ERC20???
      */
     function setMintPrice(address tokenAddress, uint256 priceInTokens) public onlyOwner {
         require(isSupported(tokenAddress), "CardRandomMinter: token is not supported!");
@@ -183,7 +184,8 @@ contract CardRandomMinter is Ownable, ICardRandomMinter {
         internal
         pure
         returns (uint8[4] memory)
-    {
+    {   
+        // 0
         if (baseOption == COLORIZED_OPTION) {
             return [
                 CARDS_WITH_EGGS_OPTION,
@@ -192,6 +194,7 @@ contract CardRandomMinter is Ownable, ICardRandomMinter {
                 RARE_OPTION
             ];
         }
+        // 1
         if (baseOption == CARDS_WITH_EGGS_OPTION) {
             return [
                 COLORIZED_OPTION,
@@ -200,6 +203,7 @@ contract CardRandomMinter is Ownable, ICardRandomMinter {
                 RARE_OPTION
             ];
         }
+        // 2
         if (baseOption == CARDS_WITH_TEARS_OPTION) {
             return [
                 CARDS_WITH_EGGS_OPTION,
@@ -208,6 +212,7 @@ contract CardRandomMinter is Ownable, ICardRandomMinter {
                 RARE_OPTION
             ];
         }
+        // 3
         if (baseOption == JOKERS_OPTION) {
             return [
                 CARDS_WITH_EGGS_OPTION,
@@ -216,6 +221,7 @@ contract CardRandomMinter is Ownable, ICardRandomMinter {
                 RARE_OPTION
             ];
         }
+        // 4
         if (baseOption == RARE_OPTION) {
             return [
                 CARDS_WITH_EGGS_OPTION,
@@ -225,79 +231,6 @@ contract CardRandomMinter is Ownable, ICardRandomMinter {
             ];
         }
         revert("CardRandomMinter: invalid option that was picked randomly!");
-    }
-
-    /**
-     * @notice Mints a set of random items (cards)
-     * @param numCards Number of cards to be minted
-     * @param to  Receiver of minted cards
-     * @param desc Description used in emitted event
-     */
-    function _mintRandom(
-        uint8 numCards,
-        address to,
-        string memory desc
-    ) internal {
-        require(
-            allowedItemsPerRandomMint[numCards],
-            "CardRandomMinter: amount of items to mint is too large. Not allowed!"
-        );
-        uint8 minted = 0;
-        for (uint8 i = 0; i < numCards; i++) {
-            uint8 randomOption = _getRandomSingleOption(_currentSeed);
-            uint8[4] memory _otherOptions = _getOtherOptions(randomOption);
-            if (factory.mint(randomOption, to)) {
-                minted++;
-            } else {
-                for (uint256 j = 0; j < 4; j++) {
-                    if (factory.mint(_otherOptions[j], to )) {
-                        minted++;
-                        break;
-                    }
-                }
-            }
-        }
-        emit Minted(minted, to , desc);
-    }
-
-    /**
-     * @notice Mints a set of random items (cards) for free
-     * @param numCards Number of cards to be minted
-     * @param to Receiver of minted cards
-     * @param desc Description used in emitted event
-     */
-    function mintRandomFree(
-        uint8 numCards,
-        address to ,
-        string memory desc
-    ) external {
-        require(isMinter[msg.sender], "CardRandomMinter: caller is not a minter!");
-        _mintRandom(numCards, to, desc);
-    }
-
-    /**
-     * @notice Mints a set of random items (cards) for provided funds
-     * @param numCards Number of cards to be minted
-     * @param tokenToPay Address of the token that will be payed to mint a card
-     *                    NOTE: Zero address for native tokens
-     */            
-    function mintRandom(uint8 numCards, address tokenToPay) external payable {
-        require(numCards > 0, "CardRandomMinter: can not mint zero cards!");
-        require(isSupported(tokenToPay), "CardRandomMinter: token is not supported!");
-        if (tokenToPay == address(0)) {
-            // If user wishes to pay in native tokens, he should send them with the transaction
-            require( 
-                msg.value >= pricesInTokens[tokenToPay] * uint256(numCards), 
-                "CardRandomMinter: not enough native tokens were provided to pay for mint!"
-            );
-        } else {
-            // If user wishes to pay in ERC20 tokens he first needs to call this token's `approve` method to 
-            // allow `CardRandomMinter` to transfer his tokens
-            IERC20(tokenToPay).transferFrom(msg.sender, address(this), pricesInTokens[tokenToPay]);
-
-        }
-        _mintRandom(numCards, msg.sender, "");
-
     }
 
     /**
@@ -352,6 +285,84 @@ contract CardRandomMinter is Ownable, ICardRandomMinter {
         return COLORIZED_OPTION;
     }
 
+    /**
+     * @notice Mints a set of random items (cards)
+     * @param numCards Number of cards to be minted
+     * @param to  Receiver of minted cards
+     * @param desc Description used in emitted event
+     */
+    function _mintRandom(
+        uint8 numCards,
+        address to,
+        string memory desc
+    ) internal {
+        require(
+            allowedItemsPerRandomMint[numCards],
+            "CardRandomMinter: this exact amount of tokens is not allowed to be minted!"
+        );
+        uint8 minted = 0;
+        for (uint8 i = 0; i < numCards; i++) {
+            uint8 randomOption = _getRandomSingleOption(_currentSeed);
+            uint8[4] memory _otherOptions = _getOtherOptions(randomOption);
+            if (factory.mint(randomOption, to)) {
+                minted++;
+            } else {
+                for (uint256 j = 0; j < 4; j++) {
+                    if (factory.mint(_otherOptions[j], to )) {
+                        minted++;
+                        break;
+                    }
+                }
+            }
+        }
+        emit Minted(minted, to , desc);
+    }
+
+    /**
+     * @notice Mints a set of random items (cards) for free
+     * @param numCards Number of cards to be minted
+     * @param to Receiver of minted cards
+     * @param desc Description used in emitted event
+     */
+    function mintRandomFree(
+        uint8 numCards,
+        address to ,
+        string memory desc
+    ) external {
+        require(isMinter[msg.sender], "CardRandomMinter: caller is not a minter!");
+        _mintRandom(numCards, to, desc);
+    }
+
+    /**
+     * @notice Mints a set of random items (cards) for provided funds
+     * @param numCards Number of cards to be minted
+     * @param tokenToPay Address of the token that will be paid to mint a card
+     *                    NOTE: Zero address for native tokens
+     */            
+    function mintRandom(uint8 numCards, address tokenToPay) external payable {
+        require(numCards > 0, "CardRandomMinter: can not mint zero cards!");
+        require(isSupported(tokenToPay), "CardRandomMinter: token is not supported!");
+        require(pricesInTokens[tokenToPay] != 0, "CardRandomMinter: mint price was not set for this token!");
+        if (tokenToPay == address(0)) {
+            // If user wishes to pay in native tokens, he should send them with the transaction
+            require( 
+                msg.value >= pricesInTokens[tokenToPay] * uint256(numCards), 
+                "CardRandomMinter: not enough native tokens were provided to pay for mint!"
+            );
+        } else {
+            // If user wishes to pay in ERC20 tokens he first needs to call this token's `approve` method to 
+            // allow `CardRandomMinter` to transfer his tokens
+            require(
+                IERC20(tokenToPay).balanceOf(msg.sender) >= pricesInTokens[tokenToPay] * uint256(numCards),
+                "CardRandomMinter: not enough ERC20 tokens to pay for the mint!"
+            );
+            IERC20(tokenToPay).transferFrom(msg.sender, address(this), pricesInTokens[tokenToPay] * uint256(numCards));
+
+        }
+        _mintRandom(numCards, msg.sender, "");
+
+    }
+
 
     /// @notice Transfers all funds to the owner
     function getRevenue() external onlyOwner {
@@ -363,8 +374,8 @@ contract CardRandomMinter is Ownable, ICardRandomMinter {
             } else {   
                 uint256 tokenBalance = IERC20(token).balanceOf(address(this));
                 if (tokenBalance > 0) {
-                    // Transfer ERC20 tokens
-                    IERC20(token).transfer(msg.sender, tokenBalance);
+                    // Transfer all ERC20 tokens
+                    IERC20(token).transfer(payable(owner()), tokenBalance);
                 }
             }
         }
