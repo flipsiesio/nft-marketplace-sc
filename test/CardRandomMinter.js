@@ -16,14 +16,16 @@ describe("CardRandomMinter", function () {
   let factory;
   let minter;
   let randomAddress = "0x6DBAd4Bd16C15AE6dDEaA640626e5A3E151F02fC";
+  let provider = ethers.provider;
 
   beforeEach(async () => {
+
     [ownerAcc, clientAcc1, clientAcc2] = await ethers.getSigners();
 
     let cardTx = await ethers.getContractFactory("Card");
     cardNFT = await cardTx.deploy();
     await cardNFT.deployed();   
-    
+
     let factoryTx = await ethers.getContractFactory("CardFactory");
     // NOTE! This does not give the factory card's CardMinter role
     // We have to explicitly give this role to the factory in the tests
@@ -37,7 +39,8 @@ describe("CardRandomMinter", function () {
     for (let [token, info] of Object.entries(SUPPORTED_TOKENS)) {
       let [address, price] = Object.values(info);
         await minter.addSupportedToken(address);
-        await minter.setMintPrice(address, parseUnits(price.toString(), 18));
+        // `price` in JSON file is withoud `decimals`, so we have to multiply it by `decimals` using `parseEther`
+        await minter.setMintPrice(address, parseEther(price.toString()));
     }
 
     // Give Minter's rights to the factory
@@ -51,13 +54,32 @@ describe("CardRandomMinter", function () {
     await factory.setIdBoundaryForOption(2, 30, 45);
     await factory.setIdBoundaryForOption(3, 45, 60);
     await factory.setIdBoundaryForOption(4, 60, 75);
+
+    // Deploy a new ERC20 to be used in tests
+    let newToken = await ethers.getContractFactory("Rummy");
+    token = await newToken.deploy();
+    await token.deployed();
+    // Mint these tokens to 2 of 3 accounts
+    // Use `parseEther` because of `decimals`
+    await token.mintTo(ownerAcc.address, parseEther("1000"));
+    await token.mintTo(clientAcc1.address, parseEther("1000"));
+    // Allow transfer of all minted tokens
+    await token.connect(ownerAcc).approve(minter.address, parseEther("1000"));
+    await token.connect(clientAcc1).approve(minter.address, parseEther("1000"));
+    // This one actually does not have any tokens
+    await token.connect(clientAcc2).approve(minter.address, parseEther("1000"));
+    // Make minter support this token
+    await minter.addSupportedToken(token.address);
+    // Set a mint price for that token
+    await minter.setMintPrice(token.address, parseEther("0.1"));
   });
 
   describe("Getters and Setters", () => {
 
     it("Should have a correct amount of supported tokens", async () => {
       let len = Object.entries(SUPPORTED_TOKENS).length;
-      expect(await minter.getSupportedLength()).to.equal(len);
+      // +1 because of a new ERC20 supported token in `beforeEach` hook
+      expect(await minter.getSupportedLength()).to.equal(len + 1);
     });
 
     it("Should support existing address", async () => {
@@ -75,7 +97,7 @@ describe("CardRandomMinter", function () {
     it("Should fail to add a new supported token if it is already supported", async () => {
       await minter.addSupportedToken(randomAddress);
       await expect(minter.addSupportedToken(randomAddress))
-      .to.be.revertedWith("CardRandomMinter: Token has already been added!");
+      .to.be.revertedWith("CardRandomMinter: token has already been added!");
     });
 
     it("Should fail to add a new supported token if caller is not the owner", async () => {
@@ -93,7 +115,7 @@ describe("CardRandomMinter", function () {
 
     it("Should fail to remove a not supported token", async () => {
       await expect(minter.removeSupportedToken(randomAddress))
-      .to.be.revertedWith("CardRandomMinter: Token is not supported!")
+      .to.be.revertedWith("CardRandomMinter: token is not supported!")
     });
 
     it("Should fail to remove a supported token if caller is not the owner", async () => {
@@ -109,7 +131,7 @@ describe("CardRandomMinter", function () {
 
     it("Should fail to get a card mint price in not supported tokens", async () => {
       await expect(minter.getMintPrice(randomAddress))
-      .to.be.revertedWith("CardRandomMinter: Token is not supported!")
+      .to.be.revertedWith("CardRandomMinter: token is not supported!")
     });
 
     it("Should set a card mint price in tokens", async () => {
@@ -120,13 +142,13 @@ describe("CardRandomMinter", function () {
 
     it("Should fail to set a card mint price in not supported tokens", async () => {
       await expect(minter.setMintPrice(randomAddress, 500))
-      .to.be.revertedWith("CardRandomMinter: Token is not supported!")
+      .to.be.revertedWith("CardRandomMinter: token is not supported!")
     });
 
     it("Should fail to set a zero mint price", async () => {
       await minter.addSupportedToken(randomAddress);
       await expect(minter.setMintPrice(randomAddress, 0))
-      .to.be.revertedWith("CardRandomMinter: Price can not be zero!")
+      .to.be.revertedWith("CardRandomMinter: price can not be zero!")
     });
 
     it("Should give minter rights to users", async () => {
@@ -149,7 +171,7 @@ describe("CardRandomMinter", function () {
 
     it("Should fail to set zero amount of cards to mint", async () => {
       await expect(minter.setAllowedAmountOfItemsPerRandomMint(0, true))
-      .to.be.revertedWith("CardRandomMinter: Can not mint zero cards!");
+      .to.be.revertedWith("CardRandomMinter: can not mint zero cards!");
     });
 
     it("Should set a new factory address", async () => {
@@ -163,7 +185,7 @@ describe("CardRandomMinter", function () {
 
     it("Should fail set a zero factory address", async () => {
       await expect(minter.setFactory(zeroAddress))
-      .to.be.revertedWith("CardRandomMinter: Factory can not have a zero address!");
+      .to.be.revertedWith("CardRandomMinter: factory can not have a zero address!");
     });
 
     it("Should set a new seed", async () => {
@@ -189,17 +211,127 @@ describe("CardRandomMinter", function () {
 
   describe("Mint Functions", () => {
 
-    it("Should mint cards for free", async () => {
-      await minter.setAllowedAmountOfItemsPerRandomMint(10, true);
-      await minter.setMinterRole(ownerAcc.address, true);
-      await minter.mintRandomFree(5, clientAcc1.address, "");
+    describe("Free Mint", () => {
+
+      it("Should mint cards for free", async () => {
+        let startBalance = await cardNFT.balanceOf(clientAcc1.address);
+        await minter.setAllowedAmountOfItemsPerRandomMint(10, true);
+        await minter.setMinterRole(ownerAcc.address, true);
+        await minter.mintRandomFree(5, clientAcc1.address, "");
+        let endBalance = await cardNFT.balanceOf(clientAcc1.address);
+        expect(endBalance.sub(startBalance)).to.equal(5);
+      });
+
+      it("Should fail to mint cards for free if caller is not a minter", async () => {
+        await minter.setAllowedAmountOfItemsPerRandomMint(10, true);
+        await expect(minter.mintRandomFree(5, clientAcc1.address, ""))
+        .to.be.revertedWith("CardRandomMinter: caller is not a minter!");
+      });
+
     });
 
-    it("Should fail to mint cards for free if caller is not a minter", async () => {
-      await minter.setAllowedAmountOfItemsPerRandomMint(10, true);
-      await expect(minter.mintRandomFree(5, clientAcc1.address, ""))
-      .to.be.revertedWith("CardRandomMinter: Caller Is Not a Minter!");
+    describe("Payed Mint", () => {
+
+      describe("For Native Tokens", () => {
+
+        it("Should mint cards for native tokens", async () => {
+          let startBalance = await cardNFT.balanceOf(ownerAcc.address);
+          await minter.setAllowedAmountOfItemsPerRandomMint(10, true);
+          await minter.setMinterRole(ownerAcc.address, true);
+          await minter.mintRandom(5, zeroAddress, {value: parseEther("1")});
+          let endBalance = await cardNFT.balanceOf(ownerAcc.address);
+          expect(endBalance.sub(startBalance)).to.equal(5);
+        });
+
+        it("Should fail to mint cards for native tokens if not enough tokens were sent", async () => {
+          await minter.setAllowedAmountOfItemsPerRandomMint(10, true);
+          await minter.setMinterRole(ownerAcc.address, true);
+          // Default price is 0.1
+          await expect(minter.mintRandom(5, zeroAddress, {value: parseEther("0.000001")}))
+          .to.be.revertedWith("CardRandomMinter: not enough native tokens were provided to pay for mint!");
+        });
+
+        it("Should fail to mint cards for native tokens if card number is zero", async () => {
+          await minter.setAllowedAmountOfItemsPerRandomMint(10, true);
+          await minter.setMinterRole(ownerAcc.address, true);
+          await expect(minter.mintRandom(0, zeroAddress, {value: parseEther("1")}))
+          .to.be.revertedWith("CardRandomMinter: can not mint zero cards!");
+        });
+
+        it("Should fail to mint cards for native tokens if token is not supported", async () => {
+          await minter.setAllowedAmountOfItemsPerRandomMint(10, true);
+          await minter.setMinterRole(ownerAcc.address, true);
+          await expect(minter.mintRandom(5, randomAddress, {value: parseEther("1")}))
+          .to.be.revertedWith("CardRandomMinter: token is not supported!");
+        });
+
+      });
+
+      describe("For ERC20 Tokens", () => {
+
+        it("Should mint cards for ERC20 tokens", async () => {
+          let startBalance = await cardNFT.balanceOf(ownerAcc.address);
+          await minter.setAllowedAmountOfItemsPerRandomMint(10, true);
+          await minter.setMinterRole(ownerAcc.address, true);
+          await minter.connect(ownerAcc).mintRandom(5, token.address);
+          let endBalance = await cardNFT.balanceOf(ownerAcc.address);
+          expect(endBalance.sub(startBalance)).to.equal(5);
+        });
+
+        it("Should fail to mint cards for ERC20 tokens if caller does not have enough ERC20 tokens", async () => {
+          await minter.setAllowedAmountOfItemsPerRandomMint(10, true);
+          await minter.setMinterRole(clientAcc2.address, true);
+          await expect(minter.connect(clientAcc2).mintRandom(5, token.address))
+          .to.be.revertedWith("CardRandomMinter: not enough ERC20 tokens to pay for the mint!");
+        });
+
+        it("Should fail to mint cards for native tokens if card number is zero", async () => {
+          await minter.setAllowedAmountOfItemsPerRandomMint(10, true);
+          await minter.setMinterRole(ownerAcc.address, true);
+          await expect(minter.mintRandom(0, token.address))
+          .to.be.revertedWith("CardRandomMinter: can not mint zero cards!");
+        });
+
+        it("Should fail to mint cards for native tokens if token is not supported", async () => {
+          await minter.setAllowedAmountOfItemsPerRandomMint(10, true);
+          await minter.setMinterRole(ownerAcc.address, true);
+          await expect(minter.mintRandom(5, randomAddress)) 
+          .to.be.revertedWith("CardRandomMinter: token is not supported!");
+        });
+
+      });
+
     });
+  });
+
+  describe("Get Revenue", () => {
+
+    it("Should withdraw all ERC20 tokens revenue from the contract", async () => {
+      await minter.setAllowedAmountOfItemsPerRandomMint(15, true);
+      await minter.setMinterRole(ownerAcc.address, true);
+      // First mint some tokens to pay for the mint
+      // 15 * 0.1 = 1.5 ERC20
+      await minter.connect(ownerAcc).mintRandom(15, token.address);
+      let startBalance = await token.balanceOf(ownerAcc.address);
+      // Now get the revenue
+      minter.connect(ownerAcc).getRevenue();
+      let endBalance = await token.balanceOf(ownerAcc.address);
+      expect(endBalance.sub(startBalance)).to.equal(parseEther("1.5"));
+    }); 
+
+    it("Should withdraw all native tokens revenue from the contract", async () => {
+      await minter.setAllowedAmountOfItemsPerRandomMint(15, true);
+      await minter.setMinterRole(ownerAcc.address, true);
+      // First mint some tokens to pay for the mint
+      // 15 * 0.1 = 1.5 ETH
+      await minter.mintRandom(15, zeroAddress, {value: parseEther("2")});
+      let startBalance = await provider.getBalance(ownerAcc.address);
+      // Now get the revenue
+      minter.connect(ownerAcc).getRevenue();
+      let endBalance = await provider.getBalance(ownerAcc.address);
+      expect(endBalance.sub(startBalance)).to.equal(parseEther("1.5"));
+
+    }); 
 
   });
 
