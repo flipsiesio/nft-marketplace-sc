@@ -25,6 +25,7 @@ describe("CardRandomMinter", function () {
   let cardNFT;
   let factory;
   let minter;
+  let token;
   let randomAddress = "0x6DBAd4Bd16C15AE6dDEaA640626e5A3E151F02fC";
   let provider = ethers.provider;
 
@@ -58,6 +59,8 @@ describe("CardRandomMinter", function () {
     await factory.setIdBoundaryForOption(3, 45, 60);
     await factory.setIdBoundaryForOption(4, 60, 75);
 
+    let addresses = new Array();
+
     // Read all tokens addresses from the file and add each of the tokens to supported tokens
     // NOTE: This are just addresses of tokens - not token objests.
     // NOTE: This is only done for `getRevenue` method to work correctly.
@@ -68,14 +71,19 @@ describe("CardRandomMinter", function () {
         await minter.addSupportedToken(address);
         // `price` in JSON file is withoud `decimals`, so we have to multiply it by `decimals` using `parseEther`
         await minter.setMintPrice(address, parseEther(price.toString()));
+
+        // Use one of the addresses from the file to connect token contract to
+        if (address != zeroAddress) {
+          addresses.push(address);
+        }
     }
 
-
-    // This is a real token object with all ERC20 methods
-    // Basically, it should be treated as one of the tokens from JSON file
+    // Pick one random address from all supported addresses from the file
+    let oneOfAddresses = addresses[Math.floor(Math.random()*addresses.length)];
     let newToken = await ethers.getContractFactory("Rummy");
-    token = await newToken.deploy();
-    await token.deployed();
+    // Connect mock contract to one of the addresses.
+    // This imitates ERC20 token in mainnet or testnet.
+    token = await ethers.getContractAt("Rummy", oneOfAddresses);
     // Mint these tokens to 2 of 3 accounts
     // Use `parseEther` because of `decimals`
     await token.mintTo(ownerAcc.address, parseEther("1000"));
@@ -85,17 +93,13 @@ describe("CardRandomMinter", function () {
     await token.connect(clientAcc1).approve(minter.address, parseEther("1000"));
     // This one actually does not have any tokens
     await token.connect(clientAcc2).approve(minter.address, parseEther("1000"));
-    // Make minter support this token
-    await minter.addSupportedToken(token.address);
-    // Set a mint price for that token
-    await minter.setMintPrice(token.address, parseEther("0.1"));
   });
 
   describe("Getters and Setters", () => {
 
     it("Should have a correct amount of supported tokens", async () => {
       let len = Object.entries(SUPPORTED_TOKENS).length;
-      expect(await minter.getSupportedLength()).to.equal(len + 1);
+      expect(await minter.getSupportedLength()).to.equal(len);
     });
 
     it("Should support existing address", async () => {
