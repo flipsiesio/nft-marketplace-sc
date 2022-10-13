@@ -1,4 +1,12 @@
 // SPDX-License-Identifier: MIT 
+
+/**
+ * 
+ * This scripts is used to deploy contracts to remote testnet or mainnet
+ * It uses real token addresses from these networks
+ * 
+ */
+
 const { ethers, network } = require("hardhat");
 const fs = require("fs");
 const path = require("path");
@@ -6,7 +14,7 @@ const delay = require("delay");
 const { parseUnits, parseEther } = ethers.utils;
 
 // JSON file to keep information about previous deployments
-const OUTPUT_DEPLOY = require("./deployOutput.json");
+const OUTPUT_DEPLOY = require("./deployOutputRemote.json");
 // JSON file to get the list of supported tokens and their prices from
 const SUPPORTED_TOKENS = require("../supportedTokens.json");
 
@@ -118,10 +126,10 @@ async function main() {
   OUTPUT_DEPLOY.networks[network.name][contractName].feeReceiverPrivateKey = nftMarketplaceFeeReceiver.privateKey;
 
 
-  console.log(`See Results in "${__dirname + '/deployOutput.json'}" File`);
+  console.log(`See Results in "${__dirname + '/deployOutputRemote.json'}" File`);
 
   fs.writeFileSync(
-    path.resolve(__dirname, "./deployOutput.json"),
+    path.resolve(__dirname, "./deployOutputRemote.json"),
     JSON.stringify(OUTPUT_DEPLOY, null, "  ")
   );
 }
