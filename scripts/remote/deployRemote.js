@@ -1,4 +1,3 @@
-// SPDX-License-Identifier: MIT 
 
 /**
  * 
@@ -7,30 +6,39 @@
  * 
  */
 
+
+
 const { ethers, network } = require("hardhat");
 const fs = require("fs");
 const path = require("path");
 const delay = require("delay");
 const { parseUnits, parseEther } = ethers.utils;
 
+// Check that one of two allowed networks was provided
+if ((network.name != "donau") && (network.name != "bttc")) {
+  throw "Please run deployment script with `--network donau` or `--network mainnet` flags!";
+}
+
 // JSON file to keep information about previous deployments
 const OUTPUT_DEPLOY = require("./deployOutputRemote.json");
-// JSON file to get the list of supported tokens and their prices from
-const SUPPORTED_TOKENS = require("./supportedTokensRemote.json");
 
-const oneDay = 86400
-const tenDays = 864000
+// List of default supported tokens differs depending on the chain of deployment
+let all_tokens = require("./supportedTokensRemote.json"); 
+let SUPPORTED_TOKENS;
+if (network.name == "donau") {
+  SUPPORTED_TOKENS = all_tokens.donau;
+} else if (network.name == "bttc") {
+  SUPPORTED_TOKENS = all_tokens.bttc;
+}
+
+
+const oneDay = 86400;
+const tenDays = 864000;
 
 // One BP 0.0001
 // One percent is 0.01
 // One percent in BP is 100BP
 const onePercent = 100;
-
-
-// Check that one of two allowed networks was provided
-if ((network.name != "donau") && (network.name != "mainnet")) {
-  throw "Please run deployment script with `--network donau` or `--network mainnet` flags!";
-}
 
 // Creates a number of random wallets to be used while deploying contracts
 function createWallets(numberWallets) {
@@ -131,8 +139,7 @@ async function main() {
   OUTPUT_DEPLOY.networks[network.name][contractName].feeReceiverAddress = nftMarketplaceFeeReceiver.address;
   OUTPUT_DEPLOY.networks[network.name][contractName].feeReceiverPrivateKey = nftMarketplaceFeeReceiver.privateKey;
 
-
-  console.log(`See Results in "${__dirname + '/deployOutputRemote.json'}" File`);
+  console.log(`\n***Deployment is finished!***\nSee Results in "${__dirname + '/deployOutputRemote.json'}" File`);
 
   fs.writeFileSync(
     path.resolve(__dirname, "./deployOutputRemote.json"),
