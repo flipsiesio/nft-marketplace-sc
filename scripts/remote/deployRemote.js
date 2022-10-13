@@ -16,7 +16,7 @@ const { parseUnits, parseEther } = ethers.utils;
 // JSON file to keep information about previous deployments
 const OUTPUT_DEPLOY = require("./deployOutputRemote.json");
 // JSON file to get the list of supported tokens and their prices from
-const SUPPORTED_TOKENS = require("../supportedTokens.json");
+const SUPPORTED_TOKENS = require("./supportedTokensRemote.json");
 
 const oneDay = 86400
 const tenDays = 864000
@@ -25,6 +25,12 @@ const tenDays = 864000
 // One percent is 0.01
 // One percent in BP is 100BP
 const onePercent = 100;
+
+
+// Check that one of two allowed networks was provided
+if ((network.name != "donau") && (network.name != "mainnet")) {
+  throw "Please run deployment script with `--network donau` or `--network mainnet` flags!";
+}
 
 // Creates a number of random wallets to be used while deploying contracts
 function createWallets(numberWallets) {
