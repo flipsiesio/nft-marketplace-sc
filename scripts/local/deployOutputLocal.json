@@ -1,45 +1,24 @@
 {
   "networks": {
-    "donau": {
+    "localhost": {
       "Card": {
-        "address": "0x1Eb4893829dDe44D4A08B0d75EBa4d0630b94226"
+        "address": "0x0165878A594ca255338adfa4d48449f69242Eb8F"
       },
       "CardFactory": {
-        "address": "0x79DA2d2a04363ec7951347edF5807499A0c47921"
+        "address": "0xa513E6E4b8f2a923D98304ec87F64353C4D5C853"
       },
       "CardRandomMinter": {
-        "address": "0x0F7700Bf3721b8F38cb497047A02fDE91474882c"
+        "address": "0x9A676e781A523b5d0C0e43731313A708CB607508"
       },
       "NFTSale": {
-        "address": "0xa9364dAFBcd832F1eF43C352A802fC980Cd04C9E",
-        "feeReceiverAddress": "0x354C5F39C203f588d7A87Cb5879F5e9b080E95cd",
-        "feeReceiverPrivateKey": "0x2cce01a0a8b71ecf184a73761ff4da1d513f7c3b95d5d0960e776b4682e9493d"
+        "address": "0x7a2088a1bFc9d81c55368AE168C2C02570cB814F",
+        "feeReceiverAddress": "0x5c5C72cFC4360c2D0973f3fbb0b335Ba837396Ef",
+        "feeReceiverPrivateKey": "0x1b0759a23acf62f756395da22da712e6a3d4309a0d7275dd38d3a42249f79b25"
       },
       "NFTMarketplace": {
-        "address": "0x90e05A88626adf6CbBb59DdFA071a12840A4fa68",
-        "feeReceiverAddress": "0xaEEBE0a40E059D2236053c683f0C3106742F7112",
-        "feeReceiverPrivateKey": "0x25c6223eeaf49b91a03f6b1d86ed0c853df4e1c4ab0a4cc4621925746d647c2a"
-      }
-    },
-    "mainnet": {
-      "Card": {
-        "address": ""
-      },
-      "CardFactory": {
-        "address": ""
-      },
-      "CardRandomMinter": {
-        "address": ""
-      },
-      "NFTSale": {
-        "address": "",
-        "feeReceiverAddress": "",
-        "feeReceiverPrivateKey": ""
-      },
-      "NFTMarketplace": {
-        "address": "",
-        "feeReceiverAddress": "",
-        "feeReceiverPrivateKey": ""
+        "address": "0x09635F643e140090A9A8Dcd712eD6285858ceBef",
+        "feeReceiverAddress": "0xE25590fF9786eCeE1AF8281220017A59a79A8cF0",
+        "feeReceiverPrivateKey": "0xb9899cf5fdf738d02fd30084c5b6e04dbb68cf83e4f08bbed916ebe33b1481c5"
       }
     }
   }
