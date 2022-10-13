@@ -1,9 +1,9 @@
 /**
- * 
+ *
  * This script is used to deploy token contracts on local Hardhat network to imitate these tokens
  * in remote testnet or mainnet.
  * It should be used before running tests on localhost.
- * 
+ *
  */
 
 const { ethers, network } = require("hardhat");
@@ -17,7 +17,6 @@ const OUTPUT_DEPLOY = require("./supportedTokensLocal.json");
 const NUM_TOKENS = 5;
 
 async function main() {
-
   if (network.name != "localhost") {
     throw "Network must be `hardhat`!";
   }
@@ -27,7 +26,7 @@ async function main() {
   console.log(`[${contractName}]: Start of Deployment...`);
   _contractProto = await ethers.getContractFactory(contractName);
   for (let i = 0; i < NUM_TOKENS; i++) {
-    console.log(`Deploying token №${i}...`)
+    console.log(`Deploying token №${i}...`);
     let deployment = await _contractProto.deploy();
     let token = await deployment.deployed();
     console.log(`Token's address is: ${token.address}`);
@@ -36,7 +35,11 @@ async function main() {
     OUTPUT_DEPLOY[i + 1].price = 0.1;
   }
 
-  console.log(`\n***Deployment is finished!***\nSee Results in "${__dirname + '/supportedTokensLocal.json'}" File`);
+  console.log(
+    `\n***Deployment is finished!***\nSee Results in "${
+      __dirname + "/supportedTokensLocal.json"
+    }" File`
+  );
 
   fs.writeFileSync(
     path.resolve(__dirname, "./supportedTokensLocal.json"),

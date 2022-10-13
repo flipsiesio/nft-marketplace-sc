@@ -17,7 +17,7 @@ function findOrder(events, tokenID) {
   }
 }
 
-if (network.name != 'localhost') {
+if (network.name != "localhost") {
   throw "[ERROR]\nNetwork is not `localhost`! Aborting tests...\nPlease run test with `npx hardhat test --network localhost`";
 }
 

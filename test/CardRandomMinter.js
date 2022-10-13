@@ -6,10 +6,9 @@ const delay = require("delay");
 const { parseUnits, parseEther } = ethers.utils;
 const zeroAddress = ethers.constants.AddressZero;
 
-  if (network.name != 'localhost') {
-    throw "[ERROR]\nNetwork is not `localhost`! Aborting tests...\nPlease run test with `npx hardhat test --network localhost`";
-  }
-
+if (network.name != "localhost") {
+  throw "[ERROR]\nNetwork is not `localhost`! Aborting tests...\nPlease run test with `npx hardhat test --network localhost`";
+}
 
 /**
  * Make sure to:
@@ -21,7 +20,6 @@ const zeroAddress = ethers.constants.AddressZero;
 const SUPPORTED_TOKENS = require("../scripts/local/supportedTokensLocal.json");
 
 describe("CardRandomMinter", function () {
-
   let cardNFT;
   let factory;
   let minter;
@@ -30,12 +28,11 @@ describe("CardRandomMinter", function () {
   let provider = ethers.provider;
 
   beforeEach(async () => {
-
     [ownerAcc, clientAcc1, clientAcc2] = await ethers.getSigners();
 
     let cardTx = await ethers.getContractFactory("Card");
     cardNFT = await cardTx.deploy();
-    await cardNFT.deployed();   
+    await cardNFT.deployed();
 
     let factoryTx = await ethers.getContractFactory("CardFactory");
     // NOTE! This does not give the factory card's CardMinter role
@@ -68,18 +65,19 @@ describe("CardRandomMinter", function () {
     // try to call the address from `localhost` while running on another network!
     for (let [token, info] of Object.entries(SUPPORTED_TOKENS)) {
       let [address, price] = Object.values(info);
-        await minter.addSupportedToken(address);
-        // `price` in JSON file is withoud `decimals`, so we have to multiply it by `decimals` using `parseEther`
-        await minter.setMintPrice(address, parseEther(price.toString()));
+      await minter.addSupportedToken(address);
+      // `price` in JSON file is withoud `decimals`, so we have to multiply it by `decimals` using `parseEther`
+      await minter.setMintPrice(address, parseEther(price.toString()));
 
-        // Use one of the addresses from the file to connect token contract to
-        if (address != zeroAddress) {
-          addresses.push(address);
-        }
+      // Use one of the addresses from the file to connect token contract to
+      if (address != zeroAddress) {
+        addresses.push(address);
+      }
     }
 
     // Pick one random address from all supported addresses from the file
-    let oneOfAddresses = addresses[Math.floor(Math.random()*addresses.length)];
+    let oneOfAddresses =
+      addresses[Math.floor(Math.random() * addresses.length)];
     let newToken = await ethers.getContractFactory("Rummy");
     // Connect mock contract to one of the addresses.
     // This imitates ERC20 token in mainnet or testnet.
@@ -96,7 +94,6 @@ describe("CardRandomMinter", function () {
   });
 
   describe("Getters and Setters", () => {
-
     it("Should have a correct amount of supported tokens", async () => {
       let len = Object.entries(SUPPORTED_TOKENS).length;
       expect(await minter.getSupportedLength()).to.equal(len);
@@ -116,13 +113,15 @@ describe("CardRandomMinter", function () {
 
     it("Should fail to add a new supported token if it is already supported", async () => {
       await minter.addSupportedToken(randomAddress);
-      await expect(minter.addSupportedToken(randomAddress))
-      .to.be.revertedWith("CardRandomMinter: token has already been added!");
+      await expect(minter.addSupportedToken(randomAddress)).to.be.revertedWith(
+        "CardRandomMinter: token has already been added!"
+      );
     });
 
     it("Should fail to add a new supported token if caller is not the owner", async () => {
-      await expect(minter.connect(clientAcc1).addSupportedToken(randomAddress))
-      .to.be.revertedWith("Ownable: caller is not the owner");
+      await expect(
+        minter.connect(clientAcc1).addSupportedToken(randomAddress)
+      ).to.be.revertedWith("Ownable: caller is not the owner");
     });
 
     it("Should remove a supported token", async () => {
@@ -134,14 +133,16 @@ describe("CardRandomMinter", function () {
     });
 
     it("Should fail to remove a not supported token", async () => {
-      await expect(minter.removeSupportedToken(randomAddress))
-      .to.be.revertedWith("CardRandomMinter: token is not supported!")
+      await expect(
+        minter.removeSupportedToken(randomAddress)
+      ).to.be.revertedWith("CardRandomMinter: token is not supported!");
     });
 
     it("Should fail to remove a supported token if caller is not the owner", async () => {
       await minter.addSupportedToken(randomAddress);
-      await expect(minter.connect(clientAcc1).removeSupportedToken(randomAddress))
-      .to.be.revertedWith("Ownable: caller is not the owner");
+      await expect(
+        minter.connect(clientAcc1).removeSupportedToken(randomAddress)
+      ).to.be.revertedWith("Ownable: caller is not the owner");
     });
 
     it("Should get a card mint price in tokens", async () => {
@@ -150,8 +151,9 @@ describe("CardRandomMinter", function () {
     });
 
     it("Should fail to get a card mint price in not supported tokens", async () => {
-      await expect(minter.getMintPrice(randomAddress))
-      .to.be.revertedWith("CardRandomMinter: token is not supported!")
+      await expect(minter.getMintPrice(randomAddress)).to.be.revertedWith(
+        "CardRandomMinter: token is not supported!"
+      );
     });
 
     it("Should set a card mint price in tokens", async () => {
@@ -161,14 +163,16 @@ describe("CardRandomMinter", function () {
     });
 
     it("Should fail to set a card mint price in not supported tokens", async () => {
-      await expect(minter.setMintPrice(randomAddress, 500))
-      .to.be.revertedWith("CardRandomMinter: token is not supported!")
+      await expect(minter.setMintPrice(randomAddress, 500)).to.be.revertedWith(
+        "CardRandomMinter: token is not supported!"
+      );
     });
 
     it("Should fail to set a zero mint price", async () => {
       await minter.addSupportedToken(randomAddress);
-      await expect(minter.setMintPrice(randomAddress, 0))
-      .to.be.revertedWith("CardRandomMinter: price can not be zero!")
+      await expect(minter.setMintPrice(randomAddress, 0)).to.be.revertedWith(
+        "CardRandomMinter: price can not be zero!"
+      );
     });
 
     it("Should give minter rights to users", async () => {
@@ -176,8 +180,9 @@ describe("CardRandomMinter", function () {
     });
 
     it("Should fail to give minter rights to users if caller is not the owner", async () => {
-      await expect(minter.connect(clientAcc1).setMinterRole(clientAcc1.address, true))
-      .to.be.revertedWith("Ownable: caller is not the owner");
+      await expect(
+        minter.connect(clientAcc1).setMinterRole(clientAcc1.address, true)
+      ).to.be.revertedWith("Ownable: caller is not the owner");
     });
 
     it("Should set allowed amount of cards to mint", async () => {
@@ -185,13 +190,15 @@ describe("CardRandomMinter", function () {
     });
 
     it("Should fail to set allowed amount of cards to mint if caller is not the owner", async () => {
-      await expect(minter.connect(clientAcc1).setAllowedAmountOfItemsPerRandomMint(5, true))
-      .to.be.revertedWith("Ownable: caller is not the owner");
+      await expect(
+        minter.connect(clientAcc1).setAllowedAmountOfItemsPerRandomMint(5, true)
+      ).to.be.revertedWith("Ownable: caller is not the owner");
     });
 
     it("Should fail to set zero amount of cards to mint", async () => {
-      await expect(minter.setAllowedAmountOfItemsPerRandomMint(0, true))
-      .to.be.revertedWith("CardRandomMinter: can not mint zero cards!");
+      await expect(
+        minter.setAllowedAmountOfItemsPerRandomMint(0, true)
+      ).to.be.revertedWith("CardRandomMinter: can not mint zero cards!");
     });
 
     it("Should set a new factory address", async () => {
@@ -199,13 +206,15 @@ describe("CardRandomMinter", function () {
     });
 
     it("Should fail set a new factory address if caller is not the onwner", async () => {
-      await expect(minter.connect(clientAcc1).setFactory(clientAcc1.address))
-      .to.be.revertedWith("Ownable: caller is not the owner");
+      await expect(
+        minter.connect(clientAcc1).setFactory(clientAcc1.address)
+      ).to.be.revertedWith("Ownable: caller is not the owner");
     });
 
     it("Should fail set a zero factory address", async () => {
-      await expect(minter.setFactory(zeroAddress))
-      .to.be.revertedWith("CardRandomMinter: factory can not have a zero address!");
+      await expect(minter.setFactory(zeroAddress)).to.be.revertedWith(
+        "CardRandomMinter: factory can not have a zero address!"
+      );
     });
 
     it("Should set a new seed", async () => {
@@ -213,8 +222,9 @@ describe("CardRandomMinter", function () {
     });
 
     it("Should fail set a new seed if caller is not the onwner", async () => {
-      await expect(minter.connect(clientAcc1).setCurrentSeed(777))
-      .to.be.revertedWith("Ownable: caller is not the owner");
+      await expect(
+        minter.connect(clientAcc1).setCurrentSeed(777)
+      ).to.be.revertedWith("Ownable: caller is not the owner");
     });
 
     it("Should set mint probabilities for different classes of cards", async () => {
@@ -222,17 +232,16 @@ describe("CardRandomMinter", function () {
     });
 
     it("Should fail to set new mint probabilities if caller is not the owner", async () => {
-      await expect(minter.connect(clientAcc1).setProbabilitiesForClasses([0, 0, 1, 5000, 777]))
-      .to.be.revertedWith("Ownable: caller is not the owner");
+      await expect(
+        minter
+          .connect(clientAcc1)
+          .setProbabilitiesForClasses([0, 0, 1, 5000, 777])
+      ).to.be.revertedWith("Ownable: caller is not the owner");
     });
-
   });
 
-
   describe("Mint Functions", () => {
-
     describe("Free Mint", () => {
-
       it("Should mint cards for free", async () => {
         let startBalance = await cardNFT.balanceOf(clientAcc1.address);
         await minter.setAllowedAmountOfItemsPerRandomMint(10, true);
@@ -244,22 +253,19 @@ describe("CardRandomMinter", function () {
 
       it("Should fail to mint cards for free if caller is not a minter", async () => {
         await minter.setAllowedAmountOfItemsPerRandomMint(10, true);
-        await expect(minter.mintRandomFree(5, clientAcc1.address, ""))
-        .to.be.revertedWith("CardRandomMinter: caller is not a minter!");
+        await expect(
+          minter.mintRandomFree(5, clientAcc1.address, "")
+        ).to.be.revertedWith("CardRandomMinter: caller is not a minter!");
       });
-
-
     });
 
     describe("Payed Mint", () => {
-
       describe("For Native Tokens", () => {
-
         it("Should mint cards for native tokens", async () => {
           let startBalance = await cardNFT.balanceOf(ownerAcc.address);
           await minter.setAllowedAmountOfItemsPerRandomMint(10, true);
           await minter.setMinterRole(ownerAcc.address, true);
-          await minter.mintRandom(5, zeroAddress, {value: parseEther("1")});
+          await minter.mintRandom(5, zeroAddress, { value: parseEther("1") });
           let endBalance = await cardNFT.balanceOf(ownerAcc.address);
           expect(endBalance.sub(startBalance)).to.equal(5);
         });
@@ -268,22 +274,29 @@ describe("CardRandomMinter", function () {
           await minter.setAllowedAmountOfItemsPerRandomMint(10, true);
           await minter.setMinterRole(ownerAcc.address, true);
           // Default price is 0.1
-          await expect(minter.mintRandom(5, zeroAddress, {value: parseEther("0.000000000001")}))
-          .to.be.revertedWith("CardRandomMinter: not enough native tokens were provided to pay for mint!");
+          await expect(
+            minter.mintRandom(5, zeroAddress, {
+              value: parseEther("0.000000000001"),
+            })
+          ).to.be.revertedWith(
+            "CardRandomMinter: not enough native tokens were provided to pay for mint!"
+          );
         });
 
         it("Should fail to mint cards for native tokens if card number is zero", async () => {
           await minter.setAllowedAmountOfItemsPerRandomMint(10, true);
           await minter.setMinterRole(ownerAcc.address, true);
-          await expect(minter.mintRandom(0, zeroAddress, {value: parseEther("1")}))
-          .to.be.revertedWith("CardRandomMinter: can not mint zero cards!");
+          await expect(
+            minter.mintRandom(0, zeroAddress, { value: parseEther("1") })
+          ).to.be.revertedWith("CardRandomMinter: can not mint zero cards!");
         });
 
         it("Should fail to mint cards for native tokens if token is not supported", async () => {
           await minter.setAllowedAmountOfItemsPerRandomMint(10, true);
           await minter.setMinterRole(ownerAcc.address, true);
-          await expect(minter.mintRandom(5, randomAddress, {value: parseEther("1")}))
-          .to.be.revertedWith("CardRandomMinter: token is not supported!");
+          await expect(
+            minter.mintRandom(5, randomAddress, { value: parseEther("1") })
+          ).to.be.revertedWith("CardRandomMinter: token is not supported!");
         });
 
         it("Should fail to mint cards for native tokens if amount was not allowed", async () => {
@@ -291,14 +304,15 @@ describe("CardRandomMinter", function () {
           await minter.setAllowedAmountOfItemsPerRandomMint(10, true);
           await minter.setMinterRole(ownerAcc.address, true);
           // Try to mint 8 cards
-          await expect(minter.mintRandom(8, zeroAddress, {value: parseEther("1")}))
-          .to.be.revertedWith("CardRandomMinter: this exact amount of tokens is not allowed to be minted!");
+          await expect(
+            minter.mintRandom(8, zeroAddress, { value: parseEther("1") })
+          ).to.be.revertedWith(
+            "CardRandomMinter: this exact amount of tokens is not allowed to be minted!"
+          );
         });
-
       });
 
       describe("For ERC20 Tokens", () => {
-
         it("Should mint cards for ERC20 tokens", async () => {
           let startBalance = await cardNFT.balanceOf(ownerAcc.address);
           await minter.setAllowedAmountOfItemsPerRandomMint(10, true);
@@ -311,22 +325,27 @@ describe("CardRandomMinter", function () {
         it("Should fail to mint cards for ERC20 tokens if caller does not have enough ERC20 tokens", async () => {
           await minter.setAllowedAmountOfItemsPerRandomMint(10, true);
           await minter.setMinterRole(clientAcc2.address, true);
-          await expect(minter.connect(clientAcc2).mintRandom(5, token.address))
-          .to.be.revertedWith("CardRandomMinter: not enough ERC20 tokens to pay for the mint!");
+          await expect(
+            minter.connect(clientAcc2).mintRandom(5, token.address)
+          ).to.be.revertedWith(
+            "CardRandomMinter: not enough ERC20 tokens to pay for the mint!"
+          );
         });
 
         it("Should fail to mint cards for ERC20 tokens if card number is zero", async () => {
           await minter.setAllowedAmountOfItemsPerRandomMint(10, true);
           await minter.setMinterRole(ownerAcc.address, true);
-          await expect(minter.mintRandom(0, token.address))
-          .to.be.revertedWith("CardRandomMinter: can not mint zero cards!");
+          await expect(minter.mintRandom(0, token.address)).to.be.revertedWith(
+            "CardRandomMinter: can not mint zero cards!"
+          );
         });
 
         it("Should fail to mint cards for ERC20 tokens if token is not supported", async () => {
           await minter.setAllowedAmountOfItemsPerRandomMint(10, true);
           await minter.setMinterRole(ownerAcc.address, true);
-          await expect(minter.mintRandom(5, randomAddress)) 
-          .to.be.revertedWith("CardRandomMinter: token is not supported!");
+          await expect(minter.mintRandom(5, randomAddress)).to.be.revertedWith(
+            "CardRandomMinter: token is not supported!"
+          );
         });
 
         it("Should fail to mint cards for ERC20 tokens if mint price was not set", async () => {
@@ -337,23 +356,21 @@ describe("CardRandomMinter", function () {
           await minter.addSupportedToken(dummy.address);
           await minter.setAllowedAmountOfItemsPerRandomMint(10, true);
           await minter.setMinterRole(ownerAcc.address, true);
-          await expect(minter.mintRandom(5, dummy.address)) 
-          .to.be.revertedWith("CardRandomMinter: mint price was not set for this token!");
+          await expect(minter.mintRandom(5, dummy.address)).to.be.revertedWith(
+            "CardRandomMinter: mint price was not set for this token!"
+          );
         });
-
       });
-
     });
   });
 
   describe("Get Revenue", () => {
-    
     it("Should withdraw all native tokens revenue from the contract", async () => {
       await minter.setAllowedAmountOfItemsPerRandomMint(15, true);
       await minter.setMinterRole(ownerAcc.address, true);
       // First mint some tokens to pay for the mint
       // 2 native tokens go to the minter
-      await minter.mintRandom(15, zeroAddress, {value: parseEther("2")});
+      await minter.mintRandom(15, zeroAddress, { value: parseEther("2") });
       let startBalance = await provider.getBalance(ownerAcc.address);
       // Now get the revenue
       // 2 native tokens should go to the owner
@@ -361,8 +378,7 @@ describe("CardRandomMinter", function () {
       let endBalance = await provider.getBalance(ownerAcc.address);
       // `lt` because some of tokens are spent for gas
       expect(endBalance.sub(startBalance)).to.be.lt(parseEther("2"));
-
-    }); 
+    });
 
     it("Should withdraw all ERC20 tokens revenue from the contract", async () => {
       await minter.setAllowedAmountOfItemsPerRandomMint(15, true);
@@ -375,7 +391,7 @@ describe("CardRandomMinter", function () {
       await minter.connect(ownerAcc).getRevenue();
       let endBalance = await token.balanceOf(ownerAcc.address);
       expect(endBalance.sub(startBalance)).to.equal(parseEther("1.5"));
-    }); 
+    });
 
     it("Should withdraw no revenue if no cards were minted", async () => {
       let startBalance = await token.balanceOf(ownerAcc.address);
@@ -383,7 +399,6 @@ describe("CardRandomMinter", function () {
       let endBalance = await token.balanceOf(ownerAcc.address);
       // Balance should stay the same
       expect(endBalance).to.equal(startBalance);
-    }); 
-
+    });
   });
 });

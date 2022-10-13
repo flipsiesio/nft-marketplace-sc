@@ -4,7 +4,6 @@ const { expect } = require("chai");
 const { ethers } = require("hardhat");
 const { parseEther } = ethers.utils;
 
-
 /**
  * Make sure to:
  * 1) Run local Hardhat node: `npx hardhat node`
@@ -12,24 +11,22 @@ const { parseEther } = ethers.utils;
  * Before running tests: `npx hardhat test --network localhost`
  */
 
-if (network.name != 'localhost') {
+if (network.name != "localhost") {
   throw "[ERROR]\nNetwork is not `localhost`! Aborting tests...\nPlease run test with `npx hardhat test --network localhost`";
 }
 
 describe("CardFactory", function () {
-
   let cardNFT;
   let factory;
   let accounts;
-
 
   beforeEach(async () => {
     accounts = await ethers.getSigners();
 
     let cardTx = await ethers.getContractFactory("Card");
     cardNFT = await cardTx.deploy();
-    await cardNFT.deployed();   
-    
+    await cardNFT.deployed();
+
     let factoryTx = await ethers.getContractFactory("CardFactory");
     // NOTE! This does not give the factory card's CardMinter role
     // We have to explicitly give this role to the factory in the tests
@@ -44,7 +41,6 @@ describe("CardFactory", function () {
     await factory.setIdBoundaryForOption(4, 60, 75);
   });
 
-
   it("Should allow to create 15 tokens of option 0", async () => {
     expect(await factory.availableTokens(0)).to.equal(15);
   });
@@ -55,14 +51,15 @@ describe("CardFactory", function () {
 
     for (let i = 0; i < 15; i++) {
       await factory.mint(0, accounts[1].address);
-      expect(await cardNFT.ownerOf(i)).to.be.equal(accounts[1].address)
+      expect(await cardNFT.ownerOf(i)).to.be.equal(accounts[1].address);
     }
     await factory.mint(0, accounts[1].address);
-    expect(await cardNFT.exists(15)).to.be.false
+    expect(await cardNFT.exists(15)).to.be.false;
   });
 
   it("Should fail to mint cards if caller does not have minter's rights", async () => {
-    await expect(factory.connect(accounts[0]).mint(0, accounts[3].address)).to.be.reverted;
+    await expect(factory.connect(accounts[0]).mint(0, accounts[3].address)).to
+      .be.reverted;
   });
 
   it("Should give minter's rights to another account", async () => {
@@ -80,18 +77,19 @@ describe("CardFactory", function () {
   });
 
   it("Should fail to change the mintable token if a caller is not an owner", async () => {
-    await expect(factory.connect(accounts[1]).setMintableToken(
-      "0x0000000000000000000000000000000000000000",
-    )).to.be.reverted;
+    await expect(
+      factory
+        .connect(accounts[1])
+        .setMintableToken("0x0000000000000000000000000000000000000000")
+    ).to.be.reverted;
   });
 
   it("Should change mintable token if a caller is an onwer", async () => {
-    await factory.connect(accounts[0]).setMintableToken(
-      "0x0000000000000000000000000000000000000000"
-    );
+    await factory
+      .connect(accounts[0])
+      .setMintableToken("0x0000000000000000000000000000000000000000");
     expect(await factory.getMintableToken()).to.equal(
       "0x0000000000000000000000000000000000000000"
     );
   });
-
 });

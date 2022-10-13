@@ -1,7 +1,6 @@
 const { expect } = require("chai");
 const { ethers } = require("hardhat");
 
-
 /**
  * Make sure to:
  * 1) Run local Hardhat node: `npx hardhat node`
@@ -17,7 +16,7 @@ function findOrder(events, tokenID) {
   }
 }
 
-if (network.name != 'localhost') {
+if (network.name != "localhost") {
   throw "[ERROR]\nNetwork is not `localhost`! Aborting tests...\nPlease run test with `npx hardhat test --network localhost`";
 }
 

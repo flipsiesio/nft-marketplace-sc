@@ -1,6 +1,5 @@
 // SPDX-License-Identifier: MIT
 
-
 /**
  * Make sure to:
  * 1) Run local Hardhat node: `npx hardhat node`
@@ -12,12 +11,11 @@ const { expect } = require("chai");
 const { ethers } = require("hardhat");
 const { parseEther } = ethers.utils;
 
-if (network.name != 'localhost') {
+if (network.name != "localhost") {
   throw "[ERROR]\nNetwork is not `localhost`! Aborting tests...\nPlease run test with `npx hardhat test --network localhost`";
 }
 
 describe("Card", function () {
-
   let cardNFT;
   let accounts;
 
@@ -33,11 +31,14 @@ describe("Card", function () {
   });
 
   it("Should fail to mint if caller does not have enough rights", async () => {
-    await expect(cardNFT.connect(accounts[2]).mint(accounts[3].address, 0)).to.be.reverted;
+    await expect(cardNFT.connect(accounts[2]).mint(accounts[3].address, 0)).to
+      .be.reverted;
   });
 
   it("Should fail to add minter if caller does not have enough rights", async () => {
-    await expect(cardNFT.connect(accounts[3]).setMinterRole(accounts[3].address, true)).to.be.reverted;
+    await expect(
+      cardNFT.connect(accounts[3]).setMinterRole(accounts[3].address, true)
+    ).to.be.reverted;
   });
 
   it("Should mint from owner account", async () => {
