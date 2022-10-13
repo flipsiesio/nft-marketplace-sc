@@ -27,8 +27,20 @@ npx hardhat compile
 ```
 
 ### 2. Test
+First, you have to start a local Hardhat node:
 ```
-npx hardhat test
+npx hardhat node
+```
+
+Then you have to deploy some ERC20 tokens to the local network:
+```
+npx hardhat run scripts/local/1_deployTokensLocal.js --network localhost
+```
+This will form a JSON file with locally supported tokens. The file will be used in the tests on the next step.  
+
+Now run tests:
+```
+npx hardhat test --network localhost
 ```
 Move to the "Deploy" step _only_ if all tests pass!
 
