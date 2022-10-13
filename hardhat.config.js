@@ -5,16 +5,15 @@ require("@nomicfoundation/hardhat-toolbox");
 
 // Add some .env individual variables
 const BTTC_PRIVATE_KEY = process.env.BTTC_PRIVATE_KEY;
-const BTTC_SCAN_KEY = process.env.BTTC_SCAN_KEY
-
+const BTTC_SCAN_KEY = process.env.BTTC_SCAN_KEY;
 
 module.exports = {
   defaultNetwork: "hardhat",
   networks: {
-    // a.k.a localhost
     hardhat: {
       gas: 2100000,
       gasPrice: 8000000000,
+      accountsBalance: ethers.utils.parseEther('1000000').toString(),
     },
     // BTTC Donau testnet
     donau: {
