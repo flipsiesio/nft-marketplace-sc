@@ -1,5 +1,3 @@
-// SPDX-License-Identifier: MIT 
-
 /**
  * 
  * This script is used to deploy token contracts on local Hardhat network to imitate these tokens

@@ -1,4 +1,3 @@
-// SPDX-License-Identifier: MIT 
 const { ethers, network } = require("hardhat");
 
 /**
