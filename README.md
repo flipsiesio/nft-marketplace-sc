@@ -48,16 +48,16 @@ Move to the "Deploy" step _only_ if all tests pass!
 а) __Donau__ test network  
 Make sure you have _enough test BTT_ tokens for testnet. You can get it for free from [faucet](https://testfaucet.bittorrentchain.io/#/).  
 ```
-npx hardhat run scripts/deploy.js --network donau
+npx hardhat run scripts/deployRemote.js --network donau
 ```  
 b) __BTTC main__ network  
 Make sure you have _enough real BTT_ tokens in your wallet. Deployment to the mainnet costs real BTT!
 ```
-npx hardhat run scripts/deploy.js --network bttc
+npx hardhat run scripts/deployRemote.js --network bttc
 ```
 Deployment script takes more than 1.5 minutes to complete. Please, be patient.  
 
-After the contracts get deployed you can find their _addresses_ and (_addresses_ + :warning:_private keys_:warning:) of some _wallets_ used in deployment in the `deployOutput.json` file. You __have to__ provide these wallets with some BTT / test BTT in order to call contracts' methods from them. Keep in mind that if you are deploying to mainnet then you have to keep your private keys secret or you risk to loose all your real BTT. But if you are deploying to testnet you might not be worried so much because you can get more test BTT from the faucet any time. 
+After the contracts get deployed you can find their _addresses_ and (_addresses_ + :warning:_private keys_:warning:) of some _wallets_ used in deployment in the `scripts/remote/deployOutputRemote.json` file. You __have to__ provide these wallets with some BTT / test BTT in order to call contracts' methods from them. Keep in mind that if you are deploying to mainnet then you have to keep your private keys secret or you risk to loose all your real BTT. But if you are deploying to testnet you might not be worried so much because you can get more test BTT from the faucet any time. 
 
 Also if you want some other address to be the owner of deployed contracts then you can use random wallet generator script:
 ```
