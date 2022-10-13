@@ -1,26 +1,55 @@
 {
-	"Native": {
-	  "address": "0x0000000000000000000000000000000000000000",
-	  "price": 0.1
+	"donau": {
+		"Native": {
+		  "address": "0x0000000000000000000000000000000000000000",
+		  "price": 0.1
+		},
+		"Ethereum": {
+		  "address": "0x1249C65AfB11D179FFB3CE7D4eEDd1D9b98AD006",
+		  "price": 0.1
+		},
+		"TRX": {
+		  "address": "0xEdf53026aeA60f8F75FcA25f8830b7e2d6200662",
+		  "price": 0.1
+		},
+		"BNB": {
+		  "address": "0x185a4091027E2dB459a2433F85f894dC3013aeB5",
+		  "price": 0.1
+		},
+		"USDT-E": {
+		  "address": "0xE887512ab8BC60BcC9224e1c3b5Be68E26048B8B",
+		  "price": 0.1
+		},
+		"USDC-E": {
+		  "address": "0xAE17940943BA9440540940DB0F1877f101D39e8b",
+		  "price": 0.1
+		}		
 	},
-	"Ethereum": {
-	  "address": "0x1249C65AfB11D179FFB3CE7D4eEDd1D9b98AD006",
-	  "price": 0.1
-	},
-	"TRX": {
-	  "address": "0xEdf53026aeA60f8F75FcA25f8830b7e2d6200662",
-	  "price": 0.1
-	},
-	"BNB": {
-	  "address": "0x185a4091027E2dB459a2433F85f894dC3013aeB5",
-	  "price": 0.1
-	},
-	"USDT-E": {
-	  "address": "0xE887512ab8BC60BcC9224e1c3b5Be68E26048B8B",
-	  "price": 0.1
-	},
-	"USDC-E": {
-	  "address": "0xAE17940943BA9440540940DB0F1877f101D39e8b",
-	  "price": 0.1
+	"bttc": {
+		"Native": {
+		  "address": "0x0000000000000000000000000000000000000000",
+		  "price": 0.1
+		},
+		"Ethereum": {
+		  "address": "0x12196ecbcc63A4e61F6907535097990494E3D215",
+		  "price": 0.1
+		},
+		"TRX": {
+		  "address": "0x8e009872B8A6d469939139BE5e3BBd99A731212F",
+		  "price": 0.1
+		},
+		"BNB": {
+		  "address": "0x61a17734E6b497cba51f16ae23BCf85aeB6984CB",
+		  "price": 0.1
+		},
+		"USDT-E": {
+		  "address": "0x298fa36A9e2ebD6D3698e552987294Fa8b65cD00",
+		  "price": 0.1
+		},
+		"USDC-E": {
+		  "address": "0x2e82880D3AEa870b6E3f7AD8d46443E90D63bfcD",
+		  "price": 0.1
+		}		
 	}
+
 }
