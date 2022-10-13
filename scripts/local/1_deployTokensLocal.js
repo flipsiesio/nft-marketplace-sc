@@ -2,8 +2,9 @@
 
 /**
  * 
- * This scripts is used to deploy token contracts on local Hardhat network to imitate these tokens
+ * This script is used to deploy token contracts on local Hardhat network to imitate these tokens
  * in remote testnet or mainnet.
+ * It should be used before running tests on localhost.
  * 
  */
 
@@ -19,7 +20,7 @@ const NUM_TOKENS = 5;
 
 async function main() {
 
-  if (network.name != "hardhat") {
+  if (network.name != "localhost") {
     throw "Network must be `hardhat`!";
   }
 
@@ -33,6 +34,8 @@ async function main() {
     let token = await deployment.deployed();
     console.log(`Token's address is: ${token.address}`);
     OUTPUT_DEPLOY[i + 1].address = token.address;
+    // Mint price of all tokens is the same
+    OUTPUT_DEPLOY[i + 1].price = 0.1;
   }
 
   console.log(`\n***Deployment is finished!***\nSee Results in "${__dirname + '/supportedTokensLocal.json'}" File`);

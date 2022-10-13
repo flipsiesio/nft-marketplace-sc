@@ -16,7 +16,7 @@ const { parseUnits, parseEther } = ethers.utils;
 // JSON file to keep information about previous deployments
 const OUTPUT_DEPLOY = require("./deployOutputLocal.json");
 // JSON file to get the list of supported tokens and their prices from
-const SUPPORTED_TOKENS = require("../supportedTokens.json");
+const SUPPORTED_TOKENS = require("./supportedTokensLocal.json");
 
 const oneDay = 86400
 const tenDays = 864000
@@ -54,6 +54,9 @@ let nftSale;
 
 async function main() {
 
+  if (network.name != "localhost") {
+    throw "Network must be `hardhat`!";
+  }
 
   // Contract #1: Card
   contractName = "Card";
@@ -125,11 +128,10 @@ async function main() {
   OUTPUT_DEPLOY.networks[network.name][contractName].feeReceiverAddress = nftMarketplaceFeeReceiver.address;
   OUTPUT_DEPLOY.networks[network.name][contractName].feeReceiverPrivateKey = nftMarketplaceFeeReceiver.privateKey;
 
-
-  console.log(`See Results in "${__dirname + '/deployOutput.json'}" File`);
+  console.log(`\n***Deployment is finished!***\nSee Results in "${__dirname + '/deployOutputLocal.json'}" File`);
 
   fs.writeFileSync(
-    path.resolve(__dirname, "./deployOutput.json"),
+    path.resolve(__dirname, "./deployOutputLocal.json"),
     JSON.stringify(OUTPUT_DEPLOY, null, "  ")
   );
 }
