@@ -21,7 +21,7 @@
         "feeReceiverPrivateKey": "0xb508d36123ce64b234a2784b346b34cb43c60cd24e09d3cb3974fa85091ebed5"
       }
     },
-    "mainnet": {
+    "bttc": {
       "Card": {
         "address": ""
       },
