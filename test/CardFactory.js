@@ -5,6 +5,17 @@ const { ethers } = require("hardhat");
 const { parseEther } = ethers.utils;
 
 
+/**
+ * Make sure to:
+ * 1) Run local Hardhat node: `npx hardhat node`
+ * 2) Deploy tokens to the node: `npx hardhat run scripts/local/1_deployTokensLocal.js --network localhost`
+ * Before running tests: `npx hardhat test --network localhost`
+ */
+
+if (network.name != 'localhost') {
+  throw "[ERROR]\nNetwork is not `localhost`! Aborting tests...\nPlease run test with `npx hardhat test --network localhost`";
+}
+
 describe("CardFactory", function () {
 
   let cardNFT;

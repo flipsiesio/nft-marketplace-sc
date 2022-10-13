@@ -6,9 +6,19 @@ const delay = require("delay");
 const { parseUnits, parseEther } = ethers.utils;
 const zeroAddress = ethers.constants.AddressZero;
 
+  if (network.name != 'localhost') {
+    throw "[ERROR]\nNetwork is not `localhost`! Aborting tests...\nPlease run test with `npx hardhat test --network localhost`";
+  }
 
-// JSON file to get the list of supported tokens and their prices from
-const SUPPORTED_TOKENS = require("../supportedTokens.json");
+
+/**
+ * Make sure to:
+ * 1) Run local Hardhat node: `npx hardhat node`
+ * 2) Deploy tokens to the node: `npx hardhat run scripts/local/1_deployTokensLocal.js --network localhost`
+ * Before running tests: `npx hardhat test --network localhost`
+ */
+
+const SUPPORTED_TOKENS = require("../scripts/local/supportedTokensLocal.json");
 
 describe("CardRandomMinter", function () {
 
@@ -48,12 +58,21 @@ describe("CardRandomMinter", function () {
     await factory.setIdBoundaryForOption(3, 45, 60);
     await factory.setIdBoundaryForOption(4, 60, 75);
 
-    // Make minter support native tokens
-    await minter.addSupportedToken(zeroAddress);
-    await minter.setMintPrice(zeroAddress, parseEther("0.1"));
+    // Read all tokens addresses from the file and add each of the tokens to supported tokens
+    // NOTE: This are just addresses of tokens - not token objests.
+    // NOTE: This is only done for `getRevenue` method to work correctly.
+    // NOTE: If test runs *not* on `localhost` network - `getRevenue` will revert as it will
+    // try to call the address from `localhost` while running on another network!
+    for (let [token, info] of Object.entries(SUPPORTED_TOKENS)) {
+      let [address, price] = Object.values(info);
+        await minter.addSupportedToken(address);
+        // `price` in JSON file is withoud `decimals`, so we have to multiply it by `decimals` using `parseEther`
+        await minter.setMintPrice(address, parseEther(price.toString()));
+    }
 
-    // Deploy a new ERC20 to be used in tests for payment for mint
-    // NOTE In testnet and mainnet all tokens from JSON file should be used instead of this single mock.
+
+    // This is a real token object with all ERC20 methods
+    // Basically, it should be treated as one of the tokens from JSON file
     let newToken = await ethers.getContractFactory("Rummy");
     token = await newToken.deploy();
     await token.deployed();
@@ -75,8 +94,8 @@ describe("CardRandomMinter", function () {
   describe("Getters and Setters", () => {
 
     it("Should have a correct amount of supported tokens", async () => {
-      // 2 tokens: custom ERC20 and native
-      expect(await minter.getSupportedLength()).to.equal(2);
+      let len = Object.entries(SUPPORTED_TOKENS).length;
+      expect(await minter.getSupportedLength()).to.equal(len + 1);
     });
 
     it("Should support existing address", async () => {
