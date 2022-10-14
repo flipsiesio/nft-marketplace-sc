@@ -5,6 +5,25 @@ pragma solidity ^0.8.9;
 /// @title A generic poker card minter contract.
 interface ICardRandomMinter {
 
+    /**
+     * @notice Checks if provided address is an admin
+     * @param adminAddress The address to check
+     * @return True if address is an admin, false - if address is not an admin
+     */
+    function isAdmin(address adminAddress) external view returns(bool);
+    
+    /**
+     * @notice Adds a new admin address
+     * @param newAdmin The address of the new admin to set
+     */
+    function addAdmin(address newAdmin) external;
+
+    /** 
+     * @notice Removes an address from admin list
+     * @param adminAddress The address to remove from admin list
+     */
+    function removeAdmin(address adminAddress) external;
+
     /** 
      * 
      * @notice Checks if provided token is supported
@@ -45,6 +64,39 @@ interface ICardRandomMinter {
      */
     function getMintPrice(address tokenAddress) external view returns(uint256);
 
+   /**
+     * @notice Gives rights to call card mint function
+     * @param who Address to be given rights to mint cards
+     * @param status 'True' gives the address the right to mint cards, 'false' - forbids to mint cards
+     */
+    function setMinterRole(address who, bool status) external;
+
+
+    /**
+     * @notice Sets the amount of items that can be randomly minted
+     * @param amount The amount of items that can be randomly minted
+     * @param status 'True' allows to mint that amount of cards, 'false' - forbids to mint that amount of cards
+     */
+    function setAllowedAmountOfItemsPerRandomMint(uint8 amount, bool status) external;
+    
+    /**
+     * @notice Changes the factory that mints cards
+     * @param newFactoryAddress An address of a new factory
+     */
+    function setFactory(address newFactoryAddress) external;
+
+    /**
+     * @notice Changes the seed to change the source of randomness
+     * @param newSeed A new seed to be set
+     */
+    function setCurrentSeed(uint256 newSeed) external;
+
+    /**
+     * @notice Sets probabilty of each class of cards to be randomly picked
+     * @param classProbs List of probabilities for all classes of cards
+     */
+    function setProbabilitiesForClasses(uint16[5] memory classProbs) external;
+
     /**
      * @notice Mints a set of random items (cards) for free
      * @param numCards Number of cards to be minted
@@ -59,5 +111,8 @@ interface ICardRandomMinter {
      * @param tokenToPay Address of the token that will be payed to mint a card
      */            
     function mintRandom(uint8 numCards, address tokenToPay) external payable;
+
+    /// @notice Transfers all funds to the owner
+    function getRevenue() external;
 
 }

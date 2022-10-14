@@ -1,5 +1,3 @@
-// SPDX-License-Identifier: MIT
-
 const { expect } = require("chai");
 const { ethers } = require("hardhat");
 const delay = require("delay");
@@ -11,10 +9,12 @@ if (network.name != "localhost") {
 }
 
 /**
- * Make sure to:
+ * NOTE: This test must be running on `localhost` network!
+ * 
+ * In order for this test suite to pass make sure to:
  * 1) Run local Hardhat node: `npx hardhat node`
  * 2) Deploy tokens to the node: `npx hardhat run scripts/local/1_deployTokensLocal.js --network localhost`
- * Before running tests: `npx hardhat test --network localhost`
+ * 3) Run this test suite with `npx hardhat test test/CardRandomMinter.js --network localhost`
  */
 
 const SUPPORTED_TOKENS = require("../scripts/local/supportedTokensLocal.json");
@@ -43,6 +43,9 @@ describe("CardRandomMinter", function () {
     let minterTx = await ethers.getContractFactory("CardRandomMinter");
     minter = await minterTx.deploy(factory.address);
     await minter.deployed();
+    // NOTE! By default only 2 addresses are admins. But for the test on local `hardhat` network
+    //       we have to add another account.
+    await minter.addAdmin(ownerAcc.address);
 
     // Give Minter's rights to the factory
     await cardNFT.connect(ownerAcc).setMinterRole(factory.address, true);
@@ -59,10 +62,9 @@ describe("CardRandomMinter", function () {
     let addresses = new Array();
 
     // Read all tokens addresses from the file and add each of the tokens to supported tokens
-    // NOTE: This are just addresses of tokens - not token objests.
     // NOTE: This is only done for `getRevenue` method to work correctly.
     // NOTE: If test runs *not* on `localhost` network - `getRevenue` will revert as it will
-    // try to call the address from `localhost` while running on another network!
+    //       try to call the address from `localhost` while running on another network!
     for (let [token, info] of Object.entries(SUPPORTED_TOKENS)) {
       let [address, price] = Object.values(info);
       await minter.addSupportedToken(address);
@@ -118,10 +120,10 @@ describe("CardRandomMinter", function () {
       );
     });
 
-    it("Should fail to add a new supported token if caller is not the owner", async () => {
+    it("Should fail to add a new supported token if caller is not an admin!", async () => {
       await expect(
         minter.connect(clientAcc1).addSupportedToken(randomAddress)
-      ).to.be.revertedWith("Ownable: caller is not the owner");
+      ).to.be.revertedWith("CardRandomMinter: caller is not an admin!");
     });
 
     it("Should remove a supported token", async () => {
@@ -138,11 +140,11 @@ describe("CardRandomMinter", function () {
       ).to.be.revertedWith("CardRandomMinter: token is not supported!");
     });
 
-    it("Should fail to remove a supported token if caller is not the owner", async () => {
+    it("Should fail to remove a supported token if caller is not an admin!", async () => {
       await minter.addSupportedToken(randomAddress);
       await expect(
         minter.connect(clientAcc1).removeSupportedToken(randomAddress)
-      ).to.be.revertedWith("Ownable: caller is not the owner");
+      ).to.be.revertedWith("CardRandomMinter: caller is not an admin!");
     });
 
     it("Should get a card mint price in tokens", async () => {
@@ -175,24 +177,57 @@ describe("CardRandomMinter", function () {
       );
     });
 
+    it("Should check if address is an admin", async () => {
+      expect(await minter.isAdmin(randomAddress)).to.equal(false);
+      expect(await minter.isAdmin(ownerAcc.address)).to.equal(true);
+      expect(await minter.isAdmin(zeroAddress)).to.equal(false);
+    });
+
+    it("Should add a new admin", async () => {
+      expect(await minter.isAdmin(randomAddress)).to.equal(false);
+      await minter.addAdmin(randomAddress);
+      expect(await minter.isAdmin(randomAddress)).to.equal(true);
+    });
+
+    it("Should fail to add an already existing admin", async () => {
+      await expect(minter.addAdmin(ownerAcc.address))
+      .to.be.revertedWith("CardRandomMinter: address is already an admin!");
+    });
+
+    it("Should fail to add a zero address admin", async () => {
+      await expect(minter.addAdmin(zeroAddress))
+      .to.be.revertedWith("CardRandomMinter: zero address can not be an admin!");
+    });
+
+    it("Should delete an admin", async () => {
+      expect(await minter.isAdmin(ownerAcc.address)).to.equal(true);
+      await minter.removeAdmin(ownerAcc.address);
+      expect(await minter.isAdmin(ownerAcc.address)).to.equal(false);
+    });
+
+    it("Should fail to delete a non-existent admin", async () => {
+      await expect(minter.removeAdmin(zeroAddress))
+      .to.be.revertedWith("CardRandomMinter: no such admin!")
+    });
+
     it("Should give minter rights to users", async () => {
       await minter.setMinterRole(clientAcc1.address, true);
     });
 
-    it("Should fail to give minter rights to users if caller is not the owner", async () => {
+    it("Should fail to give minter rights to users if caller is not an admin!", async () => {
       await expect(
         minter.connect(clientAcc1).setMinterRole(clientAcc1.address, true)
-      ).to.be.revertedWith("Ownable: caller is not the owner");
+      ).to.be.revertedWith("CardRandomMinter: caller is not an admin!");
     });
 
     it("Should set allowed amount of cards to mint", async () => {
       await minter.setAllowedAmountOfItemsPerRandomMint(5, true);
     });
 
-    it("Should fail to set allowed amount of cards to mint if caller is not the owner", async () => {
+    it("Should fail to set allowed amount of cards to mint if caller is not an admin!", async () => {
       await expect(
         minter.connect(clientAcc1).setAllowedAmountOfItemsPerRandomMint(5, true)
-      ).to.be.revertedWith("Ownable: caller is not the owner");
+      ).to.be.revertedWith("CardRandomMinter: caller is not an admin!");
     });
 
     it("Should fail to set zero amount of cards to mint", async () => {
@@ -208,7 +243,7 @@ describe("CardRandomMinter", function () {
     it("Should fail set a new factory address if caller is not the onwner", async () => {
       await expect(
         minter.connect(clientAcc1).setFactory(clientAcc1.address)
-      ).to.be.revertedWith("Ownable: caller is not the owner");
+      ).to.be.revertedWith("CardRandomMinter: caller is not an admin!");
     });
 
     it("Should fail set a zero factory address", async () => {
@@ -224,19 +259,19 @@ describe("CardRandomMinter", function () {
     it("Should fail set a new seed if caller is not the onwner", async () => {
       await expect(
         minter.connect(clientAcc1).setCurrentSeed(777)
-      ).to.be.revertedWith("Ownable: caller is not the owner");
+      ).to.be.revertedWith("CardRandomMinter: caller is not an admin!");
     });
 
     it("Should set mint probabilities for different classes of cards", async () => {
       await minter.setProbabilitiesForClasses([0, 0, 1, 5000, 777]);
     });
 
-    it("Should fail to set new mint probabilities if caller is not the owner", async () => {
+    it("Should fail to set new mint probabilities if caller is not an admin!", async () => {
       await expect(
         minter
           .connect(clientAcc1)
           .setProbabilitiesForClasses([0, 0, 1, 5000, 777])
-      ).to.be.revertedWith("Ownable: caller is not the owner");
+      ).to.be.revertedWith("CardRandomMinter: caller is not an admin!");
     });
   });
 
@@ -363,42 +398,45 @@ describe("CardRandomMinter", function () {
       });
     });
   });
+  
+  if (network.name == "localhost") {
+    describe("Get Revenue", () => {
+      it("Should withdraw all native tokens revenue from the contract", async () => {
+        await minter.setAllowedAmountOfItemsPerRandomMint(15, true);
+        await minter.setMinterRole(ownerAcc.address, true);
+        // First mint some tokens to pay for the mint
+        // 2 native tokens go to the minter
+        await minter.mintRandom(15, zeroAddress, { value: parseEther("2") });
+        let startBalance = await provider.getBalance(ownerAcc.address);
+        // Now get the revenue
+        // 2 native tokens should go to the owner
+        await minter.connect(ownerAcc).getRevenue();
+        let endBalance = await provider.getBalance(ownerAcc.address);
+        // `lt` because some of tokens are spent for gas
+        expect(endBalance.sub(startBalance)).to.be.lt(parseEther("2"));
+      });
 
-  describe("Get Revenue", () => {
-    it("Should withdraw all native tokens revenue from the contract", async () => {
-      await minter.setAllowedAmountOfItemsPerRandomMint(15, true);
-      await minter.setMinterRole(ownerAcc.address, true);
-      // First mint some tokens to pay for the mint
-      // 2 native tokens go to the minter
-      await minter.mintRandom(15, zeroAddress, { value: parseEther("2") });
-      let startBalance = await provider.getBalance(ownerAcc.address);
-      // Now get the revenue
-      // 2 native tokens should go to the owner
-      await minter.connect(ownerAcc).getRevenue();
-      let endBalance = await provider.getBalance(ownerAcc.address);
-      // `lt` because some of tokens are spent for gas
-      expect(endBalance.sub(startBalance)).to.be.lt(parseEther("2"));
-    });
+      it("Should withdraw all ERC20 tokens revenue from the contract", async () => {
+        await minter.setAllowedAmountOfItemsPerRandomMint(15, true);
+        await minter.setMinterRole(ownerAcc.address, true);
+        // First mint some tokens to pay for the mint
+        // 15 * 0.1 = 1.5 ERC20
+        await minter.connect(ownerAcc).mintRandom(15, token.address);
+        let startBalance = await token.balanceOf(ownerAcc.address);
+        // Now get the revenue
+        await minter.connect(ownerAcc).getRevenue();
+        let endBalance = await token.balanceOf(ownerAcc.address);
+        expect(endBalance.sub(startBalance)).to.equal(parseEther("1.5"));
+      });
 
-    it("Should withdraw all ERC20 tokens revenue from the contract", async () => {
-      await minter.setAllowedAmountOfItemsPerRandomMint(15, true);
-      await minter.setMinterRole(ownerAcc.address, true);
-      // First mint some tokens to pay for the mint
-      // 15 * 0.1 = 1.5 ERC20
-      await minter.connect(ownerAcc).mintRandom(15, token.address);
-      let startBalance = await token.balanceOf(ownerAcc.address);
-      // Now get the revenue
-      await minter.connect(ownerAcc).getRevenue();
-      let endBalance = await token.balanceOf(ownerAcc.address);
-      expect(endBalance.sub(startBalance)).to.equal(parseEther("1.5"));
-    });
-
-    it("Should withdraw no revenue if no cards were minted", async () => {
-      let startBalance = await token.balanceOf(ownerAcc.address);
-      await minter.connect(ownerAcc).getRevenue();
-      let endBalance = await token.balanceOf(ownerAcc.address);
-      // Balance should stay the same
-      expect(endBalance).to.equal(startBalance);
-    });
-  });
+      it("Should withdraw no revenue if no cards were minted", async () => {
+        let startBalance = await token.balanceOf(ownerAcc.address);
+        await minter.connect(ownerAcc).getRevenue();
+        let endBalance = await token.balanceOf(ownerAcc.address);
+        // Balance should stay the same
+        expect(endBalance).to.equal(startBalance);
+      });
+    });   
+  }
+  
 });

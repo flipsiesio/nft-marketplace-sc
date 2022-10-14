@@ -24,6 +24,15 @@ contract CardRandomMinter is Ownable, ICardRandomMinter {
     uint8 public constant JOKERS_OPTION = 3;
     uint8 public constant RARE_OPTION = 4;
 
+    /// @dev Two addresses of admins
+    mapping(address => bool) private _admins;
+
+    /// @dev Allows only admins to call functions with this modifier
+    ///      Owner can add/remove admins
+    modifier onlyAdmin() {
+         require(_admins[msg.sender], "CardRandomMinter: caller is not an admin!");
+         _;
+    }
 
     /// @dev The list of supported tokens to iterate over
     address[] internal _supportedTokens;
@@ -47,10 +56,41 @@ contract CardRandomMinter is Ownable, ICardRandomMinter {
         allowedItemsPerRandomMint[1] = true;
         allowedItemsPerRandomMint[3] = true;
         allowedItemsPerRandomMint[5] = true;
+        // Two admin addresses from BTTC Mainnet are initialized
+        addAdmin(0x1Ae3F0A9f468c4211d34f9018c24be148FeC9b9d);
+        addAdmin(0x59BB5F8B697c642fE8CAC6195c6803f4a4809089);
     }
 
     /// @dev Allows the contracts to receive funds from other addresses
     receive() external payable {}
+
+    /**
+     * @notice Checks if provided address is an admin
+     * @param adminAddress The address to check
+     * @return True if address is an admin, false - if address is not an admin
+     */
+    function isAdmin(address adminAddress) public view returns(bool) {
+        return _admins[adminAddress];
+    }
+
+    /**
+     * @notice Adds a new admin address
+     * @param newAdmin The address of the new admin to set
+     */
+    function addAdmin(address newAdmin) public onlyOwner {
+        require(!isAdmin(newAdmin), "CardRandomMinter: address is already an admin!");
+        require(newAdmin != address(0), "CardRandomMinter: zero address can not be an admin!");
+        _admins[newAdmin] = true;
+    }
+
+    /** 
+     * @notice Removes an address from admin list
+     * @param adminAddress The address to remove from admin list
+     */
+    function removeAdmin(address adminAddress) public onlyOwner {
+        require(isAdmin(adminAddress), "CardRandomMinter: no such admin!");
+        _admins[adminAddress] = false;
+    }
 
     /** 
      * @notice Checks if provided token is supported
@@ -65,7 +105,7 @@ contract CardRandomMinter is Ownable, ICardRandomMinter {
      * @notice Adds a supported token to pay for mint in
      * @param tokenAddress The address of the token to add
      */
-    function addSupportedToken(address tokenAddress) public onlyOwner {
+    function addSupportedToken(address tokenAddress) public onlyAdmin {
         // It shouldn't be added yet. Cleaner usage
         require(!isSupported(tokenAddress), "CardRandomMinter: token has already been added!");
         _supportedTokens.push(tokenAddress);
@@ -76,7 +116,7 @@ contract CardRandomMinter is Ownable, ICardRandomMinter {
      * @notice Removes a supported token to pay for mint in
      * @param tokenAddress The address of the token to remove
      */
-    function removeSupportedToken(address tokenAddress) public onlyOwner {
+    function removeSupportedToken(address tokenAddress) public onlyAdmin {
         // It shouldn't be removed yet. Cleaner usage
         require(isSupported(tokenAddress), "CardRandomMinter: token is not supported!");
         _supportedTokensMap[tokenAddress] = false;
@@ -88,7 +128,6 @@ contract CardRandomMinter is Ownable, ICardRandomMinter {
         }
 
     }
-
 
     /**
      * @notice Returns the number of supported tokens
@@ -107,7 +146,7 @@ contract CardRandomMinter is Ownable, ICardRandomMinter {
      *        should be eqaul to 0.5 * 10^18
      *        To set the price of 0.5 USDT per token, you have to set `priceInTokens` to 0.5 * 10^18 as well
      */
-    function setMintPrice(address tokenAddress, uint256 priceInTokens) public onlyOwner {
+    function setMintPrice(address tokenAddress, uint256 priceInTokens) public onlyAdmin {
         require(isSupported(tokenAddress), "CardRandomMinter: token is not supported!");
         require(priceInTokens > 0, "CardRandomMinter: price can not be zero!");
         pricesInTokens[tokenAddress] = priceInTokens;
@@ -129,7 +168,7 @@ contract CardRandomMinter is Ownable, ICardRandomMinter {
      * @param who Address to be given rights to mint cards
      * @param status 'True' gives the address the right to mint cards, 'false' - forbids to mint cards
      */
-    function setMinterRole(address who, bool status) external onlyOwner {
+    function setMinterRole(address who, bool status) external onlyAdmin {
         isMinter[who] = status;
     }
 
@@ -140,7 +179,7 @@ contract CardRandomMinter is Ownable, ICardRandomMinter {
      */
     function setAllowedAmountOfItemsPerRandomMint(uint8 amount, bool status)
         external
-        onlyOwner
+        onlyAdmin
     {
         require(amount > 0, "CardRandomMinter: can not mint zero cards!");
         allowedItemsPerRandomMint[amount] = status;
@@ -150,7 +189,7 @@ contract CardRandomMinter is Ownable, ICardRandomMinter {
      * @notice Changes the factory that mints cards
      * @param newFactoryAddress An address of a new factory
      */
-    function setFactory(address newFactoryAddress) external onlyOwner {
+    function setFactory(address newFactoryAddress) external onlyAdmin {
         require(newFactoryAddress != address(0), "CardRandomMinter: factory can not have a zero address!");
         factory = IOptionMintable(newFactoryAddress);
     }
@@ -159,7 +198,7 @@ contract CardRandomMinter is Ownable, ICardRandomMinter {
      * @notice Changes the seed to change the source of randomness
      * @param newSeed A new seed to be set
      */
-    function setCurrentSeed(uint256 newSeed) external onlyOwner {
+    function setCurrentSeed(uint256 newSeed) external onlyAdmin {
         _currentSeed = newSeed;
     }
 
@@ -169,11 +208,10 @@ contract CardRandomMinter is Ownable, ICardRandomMinter {
      */
     function setProbabilitiesForClasses(uint16[5] memory classProbs)
         public
-        onlyOwner
+        onlyAdmin
     {
         _classProbs = classProbs;
     }
-
 
     /**
      *  @notice Generates card options different from the given one
@@ -365,7 +403,7 @@ contract CardRandomMinter is Ownable, ICardRandomMinter {
 
 
     /// @notice Transfers all funds to the owner
-    function getRevenue() external onlyOwner {
+    function getRevenue() external onlyAdmin {
         for (uint256 i = 0; i < _supportedTokens.length; i++) {
             address token = _supportedTokens[i];
             if (token == address(0)) {
