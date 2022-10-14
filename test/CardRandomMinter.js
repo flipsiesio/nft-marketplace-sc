@@ -4,10 +4,6 @@ const delay = require("delay");
 const { parseUnits, parseEther } = ethers.utils;
 const zeroAddress = ethers.constants.AddressZero;
 
-if (network.name != "localhost") {
-  throw "[ERROR]\nNetwork is not `localhost`! Aborting tests...\nPlease run test with `npx hardhat test --network localhost`";
-}
-
 /**
  * NOTE: This test must be running on `localhost` network!
  * 
@@ -16,6 +12,10 @@ if (network.name != "localhost") {
  * 2) Deploy tokens to the node: `npx hardhat run scripts/local/1_deployTokensLocal.js --network localhost`
  * 3) Run this test suite with `npx hardhat test test/CardRandomMinter.js --network localhost`
  */
+
+if (network.name != "localhost") {
+  throw "[ERROR]\nNetwork is not `localhost`! Aborting tests...\nPlease run test with `npx hardhat test --network localhost`";
+}
 
 const SUPPORTED_TOKENS = require("../scripts/local/supportedTokensLocal.json");
 
