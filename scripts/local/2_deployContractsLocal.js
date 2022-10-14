@@ -1,6 +1,6 @@
 /**
  *
- * This scripts is used to deploy contracts to local Hardhat network with previously deployed tokens
+ * This script is used to deploy contracts to local Hardhat network with previously deployed tokens
  * NOTE: Run `deployTokensLocal.js` script before this one!
  *
  */
@@ -93,8 +93,7 @@ async function main() {
   for (let [token, info] of Object.entries(SUPPORTED_TOKENS)) {
     let [address, price] = Object.values(info);
     await cardRandomMinter.addSupportedToken(address);
-    await delay(5000);
-    // `price` in JSON file is withoud `decimals`, so we have to multiply it by `decimals` using `parseEther`
+    // `price` in JSON file is without `decimals`, so we have to multiply it by `decimals` using `parseEther`
     await cardRandomMinter.setMintPrice(address, parseEther(price.toString()));
   }
   console.log(`[${contractName}]: Deployment Finished!`);
