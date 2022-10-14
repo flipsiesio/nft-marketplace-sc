@@ -5,7 +5,49 @@
 		  "price": 0.1
 		},
 		"Ethereum": {
-		  "address": "0x1249C65AfB11D179FFB3CE7D4eEDd1D9b98AD006",
+		  "address": "0x12196ecbcc63A4e61F6907535097990494E3D215",
+		  "price": 0.1
+		},
+		"TRX": {
+		  "address": "0x8e009872B8A6d469939139BE5e3BBd99A731212F", 
+		  "price": 0.1
+		},
+		"BNB": {
+		  "address": "0x61a17734E6b497cba51f16ae23BCf85aeB6984CB", 
+		  "price": 0.1
+		},
+		"USDT-E": {
+		  "address": "0x298fa36A9e2ebD6D3698e552987294Fa8b65cD00", 
+		  "price": 0.1
+		},
+		"USDT-T": {
+		  "address": "0x7b906030735435422675E0679bC02DAE7dFC71DA",  
+		  "price": 0.1
+		},
+		"USDT-B": {
+		  "address": "0x834982c9B0690ED7CA35e10b18887C26c25CdC82", 
+		  "price": 0.1
+		},
+		"USDC-E": {
+		  "address": "0x6Ab5CA8564Ce2513e7109beDB707A34bC73e39A8", 
+		  "price": 0.1
+		},
+		"USDC-T": {
+		  "address": "0xa276888d6c2D45368417fa9bE78A2D46d45D6211", 
+		  "price": 0.1
+		},
+		"USDC-B": {
+		  "address": "0x766aCb4FC73efC7Cbb17fD550F8283062A36eEc1", 
+		  "price": 0.1
+		}
+	},
+	"bttc": {
+		"Native": {
+		  "address": "0x0000000000000000000000000000000000000000",
+		  "price": 0.1
+		},
+		"Ethereum": {
+		  "address": "0x1249C65AfB11D179FFB3CE7D4eEDd1D9b98AD006", 
 		  "price": 0.1
 		},
 		"TRX": {
@@ -20,36 +62,26 @@
 		  "address": "0xE887512ab8BC60BcC9224e1c3b5Be68E26048B8B",
 		  "price": 0.1
 		},
+		"USDT-T": {
+		  "address": "0xdB28719F7f938507dBfe4f0eAe55668903D34a15",
+		  "price": 0.1
+		},
+		"USDT-B": {
+		  "address": "0x9B5F27f6ea9bBD753ce3793a07CbA3C74644330d",
+		  "price": 0.1
+		},
 		"USDC-E": {
 		  "address": "0xAE17940943BA9440540940DB0F1877f101D39e8b",
 		  "price": 0.1
-		}		
-	},
-	"bttc": {
-		"Native": {
-		  "address": "0x0000000000000000000000000000000000000000",
+		},
+		"USDC-T": {
+		  "address": "0x935faA2FCec6Ab81265B301a30467Bbc804b43d3",
 		  "price": 0.1
 		},
-		"Ethereum": {
-		  "address": "0x12196ecbcc63A4e61F6907535097990494E3D215",
+		"USDC-B": {
+		  "address": "0xCa424b845497f7204D9301bd13Ff87C0E2e86FCF",
 		  "price": 0.1
-		},
-		"TRX": {
-		  "address": "0x8e009872B8A6d469939139BE5e3BBd99A731212F",
-		  "price": 0.1
-		},
-		"BNB": {
-		  "address": "0x61a17734E6b497cba51f16ae23BCf85aeB6984CB",
-		  "price": 0.1
-		},
-		"USDT-E": {
-		  "address": "0x298fa36A9e2ebD6D3698e552987294Fa8b65cD00",
-		  "price": 0.1
-		},
-		"USDC-E": {
-		  "address": "0x2e82880D3AEa870b6E3f7AD8d46443E90D63bfcD",
-		  "price": 0.1
-		}		
+		}			
 	}
 
 }

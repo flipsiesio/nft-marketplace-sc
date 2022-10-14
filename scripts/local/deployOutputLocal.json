@@ -2,23 +2,23 @@
   "networks": {
     "localhost": {
       "Card": {
-        "address": "0x0165878A594ca255338adfa4d48449f69242Eb8F"
+        "address": "0xC65cCB966873969179B6b0bA53D67D14Bbf1204C"
       },
       "CardFactory": {
-        "address": "0xa513E6E4b8f2a923D98304ec87F64353C4D5C853"
+        "address": "0x82Ab68099eed0b1276bcacdBbf31B3Cc7563960A"
       },
       "CardRandomMinter": {
-        "address": "0x9A676e781A523b5d0C0e43731313A708CB607508"
+        "address": "0x30474Ce2DE03045B8D0AE76F8a30DbfC8f000cea"
       },
       "NFTSale": {
-        "address": "0x7a2088a1bFc9d81c55368AE168C2C02570cB814F",
-        "feeReceiverAddress": "0x5c5C72cFC4360c2D0973f3fbb0b335Ba837396Ef",
-        "feeReceiverPrivateKey": "0x1b0759a23acf62f756395da22da712e6a3d4309a0d7275dd38d3a42249f79b25"
+        "address": "0xadf7b0f46EB35C748438F3e215F064E01cc7f5dF",
+        "feeReceiverAddress": "0x4B323BE76E774716D8E7C7d80d2b235626d7c691",
+        "feeReceiverPrivateKey": "0x80aadb0a1f9f06aa0be475a2818cc3e4072e13e03cd9a13d9e9b89a0427ef79a"
       },
       "NFTMarketplace": {
-        "address": "0x09635F643e140090A9A8Dcd712eD6285858ceBef",
-        "feeReceiverAddress": "0xE25590fF9786eCeE1AF8281220017A59a79A8cF0",
-        "feeReceiverPrivateKey": "0xb9899cf5fdf738d02fd30084c5b6e04dbb68cf83e4f08bbed916ebe33b1481c5"
+        "address": "0xE8E9B139c6477D4EaD599bE5f2bB9335533D14f7",
+        "feeReceiverAddress": "0xC923f054E485F57bE528Aba4353ACC43EA6941Cc",
+        "feeReceiverPrivateKey": "0xc6224f6a621cfc61f234520f61f043237e4dc0224de92a78166e3c2fc1efb89d"
       }
     }
   }
