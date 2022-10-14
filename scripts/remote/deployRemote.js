@@ -1,6 +1,6 @@
 /**
  *
- * This scripts is used to deploy contracts to remote testnet or mainnet
+ * This script is used to deploy contracts to remote testnet or mainnet
  * It uses real token addresses from these networks
  *
  */
@@ -102,7 +102,7 @@ async function main() {
     let [address, price] = Object.values(info);
     await cardRandomMinter.addSupportedToken(address);
     await delay(5000);
-    // `price` in JSON file is withoud `decimals`, so we have to multiply it by `decimals` using `parseEther`
+    // `price` in JSON file is without `decimals`, so we have to multiply it by `decimals` using `parseEther`
     await cardRandomMinter.setMintPrice(address, parseEther(price.toString()));
   }
   console.log(`[${contractName}]: Deployment Finished!`);

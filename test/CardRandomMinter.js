@@ -66,7 +66,7 @@ describe("CardRandomMinter", function () {
     for (let [token, info] of Object.entries(SUPPORTED_TOKENS)) {
       let [address, price] = Object.values(info);
       await minter.addSupportedToken(address);
-      // `price` in JSON file is withoud `decimals`, so we have to multiply it by `decimals` using `parseEther`
+      // `price` in JSON file is without `decimals`, so we have to multiply it by `decimals` using `parseEther`
       await minter.setMintPrice(address, parseEther(price.toString()));
 
       // Use one of the addresses from the file to connect token contract to

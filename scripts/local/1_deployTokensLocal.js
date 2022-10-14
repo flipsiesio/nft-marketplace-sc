@@ -30,6 +30,7 @@ async function main() {
     let deployment = await _contractProto.deploy();
     let token = await deployment.deployed();
     console.log(`Token's address is: ${token.address}`);
+    // No need to give each mock a name. Just use order numbers here instead.
     OUTPUT_DEPLOY[i + 1].address = token.address;
     // Mint price of all tokens is the same
     OUTPUT_DEPLOY[i + 1].price = 0.1;
