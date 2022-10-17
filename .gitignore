@@ -30,3 +30,4 @@ contracts/flat/
 
 #Local addresses should be ignored
 supportedTokensLocal.json
+deployedOutputLocal.json
