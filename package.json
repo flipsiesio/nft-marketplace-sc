@@ -18,7 +18,6 @@
   },
   "description": "Poker NFT Marketplace Contract",
   "main": ".eslintrc.js",
-  // npm run *script name*
   "scripts": {
     "compile": "hardhat compile",
     "test": "hardhat test",
