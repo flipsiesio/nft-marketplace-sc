@@ -29,5 +29,4 @@ package-lock.json
 flat/
 
 #Local addresses should be ignored
-supportedTokensLocal.json
 deployOutputLocal.json
