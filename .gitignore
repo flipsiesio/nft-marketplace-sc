@@ -27,3 +27,6 @@ artifacts
 package-lock.json
 
 contracts/flat/
+
+#Local addresses should be ignored
+supportedTokensLocal.json
