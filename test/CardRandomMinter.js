@@ -6,7 +6,7 @@ const zeroAddress = ethers.constants.AddressZero;
 
 /**
  * NOTE: This test must be running on `localhost` network!
- * 
+ *
  * In order for this test suite to pass make sure to:
  * 1) Run local Hardhat node: `npx hardhat node`
  * 2) Deploy tokens to the node: `npx hardhat run scripts/local/1_deployTokensLocal.js --network localhost`
@@ -190,13 +190,15 @@ describe("CardRandomMinter", function () {
     });
 
     it("Should fail to add an already existing admin", async () => {
-      await expect(minter.addAdmin(ownerAcc.address))
-      .to.be.revertedWith("CardRandomMinter: address is already an admin!");
+      await expect(minter.addAdmin(ownerAcc.address)).to.be.revertedWith(
+        "CardRandomMinter: address is already an admin!"
+      );
     });
 
     it("Should fail to add a zero address admin", async () => {
-      await expect(minter.addAdmin(zeroAddress))
-      .to.be.revertedWith("CardRandomMinter: zero address can not be an admin!");
+      await expect(minter.addAdmin(zeroAddress)).to.be.revertedWith(
+        "CardRandomMinter: zero address can not be an admin!"
+      );
     });
 
     it("Should delete an admin", async () => {
@@ -206,8 +208,9 @@ describe("CardRandomMinter", function () {
     });
 
     it("Should fail to delete a non-existent admin", async () => {
-      await expect(minter.removeAdmin(zeroAddress))
-      .to.be.revertedWith("CardRandomMinter: no such admin!")
+      await expect(minter.removeAdmin(zeroAddress)).to.be.revertedWith(
+        "CardRandomMinter: no such admin!"
+      );
     });
 
     it("Should give minter rights to users", async () => {
@@ -398,7 +401,7 @@ describe("CardRandomMinter", function () {
       });
     });
   });
-  
+
   if (network.name == "localhost") {
     describe("Get Revenue", () => {
       it("Should withdraw all native tokens revenue from the contract", async () => {
@@ -436,7 +439,6 @@ describe("CardRandomMinter", function () {
         // Balance should stay the same
         expect(endBalance).to.equal(startBalance);
       });
-    });   
+    });
   }
-  
 });

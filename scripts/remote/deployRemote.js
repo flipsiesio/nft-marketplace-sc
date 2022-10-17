@@ -61,7 +61,6 @@ let nftMarketplace;
 let nftSale;
 
 async function main() {
-
   [ownerAcc, clientAcc1, clientAcc2] = await ethers.getSigners();
 
   // Contract #1: Card
