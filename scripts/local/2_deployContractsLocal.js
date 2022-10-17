@@ -50,8 +50,10 @@ let nftSale;
 
 async function main() {
   if (network.name != "localhost") {
-    throw "Network must be `hardhat`!";
+    throw "Network must be `localhost`!";
   }
+
+  [ownerAcc, clientAcc1, clientAcc2] = await ethers.getSigners();
 
   // Contract #1: Card
   contractName = "Card";
@@ -88,6 +90,8 @@ async function main() {
   // Provide the game controller with factory address
   contractDeployTx = await _contractProto.deploy(cardFactory.address);
   cardRandomMinter = await contractDeployTx.deployed();
+  // Add owner to admins
+  await cardRandomMinter.addAdmin(ownerAcc.address);
   await cardFactory.setMinterRole(cardRandomMinter.address, true);
   // Read supported addresses from the JSON file and add them to the minter
   for (let [token, info] of Object.entries(SUPPORTED_TOKENS)) {

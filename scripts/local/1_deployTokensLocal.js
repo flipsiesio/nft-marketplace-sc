@@ -18,7 +18,7 @@ const NUM_TOKENS = 5;
 
 async function main() {
   if (network.name != "localhost") {
-    throw "Network must be `hardhat`!";
+    throw "Network must be `localhost`!";
   }
 
   // Contract #1: Card

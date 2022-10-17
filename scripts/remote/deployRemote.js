@@ -61,6 +61,9 @@ let nftMarketplace;
 let nftSale;
 
 async function main() {
+
+  [ownerAcc, clientAcc1, clientAcc2] = await ethers.getSigners();
+
   // Contract #1: Card
   contractName = "Card";
   console.log(`[${contractName}]: Start of Deployment...`);
@@ -97,6 +100,8 @@ async function main() {
   contractDeployTx = await _contractProto.deploy(cardFactory.address);
   cardRandomMinter = await contractDeployTx.deployed();
   await cardFactory.setMinterRole(cardRandomMinter.address, true);
+  // Add owner to admins
+  await cardRandomMinter.addAdmin(ownerAcc.address);
   // Read supported addresses from the JSON file and add them to the minter
   for (let [token, info] of Object.entries(SUPPORTED_TOKENS)) {
     let [address, price] = Object.values(info);
