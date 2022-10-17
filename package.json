@@ -18,11 +18,12 @@
   },
   "description": "Poker NFT Marketplace Contract",
   "main": ".eslintrc.js",
+  // npm run *script name*
   "scripts": {
     "compile": "hardhat compile",
     "test": "hardhat test",
     "coverage": "hardhat coverage",
-    "flatten": "hardhat flatten contracts/Card.sol > contracts/flat/Card.sol && hardhat flatten contracts/CardFactory.sol > contracts/flat/CardFactory.sol && hardhat flatten contracts/CardRandomMinter.sol > contracts/flat/CardRandomMinter.sol && hardhat flatten contracts/NFTSale.sol > contracts/flat/NFTSale.sol && hardhat flatten contracts/NFTMarketplace.sol > contracts/flat/NFTMarketplace.sol"
+    "flatten": "hardhat flatten contracts/Card.sol > flat/Card.sol && hardhat flatten contracts/CardFactory.sol > flat/CardFactory.sol && hardhat flatten contracts/CardRandomMinter.sol > flat/CardRandomMinter.sol && hardhat flatten contracts/NFTSale.sol > flat/NFTSale.sol && hardhat flatten contracts/NFTMarketplace.sol > flat/NFTMarketplace.sol"
   },
   "repository": {
     "type": "git",
