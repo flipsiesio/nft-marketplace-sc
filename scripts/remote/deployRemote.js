@@ -9,7 +9,7 @@ const { ethers, network } = require("hardhat");
 const fs = require("fs");
 const path = require("path");
 const delay = require("delay");
-const { parseUnits, parseEther } = ethers.utils;
+const { parseUnits } = ethers.utils;
 
 // Check that one of two allowed networks was provided
 if (network.name != "donau" && network.name != "bttc") {
@@ -103,11 +103,15 @@ async function main() {
   await cardRandomMinter.addAdmin(ownerAcc.address);
   // Read supported addresses from the JSON file and add them to the minter
   for (let [token, info] of Object.entries(SUPPORTED_TOKENS)) {
-    let [address, price] = Object.values(info);
+    let [address, decimals, price] = Object.values(info);
     await cardRandomMinter.addSupportedToken(address);
     await delay(5000);
-    // `price` in JSON file is without `decimals`, so we have to multiply it by `decimals` using `parseEther`
-    await cardRandomMinter.setMintPrice(address, parseEther(price.toString()));
+    // `price` in JSON file is without `decimals`, so we have to multiply it by `decimals` using `parseUtils`
+    if (typeof lastname !== "undefined") {
+      await cardRandomMinter.setMintPrice(address, parseUnits(price.toString(), decimals));
+    } else {  // If decimals not specified, fallback to default 18
+      await cardRandomMinter.setMintPrice(address, parseUnits(price.toString()));
+    }
   }
   console.log(`[${contractName}]: Deployment Finished!`);
   OUTPUT_DEPLOY.networks[network.name][contractName].address =

@@ -2,86 +2,104 @@
 	"donau": {
 		"Native": {
 		  "address": "0x0000000000000000000000000000000000000000",
+		  "decimals": 18,
 		  "price": 0.1
 		},
 		"Ethereum": {
 		  "address": "0x12196ecbcc63A4e61F6907535097990494E3D215",
+		  "decimals": 18,
 		  "price": 0.1
 		},
 		"TRX": {
-		  "address": "0x8e009872B8A6d469939139BE5e3BBd99A731212F", 
+		  "address": "0x8e009872B8A6d469939139BE5e3BBd99A731212F",
+		  "decimals": 6,
 		  "price": 0.1
 		},
 		"BNB": {
-		  "address": "0x61a17734E6b497cba51f16ae23BCf85aeB6984CB", 
+		  "address": "0x61a17734E6b497cba51f16ae23BCf85aeB6984CB",
+		  "decimals": 18,
 		  "price": 0.1
 		},
 		"USDT-E": {
-		  "address": "0x298fa36A9e2ebD6D3698e552987294Fa8b65cD00", 
+		  "address": "0x298fa36A9e2ebD6D3698e552987294Fa8b65cD00",
+		  "decimals": 6,
 		  "price": 0.1
 		},
 		"USDT-T": {
-		  "address": "0x7b906030735435422675E0679bC02DAE7dFC71DA",  
+		  "address": "0x7b906030735435422675E0679bC02DAE7dFC71DA",
+		  "decimals": 6,
 		  "price": 0.1
 		},
 		"USDT-B": {
-		  "address": "0x834982c9B0690ED7CA35e10b18887C26c25CdC82", 
+		  "address": "0x834982c9B0690ED7CA35e10b18887C26c25CdC82",
+		  "decimals": 6,
 		  "price": 0.1
 		},
 		"USDC-E": {
-		  "address": "0x6Ab5CA8564Ce2513e7109beDB707A34bC73e39A8", 
+		  "address": "0x6Ab5CA8564Ce2513e7109beDB707A34bC73e39A8",
+		  "decimals": 6,
 		  "price": 0.1
 		},
 		"USDC-T": {
-		  "address": "0xa276888d6c2D45368417fa9bE78A2D46d45D6211", 
+		  "address": "0xa276888d6c2D45368417fa9bE78A2D46d45D6211",
 		  "price": 0.1
 		},
 		"USDC-B": {
-		  "address": "0x766aCb4FC73efC7Cbb17fD550F8283062A36eEc1", 
+		  "address": "0x766aCb4FC73efC7Cbb17fD550F8283062A36eEc1",
+		  "decimals": 18,
 		  "price": 0.1
 		}
 	},
 	"bttc": {
 		"Native": {
 		  "address": "0x0000000000000000000000000000000000000000",
+		  "decimals": 18,
 		  "price": 0.1
 		},
 		"Ethereum": {
-		  "address": "0x1249C65AfB11D179FFB3CE7D4eEDd1D9b98AD006", 
+		  "address": "0x1249C65AfB11D179FFB3CE7D4eEDd1D9b98AD006",
+		  "decimals": 18,
 		  "price": 0.1
 		},
 		"TRX": {
 		  "address": "0xEdf53026aeA60f8F75FcA25f8830b7e2d6200662",
+		  "decimals": 6,
 		  "price": 0.1
 		},
 		"BNB": {
 		  "address": "0x185a4091027E2dB459a2433F85f894dC3013aeB5",
+		  "decimals": 18,
 		  "price": 0.1
 		},
 		"USDT-E": {
 		  "address": "0xE887512ab8BC60BcC9224e1c3b5Be68E26048B8B",
+		  "decimals": 6,
 		  "price": 0.1
 		},
 		"USDT-T": {
 		  "address": "0xdB28719F7f938507dBfe4f0eAe55668903D34a15",
+		  "decimals": 6,
 		  "price": 0.1
 		},
 		"USDT-B": {
 		  "address": "0x9B5F27f6ea9bBD753ce3793a07CbA3C74644330d",
+		  "decimals": 18,
 		  "price": 0.1
 		},
 		"USDC-E": {
 		  "address": "0xAE17940943BA9440540940DB0F1877f101D39e8b",
+		  "decimals": 6,
 		  "price": 0.1
 		},
 		"USDC-T": {
 		  "address": "0x935faA2FCec6Ab81265B301a30467Bbc804b43d3",
+		  "decimals": 6,
 		  "price": 0.1
 		},
 		"USDC-B": {
 		  "address": "0xCa424b845497f7204D9301bd13Ff87C0E2e86FCF",
+		  "decimals": 18,
 		  "price": 0.1
 		}			
 	}
-
 }
