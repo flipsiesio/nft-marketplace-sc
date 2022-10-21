@@ -96,11 +96,6 @@ describe("CardRandomMinter", function () {
   });
 
   describe("Getters and Setters", () => {
-    it("Should have a correct amount of supported tokens", async () => {
-      let len = Object.entries(SUPPORTED_TOKENS).length;
-      expect(await minter.getSupportedLength()).to.equal(len);
-    });
-
     it("Should support existing address", async () => {
       expect(await minter.isSupported(token.address)).to.equal(true);
     });
@@ -413,13 +408,13 @@ describe("CardRandomMinter", function () {
         let startBalance = await provider.getBalance(ownerAcc.address);
         // Now get the revenue
         // 2 native tokens should go to the owner
-        await minter.connect(ownerAcc).getRevenue();
+        await minter.connect(ownerAcc).getRevenue(zeroAddress);
         let endBalance = await provider.getBalance(ownerAcc.address);
         // `lt` because some of tokens are spent for gas
         expect(endBalance.sub(startBalance)).to.be.lt(parseEther("2"));
       });
 
-      it("Should withdraw all ERC20 tokens revenue from the contract", async () => {
+      it("Should withdraw ERC20 token revenue from the contract", async () => {
         await minter.setAllowedAmountOfItemsPerRandomMint(15, true);
         await minter.setMinterRole(ownerAcc.address, true);
         // First mint some tokens to pay for the mint
@@ -427,14 +422,14 @@ describe("CardRandomMinter", function () {
         await minter.connect(ownerAcc).mintRandom(15, token.address);
         let startBalance = await token.balanceOf(ownerAcc.address);
         // Now get the revenue
-        await minter.connect(ownerAcc).getRevenue();
+        await minter.connect(ownerAcc).getRevenue(token.address);
         let endBalance = await token.balanceOf(ownerAcc.address);
         expect(endBalance.sub(startBalance)).to.equal(parseEther("1.5"));
       });
 
       it("Should withdraw no revenue if no cards were minted", async () => {
         let startBalance = await token.balanceOf(ownerAcc.address);
-        await minter.connect(ownerAcc).getRevenue();
+        await minter.connect(ownerAcc).getRevenue(token.address);
         let endBalance = await token.balanceOf(ownerAcc.address);
         // Balance should stay the same
         expect(endBalance).to.equal(startBalance);
