@@ -100,6 +100,7 @@ async function main() {
   cardRandomMinter = await contractDeployTx.deployed();
   await cardFactory.setMinterRole(cardRandomMinter.address, true);
   // Add owner to admins
+  // Will crash if deployed from hardcoded addresses
   await cardRandomMinter.addAdmin(ownerAcc.address);
   // Read supported addresses from the JSON file and add them to the minter
   for (let [token, info] of Object.entries(SUPPORTED_TOKENS)) {
@@ -107,11 +108,7 @@ async function main() {
     await cardRandomMinter.addSupportedToken(address);
     await delay(5000);
     // `price` in JSON file is without `decimals`, so we have to multiply it by `decimals` using `parseUtils`
-    if (typeof lastname !== "undefined") {
-      await cardRandomMinter.setMintPrice(address, parseUnits(price.toString(), decimals));
-    } else {  // If decimals not specified, fallback to default 18
-      await cardRandomMinter.setMintPrice(address, parseUnits(price.toString()));
-    }
+    await cardRandomMinter.setMintPrice(address, parseUnits(price.toString(), decimals));
   }
   console.log(`[${contractName}]: Deployment Finished!`);
   OUTPUT_DEPLOY.networks[network.name][contractName].address =

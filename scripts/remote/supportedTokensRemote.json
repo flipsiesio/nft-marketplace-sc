@@ -42,6 +42,7 @@
 		},
 		"USDC-T": {
 		  "address": "0xa276888d6c2D45368417fa9bE78A2D46d45D6211",
+		  "decimals": 18,
 		  "price": 0.1
 		},
 		"USDC-B": {
