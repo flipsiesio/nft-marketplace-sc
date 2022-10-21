@@ -34,8 +34,6 @@ contract CardRandomMinter is Ownable, ICardRandomMinter {
          _;
     }
 
-    /// @dev The list of supported tokens to iterate over
-    address[] internal _supportedTokens;
     /// @dev The map of supported tokens to save gas
     mapping(address => bool) internal _supportedTokensMap;
     /// @dev The list of mint price in each of supported tokens
@@ -108,7 +106,6 @@ contract CardRandomMinter is Ownable, ICardRandomMinter {
     function addSupportedToken(address tokenAddress) public onlyAdmin {
         // It shouldn't be added yet. Cleaner usage
         require(!isSupported(tokenAddress), "CardRandomMinter: token has already been added!");
-        _supportedTokens.push(tokenAddress);
         _supportedTokensMap[tokenAddress] = true;
     }
 
@@ -120,13 +117,6 @@ contract CardRandomMinter is Ownable, ICardRandomMinter {
         // It shouldn't be removed yet. Cleaner usage
         require(isSupported(tokenAddress), "CardRandomMinter: token is not supported!");
         _supportedTokensMap[tokenAddress] = false;
-        // There should not be too many chains, so its ok to iterate through the array
-        for (uint256 i = 0; i < _supportedTokens.length; i++) {
-            if (_supportedTokens[i] == tokenAddress) {
-                delete _supportedTokens[i];
-            }
-        }
-
     }
 
      /**
@@ -395,20 +385,16 @@ contract CardRandomMinter is Ownable, ICardRandomMinter {
 
 
     /// @notice Transfers all funds to the owner
-    function getRevenue() external onlyAdmin {
-        for (uint256 i = 0; i < _supportedTokens.length; i++) {
-            address token = _supportedTokens[i];
-            if (token == address(0)) {
-                // Transfer all native tokens
-                payable(owner()).transfer(address(this).balance);     
-            } else {   
-                uint256 tokenBalance = IERC20(token).balanceOf(address(this));
-                if (tokenBalance > 0) {
-                    // Transfer all ERC20 tokens
-                    IERC20(token).transfer(payable(owner()), tokenBalance);
-                }
+    function getRevenue(address token) external onlyAdmin {
+        if (token == address(0)) {
+            // Transfer all native tokens
+            payable(owner()).transfer(address(this).balance);
+        } else {
+            uint256 tokenBalance = IERC20(token).balanceOf(address(this));
+            if (tokenBalance > 0) {
+                // Transfer all ERC20 tokens
+                IERC20(token).transfer(payable(owner()), tokenBalance);
             }
         }
     }
-
 }

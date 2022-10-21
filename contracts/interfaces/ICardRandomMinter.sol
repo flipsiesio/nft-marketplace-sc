@@ -45,12 +45,6 @@ interface ICardRandomMinter {
     function removeSupportedToken(address tokenAddress) external;
 
     /**
-     * @notice Returns the number of supported tokens
-     * @return The number of supported tokens
-     */
-    function getSupportedLength() external view returns(uint256);
-
-    /**
      * @notice Sets the mint price for each supported token
      * @param tokenAddress The address of the token to set the price in
      * @param priceInTokens The price in tokens to set
@@ -113,6 +107,6 @@ interface ICardRandomMinter {
     function mintRandom(uint8 numCards, address tokenToPay) external payable;
 
     /// @notice Transfers all funds to the owner
-    function getRevenue() external;
+    function getRevenue(address token) external;
 
 }
