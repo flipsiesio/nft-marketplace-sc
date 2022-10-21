@@ -13,6 +13,9 @@ import "./interfaces/ICardRandomMinter.sol";
 contract CardRandomMinter is Ownable, ICardRandomMinter {
     /// @dev Event emitted when a card is minted
     event Minted(uint8 amount, address indexed to , string desc);
+    event SupportedCurrencyAdded(address indexed currency);
+    event SupportedCurrencyRemoved(address indexed currency);
+    event PriceChanged(address indexed currency, uint256 price);
 
     /// @dev Factory that mints cards
     IOptionMintable public factory;
@@ -107,6 +110,7 @@ contract CardRandomMinter is Ownable, ICardRandomMinter {
         // It shouldn't be added yet. Cleaner usage
         require(!isSupported(tokenAddress), "CardRandomMinter: token has already been added!");
         _supportedTokensMap[tokenAddress] = true;
+        emit SupportedCurrencyAdded(tokenAddress);
     }
 
     /**
@@ -117,6 +121,7 @@ contract CardRandomMinter is Ownable, ICardRandomMinter {
         // It shouldn't be removed yet. Cleaner usage
         require(isSupported(tokenAddress), "CardRandomMinter: token is not supported!");
         _supportedTokensMap[tokenAddress] = false;
+        emit SupportedCurrencyRemoved(tokenAddress);
     }
 
      /**
@@ -132,6 +137,7 @@ contract CardRandomMinter is Ownable, ICardRandomMinter {
         require(isSupported(tokenAddress), "CardRandomMinter: token is not supported!");
         require(priceInTokens > 0, "CardRandomMinter: price can not be zero!");
         pricesInTokens[tokenAddress] = priceInTokens;
+        emit PriceChanged(tokenAddress, priceInTokens);
     }
 
     /**
@@ -380,7 +386,6 @@ contract CardRandomMinter is Ownable, ICardRandomMinter {
 
         }
         _mintRandom(numCards, msg.sender, "");
-
     }
 
 
