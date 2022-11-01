@@ -230,6 +230,9 @@ contract NFTMarketplace is Management {
         _sellOrders[at].expirationTime = expirationTime;
     }
 
+    /// @notice The function creates or increases an offer to buy a token
+    /// @param at The seller order index
+    /// @param amount Offer's price (initial or additional depending on bid's existence)
     function bid(uint256 at, uint256 amount)
         external
         payable
@@ -254,6 +257,8 @@ contract NFTMarketplace is Management {
         emit Bid(at, msg.sender, amount, _sellOrders[at].bids[msg.sender]);
     }
 
+    /// @notice The function to refund an offer for completed, overdued or cancelled order
+    /// @param at The seller order index
     function cancelBid(uint256 at) external nonReentrant validIndex(at) {
         require(
             (_sellOrders[at].status != Status.PENDING) ||
